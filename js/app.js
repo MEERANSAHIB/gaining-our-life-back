@@ -259,14 +259,27 @@ function switchTab(targetTab) {
     }
   });
 
-  // Update tab buttons styles
+  // Update tab buttons styles (Both desktop segmented pills and mobile bottom bar)
   if (el.navTabs) {
     el.navTabs.forEach(btn => {
       const isTarget = btn.getAttribute('data-tab-target') === targetTab;
-      if (isTarget) {
-        btn.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs bg-emerald-500 text-slate-950 shadow-md shadow-emerald-950/40 transition cursor-pointer";
+      if (btn.classList.contains('mobile-tab-btn')) {
+        // Mobile bottom navigation bar item
+        const icon = btn.querySelector('.tab-icon');
+        if (isTarget) {
+          btn.className = "mobile-tab-btn flex flex-col items-center justify-center gap-1 text-emerald-400 font-semibold cursor-pointer py-1 transition";
+          if (icon) icon.className = "tab-icon w-5 h-5 text-emerald-400";
+        } else {
+          btn.className = "mobile-tab-btn flex flex-col items-center justify-center gap-1 text-slate-400 font-medium cursor-pointer py-1 transition";
+          if (icon) icon.className = "tab-icon w-5 h-5 text-slate-400";
+        }
       } else {
-        btn.className = "px-3.5 py-1.5 rounded-xl font-medium text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition cursor-pointer";
+        // Desktop segmented button
+        if (isTarget) {
+          btn.className = "desktop-tab-btn px-3.5 py-1.5 rounded-xl font-bold text-xs bg-emerald-500 text-slate-950 shadow-md shadow-emerald-950/40 transition cursor-pointer flex items-center gap-1.5";
+        } else {
+          btn.className = "desktop-tab-btn px-3.5 py-1.5 rounded-xl font-medium text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition cursor-pointer flex items-center gap-1.5";
+        }
       }
     });
   }
@@ -637,7 +650,7 @@ function renderModalPills() {
   el.platformPillsContainer.innerHTML = window.DetoxConstants.PLATFORM_OPTIONS.map(plat => {
     const active = state.pendingRelapse.selectedPlatform === plat;
     return `
-      <button type="button" data-platform="${plat}" class="px-3 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+      <button type="button" data-platform="${plat}" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium border transition active:scale-95 cursor-pointer touch-manipulation ${
         active
           ? 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-sm'
           : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
@@ -661,7 +674,7 @@ function renderModalPills() {
   el.triggerPillsContainer.innerHTML = window.DetoxConstants.TRIGGER_OPTIONS.map(trig => {
     const active = state.pendingRelapse.selectedTriggers.includes(trig);
     return `
-      <button type="button" data-trigger="${trig}" class="px-3 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+      <button type="button" data-trigger="${trig}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition active:scale-95 cursor-pointer touch-manipulation ${
         active
           ? 'bg-rose-500/25 border-rose-400 text-rose-200 shadow-sm'
           : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
@@ -674,7 +687,7 @@ function renderModalPills() {
   el.feelingBeforePillsContainer.innerHTML = window.DetoxConstants.FEELING_BEFORE_OPTIONS.map(feel => {
     const active = state.pendingRelapse.selectedFeelingBefore === feel;
     return `
-      <button type="button" data-before="${feel}" class="px-2.5 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+      <button type="button" data-before="${feel}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition active:scale-95 cursor-pointer touch-manipulation ${
         active
           ? 'bg-amber-500/25 border-amber-400 text-amber-200 shadow-sm'
           : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
@@ -687,7 +700,7 @@ function renderModalPills() {
   el.feelingAfterPillsContainer.innerHTML = window.DetoxConstants.FEELING_AFTER_OPTIONS.map(feel => {
     const active = state.pendingRelapse.selectedFeelingAfter === feel;
     return `
-      <button type="button" data-after="${feel}" class="px-2.5 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+      <button type="button" data-after="${feel}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition active:scale-95 cursor-pointer touch-manipulation ${
         active
           ? 'bg-indigo-500/25 border-indigo-400 text-indigo-200 shadow-sm'
           : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
@@ -701,7 +714,7 @@ function renderModalPills() {
     el.relapseDurationPillsContainer.innerHTML = window.DetoxConstants.RELAPSE_DURATION_OPTIONS.map(dur => {
       const active = state.pendingRelapse.selectedRelapseDuration === dur;
       return `
-        <button type="button" data-relapse-duration="${dur}" class="px-2.5 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+        <button type="button" data-relapse-duration="${dur}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition active:scale-95 cursor-pointer touch-manipulation ${
           active
             ? 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-sm'
             : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
