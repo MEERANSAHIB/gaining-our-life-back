@@ -1,9 +1,15 @@
-const CACHE_NAME = 'lifeback-detox-cache-v1';
+const CACHE_NAME = 'lifeback-detox-cache-v2';
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  './css/styles.css',
+  './js/constants.js',
+  './js/storage.js',
+  './js/analytics.js',
+  './js/urgeSurfer.js',
+  './js/app.js'
 ];
 
 // Install: Cache core application shell

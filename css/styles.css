@@ -1,0 +1,94 @@
+/* =========================================================================
+   Gaining Our Life Back — Custom Design System & Animations
+   ========================================================================= */
+
+body {
+  background-color: #070b14;
+  color: #f1f5f9;
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Glassmorphic Surfaces */
+.glass-card {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(51, 65, 85, 0.55);
+}
+
+.glass-card-emerald {
+  background: linear-gradient(145deg, rgba(6, 78, 59, 0.22), rgba(15, 23, 42, 0.85));
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.glass-card-rose {
+  background: linear-gradient(145deg, rgba(136, 19, 55, 0.18), rgba(15, 23, 42, 0.85));
+  border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+/* Glow Effects */
+.timer-glow {
+  text-shadow: 0 0 35px rgba(16, 185, 129, 0.35);
+}
+
+.timer-glow-paused {
+  text-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Keyframe Animations */
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.08); opacity: 0.35; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-ring 3s infinite ease-in-out;
+}
+
+@keyframes breathe-circle {
+  0%, 100% {
+    transform: scale(0.88);
+    opacity: 0.55;
+    border-color: rgba(56, 189, 248, 0.4);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+    border-color: rgba(16, 185, 129, 0.85);
+    box-shadow: 0 0 45px rgba(16, 185, 129, 0.4);
+  }
+}
+
+.animate-breathe {
+  animation: breathe-circle 8s infinite ease-in-out;
+}
+
+/* Tab Transitions */
+.tab-view {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tab-view.hidden {
+  display: none;
+}

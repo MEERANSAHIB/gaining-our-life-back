@@ -109,8 +109,26 @@ The application is pre-configured with the `gaining-our-life-back` Firebase proj
 
 ---
 
-## 🛠️ Tech Stack
-* **Core**: Vanilla HTML5, Modern ES Modules JavaScript
+## 🛠️ Tech Stack & Modular Architecture
+
+```text
+gaining-our-life-back/
+├── css/
+│   └── styles.css          # Glassmorphism, timer glows, webkit scrollbars & breathing animations
+├── js/
+│   ├── constants.js        # Firebase config, storage keys, time conversion & formatting utilities
+│   ├── storage.js          # LocalStorage caching, CSV/JSON export, backup restore & demo generator
+│   ├── analytics.js        # Vulnerability clock, triggers, false dopamine loop & 30-day heatmap
+│   ├── urgeSurfer.js       # 90-second urge surfing session, breathing cues & reality check generator
+│   └── app.js              # Central orchestrator, 3-tab router, Auth/Firestore real-time sync
+├── index.html              # Streamlined 3-tab segmented interface (Stopwatch, Patterns, Journal)
+├── manifest.json           # Web App Manifest for mobile installation
+├── sw.js                   # Service Worker (v2) caching all assets for offline execution
+├── icon.svg                # High-res glowing stopwatch vector icon
+└── README.md               # Comprehensive documentation
+```
+
+* **Core**: Vanilla HTML5, Clean Modular JavaScript (Zero build step needed)
 * **Styling**: Tailwind CSS (CDN) + Inter & JetBrains Mono typography
 * **Cloud & Auth**: Google Firebase JS SDK v11.6.1 (Firebase Auth + Cloud Firestore)
 * **PWA**: Web App Manifest (`manifest.json`) + Service Worker (`sw.js`)
