@@ -7,10 +7,14 @@ import {
   getAuth,
   signInAnonymously,
   signInWithCustomToken,
+  signInWithCredential,
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
   linkWithPopup,
+  signInWithRedirect,
+  linkWithRedirect,
+  getRedirectResult,
   signOut
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import {
@@ -989,7 +993,24 @@ function setupFirestoreListeners() {
   );
 }
 
-async function handleGoogleSignIn() {
+async function executeGoogleRedirect(provider) {
+  updateCloudBadge('syncing', 'Connecting to Google...');
+  showToast("Opening Google Sign-In...");
+  
+  // Persist local state securely before leaving page
+  window.DetoxStorage.saveTimer(state.timer);
+  window.DetoxStorage.saveLaps(state.laps);
+  window.DetoxStorage.saveStats(state.urgesDefeated);
+  window.DetoxStorage.saveActiveTab(state.activeTab);
+
+  if (auth.currentUser && auth.currentUser.isAnonymous) {
+    await linkWithRedirect(auth.currentUser, provider);
+  } else {
+    await signInWithRedirect(auth, provider);
+  }
+}
+
+async function handleGoogleSignIn(forceRedirect = false) {
   if (!auth) {
     showToast("Cloud authentication initializing or unavailable. Click 'Cloud Setup' for help.");
     return;
@@ -997,10 +1018,36 @@ async function handleGoogleSignIn() {
 
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  const guestLapsSnapshot = [...state.laps];
-  const guestTimerSnapshot = { ...state.timer };
-  const previousUid = state.user ? state.user.uid : null;
 
+  // 1. Proactive Detection: Brave Shields & Mobile browsers block popups by default
+  let isBrave = false;
+  if (navigator.brave && typeof navigator.brave.isBrave === 'function') {
+    try {
+      isBrave = await navigator.brave.isBrave();
+    } catch (e) {
+      isBrave = false;
+    }
+  }
+  const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  // If Brave, mobile device, or explicitly requested redirect, route directly to zero-popup redirect
+  if (forceRedirect || isBrave || isMobile) {
+    try {
+      await executeGoogleRedirect(provider);
+      return;
+    } catch (rErr) {
+      console.error("Direct redirect sign-in error:", rErr);
+      if (rErr.code === 'auth/unauthorized-domain') {
+        showToast("Domain unauthorized: Add meeransahib.github.io to Firebase Authorized Domains");
+        if (el.rulesHelperModal) el.rulesHelperModal.classList.remove('hidden');
+      } else {
+        showToast(`Google Sign-In: ${rErr.message}`);
+      }
+      return;
+    }
+  }
+
+  // 2. Standard Desktop Browsers: Attempt popup first for instant in-page auth
   try {
     updateCloudBadge('syncing', 'Signing in with Google...');
     let resultUser = null;
@@ -1038,9 +1085,34 @@ async function handleGoogleSignIn() {
       setupFirestoreListeners();
     }
   } catch (err) {
-    console.error("Google sign-in error:", err);
+    console.warn("Popup sign-in note:", err);
+
+    // 3. Seamless Silent Fallback: If ANY browser/extension blocks the popup, fall back immediately to redirect without alarming the user
+    if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
+      try {
+        await executeGoogleRedirect(provider);
+        return;
+      } catch (fallbackErr) {
+        console.error("Silent redirect fallback error:", fallbackErr);
+        if (fallbackErr.code === 'auth/unauthorized-domain') {
+          showToast("Domain unauthorized: Add meeransahib.github.io to Firebase Authorized Domains");
+          if (el.rulesHelperModal) el.rulesHelperModal.classList.remove('hidden');
+          return;
+        }
+      }
+    }
+
     updateCloudBadge('offline', 'Session Mode');
-    showToast(`Google Sign-In: ${err.message || 'Cancelled'}`);
+
+    if (err.code === 'auth/unauthorized-domain') {
+      showToast("Domain unauthorized: Add meeransahib.github.io to Firebase Console > Auth > Settings > Authorized Domains");
+      if (el.rulesHelperModal) el.rulesHelperModal.classList.remove('hidden');
+      return;
+    }
+
+    if (err.code !== 'auth/popup-closed-by-user') {
+      showToast(`Google Sign-In: ${err.message || 'Cancelled'}`);
+    }
   }
 }
 
@@ -1071,6 +1143,44 @@ async function initCloudSync() {
     db = getFirestore(app);
 
     updateCloudBadge('syncing', 'Connecting Cloud...');
+
+    // Process redirect sign-in completion (when returning from Google without popups)
+    try {
+      const redirectResult = await getRedirectResult(auth);
+      if (redirectResult && redirectResult.user) {
+        state.user = redirectResult.user;
+        state.userId = redirectResult.user.uid;
+        state.isCloudConnected = true;
+        if (el.footerUserId) el.footerUserId.textContent = state.userId;
+        updateAuthUI(redirectResult.user);
+        updateCloudBadge('online', 'Google Cloud Synced');
+        showToast(`Signed in as ${redirectResult.user.displayName || redirectResult.user.email}!`);
+        setupFirestoreListeners();
+      }
+    } catch (redirectErr) {
+      console.warn("Redirect check error:", redirectErr);
+      if (redirectErr.code === 'auth/credential-already-in-use') {
+        const credential = GoogleAuthProvider.credentialFromError(redirectErr);
+        if (credential) {
+          try {
+            const credRes = await signInWithCredential(auth, credential);
+            state.user = credRes.user;
+            state.userId = credRes.user.uid;
+            state.isCloudConnected = true;
+            if (el.footerUserId) el.footerUserId.textContent = state.userId;
+            updateAuthUI(credRes.user);
+            updateCloudBadge('online', 'Google Cloud Synced');
+            showToast(`Signed in as ${credRes.user.displayName || credRes.user.email}!`);
+            setupFirestoreListeners();
+          } catch (credErr) {
+            console.error("Sign-in with credential error:", credErr);
+          }
+        }
+      } else if (redirectErr.code === 'auth/unauthorized-domain') {
+        showToast("Domain unauthorized: Add meeransahib.github.io to Firebase Authorized Domains");
+        if (el.rulesHelperModal) el.rulesHelperModal.classList.remove('hidden');
+      }
+    }
 
     onAuthStateChanged(auth, (user) => {
       if (user) {

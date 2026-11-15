@@ -913,6 +913,18 @@ service cloud.firestore {
   }
 }</pre>
         </div>
+
+        <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-bold text-slate-200">Step 3: Add Authorized Domain in Firebase</h4>
+            <button id="copyDomainBtn" type="button" onclick="navigator.clipboard.writeText('meeransahib.github.io'); this.textContent='Copied!';" class="px-3 py-1 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs transition cursor-pointer">
+              Copy Domain
+            </button>
+          </div>
+          <p class="text-slate-400 mb-2">Go to Firebase Console &gt; Build &gt; Authentication &gt; <strong>Settings</strong> tab &gt; <strong>Authorized domains</strong> &gt; Click <strong>Add domain</strong> and enter:</p>
+          <pre class="bg-slate-900 p-2.5 rounded-xl border border-slate-700 font-mono text-xs text-emerald-300 select-all">meeransahib.github.io</pre>
+          <p class="text-[11px] text-amber-300 mt-2">💡 In Brave browser, click the lock/shield icon in the address bar to allow pop-ups for this site, or allow automatic redirect sign-in.</p>
+        </div>
       </div>
     </div>
   </div>
