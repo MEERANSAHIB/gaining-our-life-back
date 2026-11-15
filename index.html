@@ -4,6 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gaining Our Life Back — Social Media Detox Stopwatch & Relapse Pattern Tracker</title>
+  
+  <!-- PWA & Mobile Web App Meta -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <meta name="theme-color" content="#070b14" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="LifeBack" />
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts: Inter & JetBrains Mono -->
@@ -157,6 +168,14 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span class="hidden xl:inline">Cloud Setup</span>
+        </button>
+
+        <!-- PWA Install App Button (Shown when browser supports install prompt) -->
+        <button id="installAppBtn" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition cursor-pointer" title="Install as mobile/desktop app">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 18h16" />
+          </svg>
+          <span class="hidden sm:inline">Install App</span>
         </button>
 
         <!-- Export / Backup Dropdown Trigger -->
@@ -554,6 +573,42 @@
       </div>
     </section>
 
+    <!-- 30-DAY DETOX CONSISTENCY HEATMAP & MILESTONE UNLOCKS -->
+    <section class="glass-card rounded-3xl p-5 sm:p-7 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-400">
+            <span>🗓️ Consistency & Milestones</span>
+          </div>
+          <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2 mt-0.5">
+            30-Day Activity Heatmap & Milestone Badges
+          </h2>
+          <p class="text-xs text-slate-400">Visual proof of your daily momentum. Every hour avoided turns into visual clean streak power.</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
+          <span class="inline-block w-3 h-3 rounded-sm bg-slate-900 border border-slate-800"></span> 0h
+          <span class="inline-block w-3 h-3 rounded-sm bg-emerald-950 border border-emerald-800/40 ml-1"></span> &lt;8h
+          <span class="inline-block w-3 h-3 rounded-sm bg-emerald-800 border border-emerald-600/50 ml-1"></span> &lt;16h
+          <span class="inline-block w-3 h-3 rounded-sm bg-emerald-500 border border-emerald-400 ml-1"></span> 16-24h
+        </div>
+      </div>
+
+      <!-- 30-Day Squares Grid -->
+      <div class="overflow-x-auto pb-1">
+        <div id="consistencyHeatmapGrid" class="grid grid-cols-5 sm:grid-cols-10 md:grid-cols-15 gap-2 min-w-[320px]">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- Milestone Badges Grid -->
+      <div class="pt-4 border-t border-slate-800/80">
+        <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Milestone Achievement Badges</div>
+        <div id="milestonesContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </section>
+
     <!-- CHRONOLOGICAL LAP HISTORY & RELAPSE JOURNAL -->
     <section class="glass-card rounded-3xl p-5 sm:p-7 space-y-5">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -911,6 +966,88 @@ service cloud.firestore {
   </div>
 
   <!-- ===================================================================== -->
+  <!-- MODAL 4: URGE SURFER & 90-SECOND CRAVING LIFELINE MODAL               -->
+  <!-- ===================================================================== -->
+  <div id="urgeSurferModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-5 bg-slate-950/85 backdrop-blur-md overflow-y-auto">
+    <div class="glass-card w-full max-w-xl rounded-3xl border border-amber-500/30 shadow-2xl overflow-hidden my-8 max-h-[92vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="p-5 sm:p-6 border-b border-slate-800 bg-gradient-to-r from-amber-950/40 via-slate-900 to-sky-950/30 flex items-start justify-between gap-4">
+        <div>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-2">
+            Neuroscience Lifeline • 90-Second Rule
+          </span>
+          <h3 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+            <span>🌊</span>
+            <span>Surfe The Craving</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Dopamine spikes feel overwhelming, but neuroscience proves cravings peak and fade in 60–90 seconds. Ride the wave.</p>
+        </div>
+        <button id="closeUrgeSurferBtn" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer">✕</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 sm:p-6 space-y-6 overflow-y-auto flex-1 text-center">
+
+        <!-- Animated Breathing Ring & Countdown -->
+        <div class="relative py-4 flex flex-col items-center justify-center">
+          <div class="w-44 h-44 sm:w-48 sm:h-48 rounded-full border-4 border-dashed border-sky-400/50 flex flex-col items-center justify-center animate-breathe bg-gradient-to-br from-emerald-500/10 via-sky-500/10 to-amber-500/10 transition-all">
+            <span id="urgeTimerDisplay" class="font-mono text-3xl sm:text-4xl font-extrabold text-white tracking-tight">01:30</span>
+            <span id="urgeBreathingCue" class="text-xs uppercase tracking-wider text-emerald-300 font-semibold mt-1 transition-all duration-500">Inhale Slowly...</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-4">Follow the ring: Breathe in as it expands, hold gently, and exhale as it contracts.</p>
+        </div>
+
+        <!-- Dynamic Data Reality Check Box -->
+        <div class="bg-slate-950/80 border border-indigo-500/30 rounded-2xl p-4 text-left space-y-1.5">
+          <div class="flex items-center gap-2 text-xs font-semibold text-indigo-300">
+            <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Your Personal Reality Check:</span>
+          </div>
+          <p id="urgeRealityCheckText" class="text-xs text-slate-200 leading-relaxed">
+            Your brain is telling you opening social media will relieve your discomfort. But remember: in past relapses, scrolling rarely solved what you were feeling.
+          </p>
+        </div>
+
+        <!-- 3 Tangible Replacement Micro-Actions -->
+        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 text-left">
+          <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2.5">
+            Do One Of These Instead of Unlocking:
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-300">
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-2">
+              <span class="text-base">💧</span>
+              <span>Drink cold water</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-2">
+              <span class="text-base">🚶</span>
+              <span>10 deep breaths / walk</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-2">
+              <span class="text-base">🪟</span>
+              <span>Look out window 20s</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-slate-800">
+          <button type="button" id="urgeRelapsedBtn" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-rose-950/30 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-500/30 text-xs font-medium transition cursor-pointer">
+            I Still Relapsed (Log Lap)
+          </button>
+
+          <button type="button" id="urgeDefeatedBtn" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-950/50 transition cursor-pointer flex items-center justify-center gap-2">
+            <span>🎉</span>
+            <span>I Defeated The Urge! (+1 Win)</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
   <!-- APPLICATION LOGIC & FIREBASE CLOUD SYNC                               -->
   <!-- ===================================================================== -->
   <script type="module">
@@ -1031,6 +1168,13 @@ service cloud.firestore {
       // Logged Laps (Cloud Synced)
       laps: [],
 
+      // Urge Surfer & Life Reclaimed State
+      urgesDefeated: 0,
+      urgeSession: {
+        remainingSeconds: 90,
+        intervalId: null
+      },
+
       // UI State
       resetConfirmPending: false,
       deleteConfirmLapId: null,
@@ -1051,6 +1195,7 @@ service cloud.firestore {
       userDisplayName: document.getElementById('userDisplayName'),
       userEmailText: document.getElementById('userEmailText'),
       googleSignOutBtn: document.getElementById('googleSignOutBtn'),
+      installAppBtn: document.getElementById('installAppBtn'),
       footerUserId: document.getElementById('footerUserId'),
 
       // Diagnostic & Rules Helper Modal
@@ -1069,6 +1214,9 @@ service cloud.firestore {
       streakPulseDot: document.getElementById('streakPulseDot'),
       streakStatusLabel: document.getElementById('streakStatusLabel'),
       currentLapNumberBadge: document.getElementById('currentLapNumberBadge'),
+      cravingsDefeatedBadge: document.getElementById('cravingsDefeatedBadge'),
+      cravingsDefeatedText: document.getElementById('cravingsDefeatedText'),
+      openUrgeSurferBtn: document.getElementById('openUrgeSurferBtn'),
       timerDays: document.getElementById('timerDays'),
       timerHours: document.getElementById('timerHours'),
       timerMinutes: document.getElementById('timerMinutes'),
@@ -1109,6 +1257,10 @@ service cloud.firestore {
       emotionalPairsContainer: document.getElementById('emotionalPairsContainer'),
       emotionInsightText: document.getElementById('emotionInsightText'),
       loadDemoDataBtn: document.getElementById('loadDemoDataBtn'),
+
+      // Consistency & Milestones
+      consistencyHeatmapGrid: document.getElementById('consistencyHeatmapGrid'),
+      milestonesContainer: document.getElementById('milestonesContainer'),
 
       // History
       searchLapsInput: document.getElementById('searchLapsInput'),
@@ -1152,7 +1304,23 @@ service cloud.firestore {
 
       // Toast
       toastBanner: document.getElementById('toastBanner'),
-      toastMessage: document.getElementById('toastMessage')
+      toastMessage: document.getElementById('toastMessage'),
+
+      // Life Reclaimed Dashboard
+      reclaimedTotalHoursText: document.getElementById('reclaimedTotalHoursText'),
+      statBooksEquivalent: document.getElementById('statBooksEquivalent'),
+      statWorkoutsEquivalent: document.getElementById('statWorkoutsEquivalent'),
+      statDeepFocusCycles: document.getElementById('statDeepFocusCycles'),
+      statUrgesDefeatedCount: document.getElementById('statUrgesDefeatedCount'),
+
+      // Urge Surfer Modal
+      urgeSurferModal: document.getElementById('urgeSurferModal'),
+      closeUrgeSurferBtn: document.getElementById('closeUrgeSurferBtn'),
+      urgeTimerDisplay: document.getElementById('urgeTimerDisplay'),
+      urgeBreathingCue: document.getElementById('urgeBreathingCue'),
+      urgeRealityCheckText: document.getElementById('urgeRealityCheckText'),
+      urgeDefeatedBtn: document.getElementById('urgeDefeatedBtn'),
+      urgeRelapsedBtn: document.getElementById('urgeRelapsedBtn')
     };
 
     // -------------------------------------------------------------------------
@@ -1226,6 +1394,7 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
     const LOCAL_TIMER_KEY = 'detox_pulse_timer_cache_v1';
     const LOCAL_LAPS_KEY = 'detox_pulse_laps_cache_v1';
+    const LOCAL_STATS_KEY = 'detox_pulse_stats_v1';
 
     function loadFromLocalStorage() {
       try {
@@ -1249,8 +1418,25 @@ service cloud.firestore {
             state.laps = parsedLaps;
           }
         }
+
+        const cachedStats = localStorage.getItem(LOCAL_STATS_KEY);
+        if (cachedStats) {
+          const parsedStats = JSON.parse(cachedStats);
+          state.urgesDefeated = Number(parsedStats.urgesDefeated || 0);
+        }
       } catch (err) {
         console.warn("Could not read from localStorage:", err);
+      }
+    }
+
+    function saveStatsToLocalStorage() {
+      try {
+        localStorage.setItem(LOCAL_STATS_KEY, JSON.stringify({
+          urgesDefeated: state.urgesDefeated,
+          updatedAt: Date.now()
+        }));
+      } catch (err) {
+        console.warn("Could not write stats to localStorage:", err);
       }
     }
 
@@ -1566,6 +1752,10 @@ service cloud.firestore {
               accumulatedMs: Number(data.accumulatedMs || 0),
               streakInitialStartTime: data.streakInitialStartTime || data.currentLapStartTime || Date.now()
             };
+            if (data.urgesDefeated !== undefined) {
+              state.urgesDefeated = Math.max(state.urgesDefeated, Number(data.urgesDefeated || 0));
+              saveStatsToLocalStorage();
+            }
             saveTimerToLocalStorage();
           } else {
             const hasExisting = state.timer.isRunning || state.timer.accumulatedMs > 0;
@@ -1643,6 +1833,7 @@ service cloud.firestore {
           currentLapStartTime: state.timer.currentLapStartTime,
           accumulatedMs: state.timer.accumulatedMs,
           streakInitialStartTime: state.timer.streakInitialStartTime,
+          urgesDefeated: state.urgesDefeated,
           updatedAt: Date.now()
         });
         updateCloudBadge('online', 'Cloud Synced • Live');
@@ -2014,6 +2205,107 @@ service cloud.firestore {
     }
 
     // -------------------------------------------------------------------------
+    // 7B. URGE SURFER & 90-SECOND CRAVING LIFELINE CONTROLLER
+    // -------------------------------------------------------------------------
+    function openUrgeSurferModal() {
+      // 1. Generate dynamic reality check from actual user data
+      const laps = state.laps;
+      if (laps.length > 0) {
+        const negativeAfterFeelings = ["Regretful", "Brain-Fogged", "Still Bored", "Guilty", "Drained", "Drained / Worse", "Anxious", "Numb"];
+        const counts = {};
+        let totalNeg = 0;
+        laps.forEach(l => {
+          const feel = l.feelingAfter;
+          if (feel && negativeAfterFeelings.includes(feel)) {
+            counts[feel] = (counts[feel] || 0) + 1;
+            totalNeg++;
+          }
+        });
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        const topFeel = sorted.length > 0 ? sorted[0][0] : null;
+        const negPct = Math.round((totalNeg / laps.length) * 100);
+
+        if (topFeel && negPct > 0) {
+          el.urgeRealityCheckText.innerHTML = `
+            In <strong class="text-amber-300 font-bold">${negPct}% of your past relapses</strong>, scrolling left you feeling <strong class="text-white font-bold underline">${escapeHtml(topFeel)}</strong>. Your brain craves quick dopamine, but your own data proves scrolling will only leave you depleted.
+          `;
+        } else {
+          el.urgeRealityCheckText.innerHTML = `
+            Your brain is seeking quick comfort, but scrolling has consistently interrupted your momentum. Ride this wave for 90 seconds.
+          `;
+        }
+      } else {
+        el.urgeRealityCheckText.innerHTML = `
+          Behavioral studies prove that cravings spike like a wave and naturally recede within 60–90 seconds if you observe them without touching your phone. Protect your streak!
+        `;
+      }
+
+      // 2. Reset 90-second countdown
+      state.urgeSession.remainingSeconds = 90;
+      updateUrgeTimerDisplay();
+
+      if (state.urgeSession.intervalId) {
+        clearInterval(state.urgeSession.intervalId);
+      }
+
+      state.urgeSession.intervalId = setInterval(() => {
+        state.urgeSession.remainingSeconds--;
+        updateUrgeTimerDisplay();
+        if (state.urgeSession.remainingSeconds <= 0) {
+          clearInterval(state.urgeSession.intervalId);
+          state.urgeSession.intervalId = null;
+          el.urgeBreathingCue.textContent = "Wave Passed! You did it! 🎉";
+          el.urgeBreathingCue.className = "text-xs uppercase tracking-wider text-amber-300 font-bold mt-1";
+          el.urgeDefeatedBtn.classList.add('animate-pulse');
+        }
+      }, 1000);
+
+      el.urgeSurferModal.classList.remove('hidden');
+    }
+
+    function updateUrgeTimerDisplay() {
+      const sec = Math.max(0, state.urgeSession.remainingSeconds);
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      el.urgeTimerDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+      // Breathing cues in an 8-second cycle (3s inhale, 2s hold, 3s exhale)
+      const cyclePos = (90 - sec) % 8;
+      if (cyclePos < 3) {
+        el.urgeBreathingCue.textContent = "Inhale Slowly... (3s)";
+        el.urgeBreathingCue.className = "text-xs uppercase tracking-wider text-emerald-300 font-semibold mt-1";
+      } else if (cyclePos < 5) {
+        el.urgeBreathingCue.textContent = "Hold Gently... (2s)";
+        el.urgeBreathingCue.className = "text-xs uppercase tracking-wider text-sky-300 font-semibold mt-1";
+      } else {
+        el.urgeBreathingCue.textContent = "Exhale Completely... (3s)";
+        el.urgeBreathingCue.className = "text-xs uppercase tracking-wider text-amber-300 font-semibold mt-1";
+      }
+    }
+
+    function closeUrgeSurferModal() {
+      if (state.urgeSession.intervalId) {
+        clearInterval(state.urgeSession.intervalId);
+        state.urgeSession.intervalId = null;
+      }
+      el.urgeSurferModal.classList.add('hidden');
+    }
+
+    async function handleUrgeDefeated() {
+      closeUrgeSurferModal();
+      state.urgesDefeated = (state.urgesDefeated || 0) + 1;
+      saveStatsToLocalStorage();
+      renderKPIsAndAnalytics();
+      saveTimerStateToCloud();
+      showToast(`🌊 Urge defeated! You have surfed ${state.urgesDefeated} cravings so far!`);
+    }
+
+    function handleUrgeRelapsed() {
+      closeUrgeSurferModal();
+      openRelapseModal();
+    }
+
+    // -------------------------------------------------------------------------
     // 8. PATTERN RECOGNITION & ANALYTICS ENGINE
     // -------------------------------------------------------------------------
     function renderKPIsAndAnalytics() {
@@ -2046,10 +2338,162 @@ service cloud.firestore {
       el.kpiTotalRelapses.textContent = String(laps.length);
       el.backupModalLapCount.textContent = String(laps.length);
 
+      // 5. Cravings Defeated Badge in Stopwatch Hero
+      if (el.cravingsDefeatedText) {
+        el.cravingsDefeatedText.textContent = `${state.urgesDefeated} Urges Surfed`;
+      }
+
+      // 6. Tangible Life Reclaimed Calculator
+      const totalHoursNum = grandTotalMs / (1000 * 60 * 60);
+      if (el.reclaimedTotalHoursText) {
+        el.reclaimedTotalHoursText.textContent = totalHoursNum.toFixed(1);
+      }
+      if (el.statBooksEquivalent) {
+        el.statBooksEquivalent.textContent = (totalHoursNum / 5.0).toFixed(1);
+      }
+      if (el.statWorkoutsEquivalent) {
+        el.statWorkoutsEquivalent.textContent = String(Math.floor(totalHoursNum));
+      }
+      if (el.statDeepFocusCycles) {
+        el.statDeepFocusCycles.textContent = String(Math.floor(totalHoursNum / 1.5));
+      }
+      if (el.statUrgesDefeatedCount) {
+        el.statUrgesDefeatedCount.textContent = String(state.urgesDefeated);
+      }
+
       // Render the 3 Pattern Cards
       renderVulnerabilityWindow(laps);
       renderTopTriggersAndPlatforms(laps);
       renderEmotionalLoop(laps);
+
+      // Render 30-Day Activity Heatmap & Milestone Badges
+      renderConsistencyHeatmap(grandTotalMs);
+      renderMilestones(grandTotalMs);
+    }
+
+    // -------------------------------------------------------------------------
+    // 8B. 30-DAY CONSISTENCY HEATMAP & MILESTONE ACHIEVEMENTS
+    // -------------------------------------------------------------------------
+    function renderConsistencyHeatmap(grandTotalMs) {
+      if (!el.consistencyHeatmapGrid) return;
+
+      const now = new Date();
+      const daySlots = [];
+
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+        const dayStartMs = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0).getTime();
+        const dayEndMs = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999).getTime();
+
+        let cleanMsForDay = 0;
+
+        // Overlap with current live streak
+        const { isRunning, streakInitialStartTime } = state.timer;
+        if (streakInitialStartTime && streakInitialStartTime <= dayEndMs) {
+          const streakEnd = isRunning ? Date.now() : (state.timer.currentLapStartTime || Date.now());
+          const overlapStart = Math.max(dayStartMs, streakInitialStartTime);
+          const overlapEnd = Math.min(dayEndMs, streakEnd);
+          if (overlapEnd > overlapStart) {
+            cleanMsForDay += (overlapEnd - overlapStart);
+          }
+        }
+
+        // Overlap with completed laps
+        state.laps.forEach(lap => {
+          const lStart = lap.startedAtMs || (lap.relapsedAtMs - (lap.durationMs || 0));
+          const lEnd = lap.relapsedAtMs;
+          if (lStart <= dayEndMs && lEnd >= dayStartMs) {
+            const oStart = Math.max(dayStartMs, lStart);
+            const oEnd = Math.min(dayEndMs, lEnd);
+            if (oEnd > oStart) {
+              cleanMsForDay += (oEnd - oStart);
+            }
+          }
+        });
+
+        // Cap at 24 hours (86,400,000 ms)
+        cleanMsForDay = Math.min(86400000, cleanMsForDay);
+        const hours = cleanMsForDay / (1000 * 60 * 60);
+
+        daySlots.push({
+          date: d,
+          dateStr: d.toLocaleDateString([], { month: 'short', day: 'numeric' }),
+          dayName: d.toLocaleDateString([], { weekday: 'narrow' }),
+          dayNum: d.getDate(),
+          hours: hours
+        });
+      }
+
+      el.consistencyHeatmapGrid.innerHTML = daySlots.map(slot => {
+        let bgStyle = "bg-slate-900 border-slate-800 text-slate-500";
+        if (slot.hours >= 16) {
+          bgStyle = "bg-emerald-500 border-emerald-400 text-slate-950 font-bold shadow-md shadow-emerald-950/40";
+        } else if (slot.hours >= 8) {
+          bgStyle = "bg-emerald-700/80 border-emerald-500/60 text-emerald-100";
+        } else if (slot.hours > 0) {
+          bgStyle = "bg-emerald-950/70 border-emerald-800/40 text-emerald-300";
+        }
+
+        const isToday = slot.date.toDateString() === now.toDateString();
+
+        return `
+          <div class="p-2 rounded-xl border flex flex-col items-center justify-center text-center transition hover:scale-105 select-none relative ${bgStyle} ${isToday ? 'ring-2 ring-emerald-400' : ''}" title="${slot.dateStr}: ${slot.hours.toFixed(1)} hrs clean">
+            <span class="text-[9px] uppercase tracking-wider opacity-75">${slot.dayName}</span>
+            <span class="text-xs font-mono font-bold leading-tight">${slot.dayNum}</span>
+            <span class="text-[9px] font-mono mt-0.5">${slot.hours > 0 ? slot.hours.toFixed(0) + 'h' : '—'}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderMilestones(grandTotalMs) {
+      if (!el.milestonesContainer) return;
+
+      const totalHours = grandTotalMs / (1000 * 60 * 60);
+
+      const MILESTONES = [
+        { id: 'm1', icon: '🥉', title: 'Day One Hero', targetHours: 24, desc: '24 hours social-free' },
+        { id: 'm2', icon: '🥈', title: 'Dopamine Reset', targetHours: 72, desc: '3 full days clean' },
+        { id: 'm3', icon: '🥇', title: 'One Week Warrior', targetHours: 168, desc: '7 days freedom' },
+        { id: 'm4', icon: '💎', title: 'Habit Breaker', targetHours: 336, desc: '14 days mastered' },
+        { id: 'm5', icon: '👑', title: 'Life Reclaimed', targetHours: 720, desc: '30 days transformed' }
+      ];
+
+      el.milestonesContainer.innerHTML = MILESTONES.map(m => {
+        const isUnlocked = totalHours >= m.targetHours;
+        const pct = Math.min(100, Math.round((totalHours / m.targetHours) * 100));
+
+        if (isUnlocked) {
+          return `
+            <div class="bg-gradient-to-br from-emerald-950/50 to-slate-900 border border-emerald-500/40 p-3.5 rounded-2xl flex flex-col justify-between shadow-lg shadow-emerald-950/30">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">${m.icon}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">UNLOCKED ✓</span>
+              </div>
+              <div class="mt-2">
+                <div class="text-xs font-bold text-white">${m.title}</div>
+                <div class="text-[11px] text-emerald-400 mt-0.5">${m.desc}</div>
+              </div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl flex flex-col justify-between opacity-70 hover:opacity-100 transition">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl grayscale">${m.icon}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono text-slate-400 bg-slate-900 border border-slate-800">${pct}%</span>
+              </div>
+              <div class="mt-2">
+                <div class="text-xs font-semibold text-slate-300">${m.title}</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">${(m.targetHours - totalHours).toFixed(1)}h remaining</div>
+                <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden mt-1.5 border border-slate-800">
+                  <div class="h-full bg-emerald-500/50 rounded-full" style="width: ${pct}%"></div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }).join('');
     }
 
     function renderVulnerabilityWindow(laps) {
@@ -2558,6 +3002,12 @@ service cloud.firestore {
       el.toggleTimerBtn.addEventListener('click', toggleStopwatch);
       el.relapseBtn.addEventListener('click', openRelapseModal);
       el.resetTimerBtn.addEventListener('click', handleResetClick);
+      if (el.openUrgeSurferBtn) el.openUrgeSurferBtn.addEventListener('click', openUrgeSurferModal);
+
+      // Urge Surfer Modal Events
+      if (el.closeUrgeSurferBtn) el.closeUrgeSurferBtn.addEventListener('click', closeUrgeSurferModal);
+      if (el.urgeDefeatedBtn) el.urgeDefeatedBtn.addEventListener('click', handleUrgeDefeated);
+      if (el.urgeRelapsedBtn) el.urgeRelapsedBtn.addEventListener('click', handleUrgeRelapsed);
 
       // Backdate Drawer
       el.openBackdateBtn.addEventListener('click', () => {
@@ -2701,6 +3151,42 @@ service cloud.firestore {
           }
         });
       }
+
+      // PWA Install Prompt Handler
+      let deferredInstallPrompt = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        if (el.installAppBtn) {
+          el.installAppBtn.classList.remove('hidden');
+          el.installAppBtn.classList.add('inline-flex');
+        }
+      });
+
+      if (el.installAppBtn) {
+        el.installAppBtn.addEventListener('click', async () => {
+          if (deferredInstallPrompt) {
+            deferredInstallPrompt.prompt();
+            const { outcome } = await deferredInstallPrompt.userChoice;
+            if (outcome === 'accepted') {
+              showToast("LifeBack added to your home screen! 📲");
+              el.installAppBtn.classList.add('hidden');
+            }
+            deferredInstallPrompt = null;
+          } else {
+            showToast("To install on iOS Safari: tap Share (↑) and choose 'Add to Home Screen'.");
+          }
+        });
+      }
+    }
+
+    // Register PWA Service Worker for offline capability
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.log('PWA Service Worker note:', err);
+        });
+      });
     }
 
     // Start live 1-second stopwatch loop & cloud sync

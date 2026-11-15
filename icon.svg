@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1324"/>
+      <stop offset="100%" stop-color="#070b14"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="50%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#065f46"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background Squircle -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  <rect width="504" height="504" x="4" y="4" rx="124" fill="none" stroke="#1e293b" stroke-width="4"/>
+
+  <!-- Stopwatch Outer Glowing Ring -->
+  <circle cx="256" cy="272" r="150" fill="none" stroke="url(#ringGrad)" stroke-width="22" stroke-linecap="round" stroke-dasharray="720 180" filter="url(#glow)"/>
+  
+  <!-- Subtle Inner Guide Ring -->
+  <circle cx="256" cy="272" r="115" fill="none" stroke="#334155" stroke-width="4" stroke-dasharray="10 14" opacity="0.6"/>
+
+  <!-- Top Stopwatch Crown Button -->
+  <path d="M236 84h40v34h-40z" fill="#10b981" rx="6"/>
+  <path d="M256 118v16" stroke="#10b981" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Right Push Button -->
+  <rect x="366" y="142" width="30" height="12" rx="4" transform="rotate(45 366 142)" fill="#34d399"/>
+
+  <!-- Clock Hands (Pointing to Freedom) -->
+  <path d="M256 272V176" stroke="#f1f5f9" stroke-width="16" stroke-linecap="round"/>
+  <path d="M256 272l68 40" stroke="#34d399" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="256" cy="272" r="16" fill="#10b981"/>
+  <circle cx="256" cy="272" r="8" fill="#ffffff"/>
+</svg>
