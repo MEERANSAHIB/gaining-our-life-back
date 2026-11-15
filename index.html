@@ -80,6 +80,13 @@
     .animate-pulse-slow {
       animation: pulse-ring 3s infinite ease-in-out;
     }
+    @keyframes breathe-circle {
+      0%, 100% { transform: scale(0.88); opacity: 0.55; border-color: rgba(56, 189, 248, 0.4); box-shadow: 0 0 20px rgba(56, 189, 248, 0.2); }
+      50% { transform: scale(1.15); opacity: 1; border-color: rgba(16, 185, 129, 0.85); box-shadow: 0 0 45px rgba(16, 185, 129, 0.4); }
+    }
+    .animate-breathe {
+      animation: breathe-circle 8s infinite ease-in-out;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-emerald-500/30 selection:text-emerald-200">
@@ -204,6 +211,10 @@
           <span id="currentLapNumberBadge" class="px-2.5 py-1 rounded-full text-xs font-mono font-medium bg-slate-900/80 text-slate-300 border border-slate-700/80">
             Lap #1
           </span>
+          <span id="cravingsDefeatedBadge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+            <span>🛡️</span>
+            <span id="cravingsDefeatedText">0 Urges Surfed</span>
+          </span>
         </div>
 
         <div class="flex items-center gap-2">
@@ -276,29 +287,38 @@
       </div>
 
       <!-- Primary Stopwatch Controls -->
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-2xl mx-auto">
-        <!-- Start / Pause / Resume Button -->
-        <button id="toggleTimerBtn" class="flex-1 py-3.5 px-6 rounded-2xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-950/60 transition cursor-pointer">
-          <svg id="toggleTimerIcon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
-          </svg>
-          <span id="toggleTimerText">Start Detox Lap</span>
-        </button>
+      <div class="space-y-3 max-w-2xl mx-auto">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+          <!-- Start / Pause / Resume Button -->
+          <button id="toggleTimerBtn" class="flex-1 py-3.5 px-6 rounded-2xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-950/60 transition cursor-pointer">
+            <svg id="toggleTimerIcon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+            </svg>
+            <span id="toggleTimerText">Start Detox Lap</span>
+          </button>
 
-        <!-- I Relapsed (Log Lap & Reset) Button -->
-        <button id="relapseBtn" class="flex-1 py-3.5 px-6 rounded-2xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 bg-rose-600/90 hover:bg-rose-500 text-white shadow-lg shadow-rose-950/60 border border-rose-400/30 transition cursor-pointer">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <span>I Relapsed (Log Lap & Reset)</span>
-        </button>
+          <!-- I Relapsed (Log Lap & Reset) Button -->
+          <button id="relapseBtn" class="flex-1 py-3.5 px-6 rounded-2xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 bg-rose-600/90 hover:bg-rose-500 text-white shadow-lg shadow-rose-950/60 border border-rose-400/30 transition cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>I Relapsed (Log Lap & Reset)</span>
+          </button>
 
-        <!-- Subtle Reset Button (Two-Step Inline Confirmation) -->
-        <button id="resetTimerBtn" class="py-3.5 px-4 rounded-2xl font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/80 transition cursor-pointer">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          <span id="resetTimerText">Reset</span>
+          <!-- Subtle Reset Button (Two-Step Inline Confirmation) -->
+          <button id="resetTimerBtn" class="py-3.5 px-4 rounded-2xl font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/80 transition cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span id="resetTimerText">Reset</span>
+          </button>
+        </div>
+
+        <!-- Emergency Craving Lifeline: Urge Surfer -->
+        <button id="openUrgeSurferBtn" class="w-full py-3 px-4 rounded-2xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500/20 via-sky-500/15 to-emerald-500/20 hover:from-amber-500/30 hover:via-sky-500/25 hover:to-emerald-500/30 text-amber-200 hover:text-white border border-amber-400/40 shadow-lg shadow-amber-950/40 transition cursor-pointer group">
+          <span class="text-base group-hover:scale-125 transition-transform duration-300">🌊</span>
+          <span>Craving an App Right Now? <strong>Urge Surf</strong> (90-Second Delay Lifeline)</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 hidden sm:inline">Defeat The Urge</span>
         </button>
       </div>
 
@@ -376,6 +396,58 @@
         </div>
         <div id="kpiTotalRelapses" class="font-mono text-xl sm:text-2xl font-bold text-rose-300">0</div>
         <p id="kpiTotalRelapsesSub" class="text-[11px] text-slate-400 mt-1">Each log reveals your patterns</p>
+      </div>
+    </section>
+
+    <!-- LIFE RECLAIMED: REAL-WORLD IMPACT CONVERTER -->
+    <section class="glass-card rounded-3xl p-5 sm:p-6 border border-emerald-500/25 bg-gradient-to-br from-slate-950 via-slate-900/90 to-emerald-950/20 shadow-xl">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+        <div>
+          <div class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-400">
+            <span>✨ Tangible Life Impact</span>
+          </div>
+          <h3 class="text-base sm:text-lg font-bold text-white mt-0.5">What You Have Gained Back</h3>
+          <p class="text-xs text-slate-400">Hours reclaimed from algorithmic doomscrolling translated into real-world living.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-mono font-semibold px-3 py-1.5 rounded-xl bg-slate-900/90 text-emerald-300 border border-emerald-500/30">
+            <span id="reclaimedTotalHoursText">0.0</span> hrs Reclaimed
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <!-- Metric 1: Books Read Equivalent -->
+        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-4 text-center">
+          <div class="text-2xl mb-1.5">📚</div>
+          <div id="statBooksEquivalent" class="font-mono text-xl sm:text-2xl font-bold text-white">0.0</div>
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-300 mt-1">Books Equivalent</div>
+          <p class="text-[10px] text-slate-500 mt-0.5">~5 hrs per 300-page book</p>
+        </div>
+
+        <!-- Metric 2: Workouts / Walks -->
+        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-4 text-center">
+          <div class="text-2xl mb-1.5">🏃</div>
+          <div id="statWorkoutsEquivalent" class="font-mono text-xl sm:text-2xl font-bold text-emerald-400">0</div>
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-300 mt-1">Workouts / Walks</div>
+          <p class="text-[10px] text-slate-500 mt-0.5">1-hour active sessions</p>
+        </div>
+
+        <!-- Metric 3: Deep Work Cycles -->
+        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-4 text-center">
+          <div class="text-2xl mb-1.5">🎯</div>
+          <div id="statDeepFocusCycles" class="font-mono text-xl sm:text-2xl font-bold text-sky-400">0</div>
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-300 mt-1">Deep Work Sessions</div>
+          <p class="text-[10px] text-slate-500 mt-0.5">90-min focus cycles</p>
+        </div>
+
+        <!-- Metric 4: Urges Successfully Defeated -->
+        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-4 text-center">
+          <div class="text-2xl mb-1.5">🛡️</div>
+          <div id="statUrgesDefeatedCount" class="font-mono text-xl sm:text-2xl font-bold text-amber-300">0</div>
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-300 mt-1">Urges Defeated</div>
+          <p class="text-[10px] text-slate-500 mt-0.5">Craving lifelines surfed</p>
+        </div>
       </div>
     </section>
 
@@ -601,6 +673,14 @@
           <div id="platformPillsContainer" class="flex flex-wrap gap-2">
             <!-- Populated via JS -->
           </div>
+          <div id="customPlatformContainer" class="mt-2.5 hidden">
+            <input
+              type="text"
+              id="customPlatformInput"
+              placeholder="Specify platform (e.g., Discord, Twitch, Chess.com)..."
+              class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            />
+          </div>
         </div>
 
         <!-- 2. What happened BEFORE you failed? (Triggers) -->
@@ -744,6 +824,22 @@
           </svg>
           <span>Copy Full Pattern Summary to Clipboard</span>
         </button>
+
+        <!-- Restore / Import Section -->
+        <div class="pt-3 border-t border-slate-800/80 space-y-2">
+          <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <span>Restore Backup Archive</span>
+            <span class="text-[10px] text-slate-500 font-normal">JSON Archives</span>
+          </div>
+          <input type="file" id="importJsonFileInput" accept=".json,application/json" class="hidden" />
+          <button type="button" id="triggerImportJsonBtn" class="w-full py-3 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-medium transition cursor-pointer flex items-center justify-center gap-2">
+            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            <span>Upload & Restore JSON Backup</span>
+          </button>
+          <p class="text-[11px] text-slate-500 text-center">Merges imported laps with your records and synchronizes with local cache & cloud account.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -1030,6 +1126,8 @@ service cloud.firestore {
       modalCapturedTimestampText: document.getElementById('modalCapturedTimestampText'),
       modalCapturedBucketBadge: document.getElementById('modalCapturedBucketBadge'),
       platformPillsContainer: document.getElementById('platformPillsContainer'),
+      customPlatformContainer: document.getElementById('customPlatformContainer'),
+      customPlatformInput: document.getElementById('customPlatformInput'),
       triggerPillsContainer: document.getElementById('triggerPillsContainer'),
       whatHappenedBeforeInput: document.getElementById('whatHappenedBeforeInput'),
       feelingBeforePillsContainer: document.getElementById('feelingBeforePillsContainer'),
@@ -1049,6 +1147,8 @@ service cloud.firestore {
       exportCsvBtn: document.getElementById('exportCsvBtn'),
       exportJsonBtn: document.getElementById('exportJsonBtn'),
       copyMarkdownReportBtn: document.getElementById('copyMarkdownReportBtn'),
+      triggerImportJsonBtn: document.getElementById('triggerImportJsonBtn'),
+      importJsonFileInput: document.getElementById('importJsonFileInput'),
 
       // Toast
       toastBanner: document.getElementById('toastBanner'),
@@ -1119,6 +1219,58 @@ service cloud.firestore {
         hour: 'numeric',
         minute: '2-digit'
       });
+    }
+
+    // -------------------------------------------------------------------------
+    // 4B. OFFLINE-FIRST LOCAL STORAGE PERSISTENCE LAYER
+    // -------------------------------------------------------------------------
+    const LOCAL_TIMER_KEY = 'detox_pulse_timer_cache_v1';
+    const LOCAL_LAPS_KEY = 'detox_pulse_laps_cache_v1';
+
+    function loadFromLocalStorage() {
+      try {
+        const cachedTimer = localStorage.getItem(LOCAL_TIMER_KEY);
+        if (cachedTimer) {
+          const parsed = JSON.parse(cachedTimer);
+          state.timer = {
+            isRunning: Boolean(parsed.isRunning),
+            currentLapStartTime: parsed.currentLapStartTime || null,
+            accumulatedMs: Number(parsed.accumulatedMs || 0),
+            streakInitialStartTime: parsed.streakInitialStartTime || null
+          };
+        } else {
+          startStopwatchIfFirstVisit();
+        }
+
+        const cachedLaps = localStorage.getItem(LOCAL_LAPS_KEY);
+        if (cachedLaps) {
+          const parsedLaps = JSON.parse(cachedLaps);
+          if (Array.isArray(parsedLaps) && parsedLaps.length > 0) {
+            state.laps = parsedLaps;
+          }
+        }
+      } catch (err) {
+        console.warn("Could not read from localStorage:", err);
+      }
+    }
+
+    function saveTimerToLocalStorage() {
+      try {
+        localStorage.setItem(LOCAL_TIMER_KEY, JSON.stringify({
+          ...state.timer,
+          updatedAt: Date.now()
+        }));
+      } catch (err) {
+        console.warn("Could not write timer to localStorage:", err);
+      }
+    }
+
+    function saveLapsToLocalStorage() {
+      try {
+        localStorage.setItem(LOCAL_LAPS_KEY, JSON.stringify(state.laps));
+      } catch (err) {
+        console.warn("Could not write laps to localStorage:", err);
+      }
     }
 
     // -------------------------------------------------------------------------
@@ -1414,14 +1566,18 @@ service cloud.firestore {
               accumulatedMs: Number(data.accumulatedMs || 0),
               streakInitialStartTime: data.streakInitialStartTime || data.currentLapStartTime || Date.now()
             };
+            saveTimerToLocalStorage();
           } else {
-            const now = Date.now();
-            state.timer = {
-              isRunning: true,
-              currentLapStartTime: now,
-              accumulatedMs: 0,
-              streakInitialStartTime: now
-            };
+            const hasExisting = state.timer.isRunning || state.timer.accumulatedMs > 0;
+            if (!hasExisting) {
+              const now = Date.now();
+              state.timer = {
+                isRunning: true,
+                currentLapStartTime: now,
+                accumulatedMs: 0,
+                streakInitialStartTime: now
+              };
+            }
             saveTimerStateToCloud();
           }
           renderStopwatchUI();
@@ -1453,8 +1609,20 @@ service cloud.firestore {
               ...docItem.data()
             });
           });
+
+          // Merge unsynced local laps if any
+          const localOnlyLaps = state.laps.filter(l => String(l.id).startsWith('local-'));
+          for (const localLap of localOnlyLaps) {
+            if (!loadedLaps.some(cl => cl.relapsedAtMs === localLap.relapsedAtMs)) {
+              const { id, ...lapData } = localLap;
+              addDoc(lapsColRef, lapData).catch(e => console.error("Sync error:", e));
+              loadedLaps.push(localLap);
+            }
+          }
+
           loadedLaps.sort((a, b) => (b.relapsedAtMs || 0) - (a.relapsedAtMs || 0));
           state.laps = loadedLaps;
+          saveLapsToLocalStorage();
           renderAll();
         },
         (error) => {
@@ -1464,6 +1632,7 @@ service cloud.firestore {
     }
 
     async function saveTimerStateToCloud() {
+      saveTimerToLocalStorage();
       renderStopwatchUI();
       if (!state.user || !db) return;
       try {
@@ -1479,31 +1648,41 @@ service cloud.firestore {
         updateCloudBadge('online', 'Cloud Synced • Live');
       } catch (err) {
         console.error("Failed to save timer state:", err);
-        updateCloudBadge('offline', 'Sync Error');
+        updateCloudBadge('offline', 'Cached Locally');
       }
     }
 
     async function addLapRecordToCloud(lapRecord) {
       if (!state.user || !db) {
         state.laps.unshift({ id: 'local-' + Date.now(), ...lapRecord });
+        saveLapsToLocalStorage();
         renderAll();
         return;
       }
       try {
         updateCloudBadge('syncing', 'Saving Lap...');
         const lapsColRef = collection(db, 'artifacts', state.appId, 'users', state.userId, 'detox_laps');
-        await addDoc(lapsColRef, lapRecord);
+        const docRef = await addDoc(lapsColRef, lapRecord);
+        if (!state.laps.some(l => l.relapsedAtMs === lapRecord.relapsedAtMs)) {
+          state.laps.unshift({ id: docRef.id, ...lapRecord });
+        }
+        saveLapsToLocalStorage();
         updateCloudBadge('online', 'Cloud Synced • Live');
       } catch (err) {
         console.error("Failed to add lap record:", err);
-        updateCloudBadge('offline', 'Save Error');
+        state.laps.unshift({ id: 'local-' + Date.now(), ...lapRecord });
+        saveLapsToLocalStorage();
+        renderAll();
+        updateCloudBadge('offline', 'Saved Locally');
       }
     }
 
     async function deleteLapFromCloud(lapId) {
-      if (!state.user || !db) {
-        state.laps = state.laps.filter(l => l.id !== lapId);
-        renderAll();
+      state.laps = state.laps.filter(l => l.id !== lapId);
+      saveLapsToLocalStorage();
+      renderAll();
+      if (!state.user || !db || String(lapId).startsWith('local-')) {
+        showToast("Deleted lap entry from local storage");
         return;
       }
       try {
@@ -1513,7 +1692,7 @@ service cloud.firestore {
         updateCloudBadge('online', 'Cloud Synced • Live');
         showToast("Deleted lap entry from cloud");
       } catch (err) {
-        console.error("Failed to delete lap:", err);
+        console.error("Failed to delete lap from cloud:", err);
       }
     }
 
@@ -1523,6 +1702,7 @@ service cloud.firestore {
         state.timer.isRunning = true;
         state.timer.currentLapStartTime = now;
         state.timer.streakInitialStartTime = now;
+        saveTimerToLocalStorage();
       }
     }
 
@@ -1681,6 +1861,8 @@ service cloud.firestore {
       el.feelingBeforeNoteInput.value = "";
       el.feelingAfterNoteInput.value = "";
       if (el.nextTimePlanInput) el.nextTimePlanInput.value = "";
+      if (el.customPlatformInput) el.customPlatformInput.value = "";
+      if (el.customPlatformContainer) el.customPlatformContainer.classList.add('hidden');
 
       renderModalPills();
       el.relapseModal.classList.remove('hidden');
@@ -1704,6 +1886,17 @@ service cloud.firestore {
           </button>
         `;
       }).join('');
+
+      if (el.customPlatformContainer) {
+        if (state.pendingRelapse.selectedPlatform === 'Other') {
+          el.customPlatformContainer.classList.remove('hidden');
+          if (el.customPlatformInput && document.activeElement !== el.customPlatformInput) {
+            setTimeout(() => el.customPlatformInput.focus(), 50);
+          }
+        } else {
+          el.customPlatformContainer.classList.add('hidden');
+        }
+      }
 
       // 2. Triggers (Multi-select)
       el.triggerPillsContainer.innerHTML = TRIGGER_OPTIONS.map(trig => {
@@ -1779,13 +1972,18 @@ service cloud.firestore {
       const finalHours = Number((finalDurationMs / (1000 * 60 * 60)).toFixed(2));
       const now = Date.now();
 
+      let chosenPlatform = state.pendingRelapse.selectedPlatform || "Other";
+      if (chosenPlatform === "Other" && el.customPlatformInput && el.customPlatformInput.value.trim()) {
+        chosenPlatform = el.customPlatformInput.value.trim();
+      }
+
       const lapRecord = {
         durationMs: finalDurationMs,
         hoursAvoided: finalHours,
         startedAtMs: state.timer.streakInitialStartTime || (now - finalDurationMs),
         relapsedAtMs: state.pendingRelapse.timestampMs || now,
         timeOfDayBucket: state.pendingRelapse.timeBucket,
-        platform: state.pendingRelapse.selectedPlatform,
+        platform: chosenPlatform,
         triggers: state.pendingRelapse.selectedTriggers.length > 0 ? state.pendingRelapse.selectedTriggers : ["Unspecified"],
         whatHappenedBefore: el.whatHappenedBeforeInput.value.trim(),
         feelingBefore: state.pendingRelapse.selectedFeelingBefore,
@@ -2286,6 +2484,70 @@ service cloud.firestore {
       showToast("Copied summary report to clipboard!");
     }
 
+    function handleJsonFileImport(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          const rawLaps = Array.isArray(data) ? data : (Array.isArray(data.laps) ? data.laps : null);
+          if (!rawLaps) {
+            showToast("Invalid JSON backup: missing laps array.");
+            return;
+          }
+
+          let newLapsCount = 0;
+          for (const lap of rawLaps) {
+            const exists = state.laps.some(existing =>
+              (lap.id && existing.id === lap.id) ||
+              (lap.relapsedAtMs && existing.relapsedAtMs === lap.relapsedAtMs)
+            );
+            if (!exists) {
+              const importedRecord = {
+                durationMs: Number(lap.durationMs || 0),
+                hoursAvoided: Number(lap.hoursAvoided || ((lap.durationMs || 0) / 3600000).toFixed(2)),
+                startedAtMs: lap.startedAtMs || Date.now(),
+                relapsedAtMs: lap.relapsedAtMs || Date.now(),
+                timeOfDayBucket: lap.timeOfDayBucket || "Afternoon",
+                platform: lap.platform || "Other",
+                triggers: Array.isArray(lap.triggers) ? lap.triggers : ["Imported"],
+                whatHappenedBefore: lap.whatHappenedBefore || "",
+                feelingBefore: lap.feelingBefore || "Bored",
+                feelingBeforeNote: lap.feelingBeforeNote || "",
+                feelingAfter: lap.feelingAfter || "Regretful",
+                feelingAfterNote: lap.feelingAfterNote || "",
+                relapseDuration: lap.relapseDuration || "15 mins",
+                nextTimePlan: lap.nextTimePlan || ""
+              };
+              await addLapRecordToCloud(importedRecord);
+              newLapsCount++;
+            }
+          }
+
+          if (data.currentStreakTimer && (!state.timer.isRunning && state.timer.accumulatedMs === 0)) {
+            state.timer = {
+              isRunning: Boolean(data.currentStreakTimer.isRunning),
+              currentLapStartTime: data.currentStreakTimer.currentLapStartTime || null,
+              accumulatedMs: Number(data.currentStreakTimer.accumulatedMs || 0),
+              streakInitialStartTime: data.currentStreakTimer.streakInitialStartTime || null
+            };
+            saveTimerStateToCloud();
+          }
+
+          saveLapsToLocalStorage();
+          renderAll();
+          el.backupModal.classList.add('hidden');
+          showToast(`Successfully imported ${newLapsCount} new lap(s)!`);
+        } catch (err) {
+          console.error("JSON restore error:", err);
+          showToast("Failed to parse JSON backup file.");
+        } finally {
+          if (el.importJsonFileInput) el.importJsonFileInput.value = "";
+        }
+      };
+      reader.readAsText(file);
+    }
+
     // -------------------------------------------------------------------------
     // 11. EVENT LISTENERS & INITIALIZATION
     // -------------------------------------------------------------------------
@@ -2430,11 +2692,22 @@ service cloud.firestore {
       el.exportCsvBtn.addEventListener('click', exportCSV);
       el.exportJsonBtn.addEventListener('click', exportJSON);
       el.copyMarkdownReportBtn.addEventListener('click', copySummaryToClipboard);
+
+      if (el.triggerImportJsonBtn && el.importJsonFileInput) {
+        el.triggerImportJsonBtn.addEventListener('click', () => el.importJsonFileInput.click());
+        el.importJsonFileInput.addEventListener('change', (e) => {
+          if (e.target.files && e.target.files[0]) {
+            handleJsonFileImport(e.target.files[0]);
+          }
+        });
+      }
     }
 
     // Start live 1-second stopwatch loop & cloud sync
     window.addEventListener('DOMContentLoaded', () => {
       bindEvents();
+      loadFromLocalStorage();
+      renderAll();
       initCloudSync();
       setInterval(() => {
         renderStopwatchTick();
