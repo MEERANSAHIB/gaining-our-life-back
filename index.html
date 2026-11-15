@@ -1,0 +1,2445 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gaining Our Life Back — Social Media Detox Stopwatch & Relapse Pattern Tracker</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            slate: {
+              850: '#131c2e',
+              950: '#070b14'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #070b14;
+      color: #f1f5f9;
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+    /* Custom subtle glassmorphism and scrollbars */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(51, 65, 85, 0.55);
+    }
+    .glass-card-emerald {
+      background: linear-gradient(145deg, rgba(6, 78, 59, 0.22), rgba(15, 23, 42, 0.85));
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .glass-card-rose {
+      background: linear-gradient(145deg, rgba(136, 19, 55, 0.18), rgba(15, 23, 42, 0.85));
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+    .timer-glow {
+      text-shadow: 0 0 35px rgba(16, 185, 129, 0.35);
+    }
+    .timer-glow-paused {
+      text-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.08); opacity: 0.35; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .animate-pulse-slow {
+      animation: pulse-ring 3s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-emerald-500/30 selection:text-emerald-200">
+
+  <!-- Ambient Background Accents -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div id="ambientGlowPrimary" class="absolute -top-36 left-1/2 -translate-x-1/2 w-[650px] h-[340px] bg-emerald-500/10 rounded-full blur-[130px] transition-colors duration-1000"></div>
+    <div class="absolute top-1/3 -right-32 w-[420px] h-[420px] bg-indigo-500/5 rounded-full blur-[120px]"></div>
+    <div class="absolute bottom-0 -left-32 w-[420px] h-[380px] bg-rose-500/5 rounded-full blur-[120px]"></div>
+  </div>
+
+  <!-- Top Navigation & Cloud Status Header -->
+  <header class="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+      <!-- Brand -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-950/60 border border-emerald-400/30">
+          <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">Gaining Our <span class="text-emerald-400">Life Back</span></h1>
+            <span class="hidden lg:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+              gaining-our-life-back
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">Social Media Detox Stopwatch & Relapse Pattern Tracker</p>
+        </div>
+      </div>
+
+      <!-- Cloud Status & Quick Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Cloud Sync Status Pill -->
+        <button id="cloudStatusBadge" type="button" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-xs font-medium text-slate-300 transition cursor-pointer" title="Click to view Firebase Cloud Connection & Security Rules">
+          <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span id="cloudStatusText">Connecting Cloud...</span>
+        </button>
+
+        <!-- Google Sign-In Button (Visible when Guest / Anonymous) -->
+        <button id="googleSignInBtn" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-semibold text-xs shadow-md transition cursor-pointer">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+            <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
+            <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5L1.6 17c1.9 3.9 5.8 7 10.4 7z"/>
+          </svg>
+          <span>Sign in with Google</span>
+        </button>
+
+        <!-- Signed-In Google User Profile Pill (Hidden when Guest) -->
+        <div id="userProfileBar" class="hidden items-center gap-2 pl-2 pr-1.5 py-1 rounded-xl bg-slate-900/90 border border-slate-700/80">
+          <img id="userAvatarImg" src="https://placehold.co/32x32/10b981/070b14?text=G" alt="Profile" class="w-6 h-6 rounded-full object-cover border border-emerald-500/40" onerror="this.src='https://placehold.co/32x32/10b981/070b14?text=U'" />
+          <div class="hidden sm:flex flex-col leading-tight max-w-[140px]">
+            <span id="userDisplayName" class="text-[11px] font-semibold text-white truncate">Google User</span>
+            <span id="userEmailText" class="text-[10px] text-emerald-400 truncate">Synced</span>
+          </div>
+          <button id="googleSignOutBtn" class="ml-1 px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-500/30 text-[11px] font-medium transition cursor-pointer" title="Sign Out">
+            Sign Out
+          </button>
+        </div>
+
+        <!-- Cloud Diagnostics / Rules Helper Trigger -->
+        <button id="openRulesHelperBtn" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 text-xs font-medium transition cursor-pointer" title="Firebase Console Setup & Security Rules">
+          <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span class="hidden xl:inline">Cloud Setup</span>
+        </button>
+
+        <!-- Export / Backup Dropdown Trigger -->
+        <button id="openBackupModalBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 text-xs font-medium transition cursor-pointer">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span class="hidden sm:inline">Backup & Export</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
+
+    <!-- Cloud Permission / Setup Alert Banner (Shown automatically if Firebase rules/auth need enabling) -->
+    <div id="cloudDiagnosticBanner" class="hidden rounded-2xl bg-amber-950/50 border border-amber-500/40 p-4 text-xs sm:text-sm text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+      <div class="flex items-start gap-3">
+        <span class="p-2 rounded-xl bg-amber-500/20 text-amber-300 font-bold shrink-0">!</span>
+        <div>
+          <h4 id="cloudDiagnosticTitle" class="font-bold text-white">Firebase Cloud Action Needed</h4>
+          <p id="cloudDiagnosticMessage" class="text-amber-200/90 mt-0.5">
+            Your progress is safe in this session, but to sync across all devices with your <code>gaining-our-life-back</code> Firebase project, verify your Firestore Rules & Authorized Domains.
+          </p>
+        </div>
+      </div>
+      <button id="diagnosticOpenRulesBtn" type="button" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-semibold text-xs shrink-0 transition cursor-pointer">
+        View Fix & Copy Rules
+      </button>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="toastBanner" class="fixed bottom-5 right-5 z-50 hidden transform transition-all duration-300 max-w-sm">
+      <div class="glass-card px-4 py-3 rounded-2xl shadow-2xl border border-emerald-500/40 flex items-center gap-3">
+        <div id="toastIcon" class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+          ✓
+        </div>
+        <div class="text-xs sm:text-sm font-medium text-slate-100" id="toastMessage">Saved to cloud</div>
+      </div>
+    </div>
+
+    <!-- HERO SECTION: LIVE DETOX STOPWATCH (CURRENT LAP) -->
+    <section class="glass-card-emerald rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden">
+      <!-- Top Row inside Stopwatch Card -->
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div class="flex items-center gap-2.5">
+          <span id="streakLiveIndicator" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <span id="streakPulseDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span id="streakStatusLabel">ACTIVE DETOX LAP</span>
+          </span>
+          <span id="currentLapNumberBadge" class="px-2.5 py-1 rounded-full text-xs font-mono font-medium bg-slate-900/80 text-slate-300 border border-slate-700/80">
+            Lap #1
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Backdate / Adjust Start Time Button -->
+          <button id="openBackdateBtn" class="text-xs text-slate-300 hover:text-emerald-300 bg-slate-900/70 hover:bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-700/70 transition flex items-center gap-1.5 cursor-pointer" title="Started your detox earlier? Adjust your start time">
+            <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Adjust Start Time</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Digital Stopwatch Display -->
+      <div class="text-center my-4 sm:my-6">
+        <p class="text-xs uppercase tracking-widest text-slate-400 font-semibold mb-3">
+          Time Free From Social Media (Current Streak)
+        </p>
+
+        <!-- D : H : M : S Grid -->
+        <div class="grid grid-cols-4 gap-2 sm:gap-4 max-w-2xl mx-auto">
+          <!-- Days -->
+          <div class="bg-slate-950/75 border border-slate-800/90 rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center">
+            <span id="timerDays" class="font-mono text-3xl sm:text-5xl md:text-6xl font-bold text-white timer-glow tracking-tight">00</span>
+            <span class="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 mt-1.5 font-medium">Days</span>
+          </div>
+          <!-- Hours -->
+          <div class="bg-slate-950/75 border border-slate-800/90 rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center">
+            <span id="timerHours" class="font-mono text-3xl sm:text-5xl md:text-6xl font-bold text-white timer-glow tracking-tight">00</span>
+            <span class="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 mt-1.5 font-medium">Hours</span>
+          </div>
+          <!-- Minutes -->
+          <div class="bg-slate-950/75 border border-slate-800/90 rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center">
+            <span id="timerMinutes" class="font-mono text-3xl sm:text-5xl md:text-6xl font-bold text-emerald-400 timer-glow tracking-tight">00</span>
+            <span class="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 mt-1.5 font-medium">Minutes</span>
+          </div>
+          <!-- Seconds -->
+          <div class="bg-slate-950/75 border border-slate-800/90 rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center relative overflow-hidden">
+            <span id="timerSeconds" class="font-mono text-3xl sm:text-5xl md:text-6xl font-bold text-emerald-300 timer-glow tracking-tight">00</span>
+            <span class="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 mt-1.5 font-medium">Seconds</span>
+          </div>
+        </div>
+
+        <!-- Total Hours Equivalent & Start Timestamp Info -->
+        <div class="mt-4 flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm text-slate-300">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800">
+            <span class="text-slate-400">Total Hours This Lap:</span>
+            <span id="currentLapTotalHours" class="font-mono font-semibold text-emerald-400">0.00 hrs</span>
+          </div>
+          <div id="lapStartedAtBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800 text-slate-400">
+            <span>Ready to start</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress vs Personal Best Bar -->
+      <div class="max-w-2xl mx-auto mt-6 mb-7 bg-slate-950/60 rounded-2xl p-3.5 border border-slate-800/80">
+        <div class="flex items-center justify-between text-xs mb-1.5">
+          <span class="text-slate-400 font-medium flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            Progress Toward Longest Streak Record
+          </span>
+          <span id="pbProgressLabel" class="font-mono text-emerald-400 font-semibold">0% of Personal Best</span>
+        </div>
+        <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+          <div id="pbProgressBar" class="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Primary Stopwatch Controls -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-2xl mx-auto">
+        <!-- Start / Pause / Resume Button -->
+        <button id="toggleTimerBtn" class="flex-1 py-3.5 px-6 rounded-2xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-950/60 transition cursor-pointer">
+          <svg id="toggleTimerIcon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+          </svg>
+          <span id="toggleTimerText">Start Detox Lap</span>
+        </button>
+
+        <!-- I Relapsed (Log Lap & Reset) Button -->
+        <button id="relapseBtn" class="flex-1 py-3.5 px-6 rounded-2xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 bg-rose-600/90 hover:bg-rose-500 text-white shadow-lg shadow-rose-950/60 border border-rose-400/30 transition cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span>I Relapsed (Log Lap & Reset)</span>
+        </button>
+
+        <!-- Subtle Reset Button (Two-Step Inline Confirmation) -->
+        <button id="resetTimerBtn" class="py-3.5 px-4 rounded-2xl font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/80 transition cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span id="resetTimerText">Reset</span>
+        </button>
+      </div>
+
+      <!-- Inline Backdate Drawer (Hidden by default) -->
+      <div id="backdateDrawer" class="hidden max-w-xl mx-auto mt-5 pt-4 border-t border-slate-800/80">
+        <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-emerald-400">Set Custom Streak Start Time</h4>
+            <button id="closeBackdateBtn" class="text-xs text-slate-400 hover:text-white cursor-pointer">Cancel</button>
+          </div>
+          <p class="text-xs text-slate-400">If you started avoiding social media earlier today or yesterday, pick when your current streak began:</p>
+          <div class="flex flex-col sm:flex-row gap-2.5">
+            <input type="datetime-local" id="customStartTimeInput" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-emerald-500" />
+            <button id="applyBackdateBtn" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs sm:text-sm transition cursor-pointer">
+              Update Streak Start
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUMMARY KPI CARDS -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <!-- KPI 1: Total Clean Time -->
+      <div class="glass-card rounded-2xl p-4 sm:p-5">
+        <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+          <span class="font-medium">Total Clean Time</span>
+          <span class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </span>
+        </div>
+        <div id="kpiTotalCleanTime" class="font-mono text-xl sm:text-2xl font-bold text-white">0.0 hrs</div>
+        <p id="kpiTotalCleanSub" class="text-[11px] text-slate-400 mt-1">Across all laps + active streak</p>
+      </div>
+
+      <!-- KPI 2: Longest Streak (Personal Best) -->
+      <div class="glass-card rounded-2xl p-4 sm:p-5">
+        <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+          <span class="font-medium">Longest Lap Record</span>
+          <span class="p-1.5 rounded-lg bg-amber-500/10 text-amber-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+          </span>
+        </div>
+        <div id="kpiLongestLap" class="font-mono text-xl sm:text-2xl font-bold text-amber-300">0.0 hrs</div>
+        <p id="kpiLongestLapSub" class="text-[11px] text-slate-400 mt-1">Best single social-free lap</p>
+      </div>
+
+      <!-- KPI 3: Average Lap Duration -->
+      <div class="glass-card rounded-2xl p-4 sm:p-5">
+        <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+          <span class="font-medium">Average Lap Before Relapse</span>
+          <span class="p-1.5 rounded-lg bg-sky-500/10 text-sky-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          </span>
+        </div>
+        <div id="kpiAverageLap" class="font-mono text-xl sm:text-2xl font-bold text-sky-300">0.0 hrs</div>
+        <p id="kpiAverageLapSub" class="text-[11px] text-slate-400 mt-1">Mean duration between relapses</p>
+      </div>
+
+      <!-- KPI 4: Total Relapses Logged -->
+      <div class="glass-card rounded-2xl p-4 sm:p-5">
+        <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+          <span class="font-medium">Relapse Laps Logged</span>
+          <span class="p-1.5 rounded-lg bg-rose-500/10 text-rose-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </span>
+        </div>
+        <div id="kpiTotalRelapses" class="font-mono text-xl sm:text-2xl font-bold text-rose-300">0</div>
+        <p id="kpiTotalRelapsesSub" class="text-[11px] text-slate-400 mt-1">Each log reveals your patterns</p>
+      </div>
+    </section>
+
+    <!-- PATTERN RECOGNITION & BEHAVIORAL ANALYTICS SECTION -->
+    <section class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Relapse Pattern Recognition & Behavioral Insights
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400">Automatically decoded from your logged laps: when you fail, why you fail, and how your emotions shift.</p>
+        </div>
+
+        <!-- Sample Data Helper for First-Time Users -->
+        <div class="flex items-center gap-2">
+          <button id="loadDemoDataBtn" class="text-xs px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 transition cursor-pointer">
+            + Load Sample Relapse Logs to Preview Patterns
+          </button>
+        </div>
+      </div>
+
+      <!-- 3-Column Pattern Analytics Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        <!-- CARD 1: Vulnerability Window (When do I fail?) -->
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">1. When Do You Fail?</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">Time of Day</span>
+            </div>
+            <h3 class="text-base font-bold text-white mb-1">Vulnerability Window</h3>
+            <p id="vulnerabilitySummaryText" class="text-xs text-slate-400 mb-4">
+              Log your first relapse lap to see which hours of the day are your highest risk.
+            </p>
+
+            <!-- 4 Time Buckets Breakdown -->
+            <div id="timeOfDayBucketsContainer" class="space-y-3">
+              <!-- Populated dynamically via JS -->
+            </div>
+          </div>
+
+          <div id="vulnerabilityAdviceBox" class="mt-5 p-3 rounded-xl bg-slate-950/70 border border-slate-800/90 text-xs text-slate-300">
+            <span class="font-semibold text-amber-300">Pattern Tip:</span> Knowing your peak relapse window lets you set phone blocks 30 minutes before that window starts.
+          </div>
+        </div>
+
+        <!-- CARD 2: Top Triggers & Context (What happened right before failing?) -->
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold uppercase tracking-wider text-rose-400">2. What Happened Before?</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-300 border border-rose-500/20">Triggers & Culprits</span>
+            </div>
+            <h3 class="text-base font-bold text-white mb-1">Pre-Relapse Triggers</h3>
+            <p class="text-xs text-slate-400 mb-4">
+              The situations and urges that most frequently precede opening social media.
+            </p>
+
+            <!-- Ranked Trigger Bars -->
+            <div id="topTriggersContainer" class="space-y-3">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Top Platform Breakdown -->
+          <div class="mt-5 pt-4 border-t border-slate-800/80">
+            <div class="text-xs font-semibold text-slate-400 mb-2">Most Frequent Relapse Platforms:</div>
+            <div id="topPlatformsContainer" class="flex flex-wrap gap-1.5">
+              <span class="text-xs text-slate-500">No platform data yet</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 3: The Emotional Loop (How did I feel Before vs. After?) -->
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">3. Emotional Loop</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Before ➔ After</span>
+            </div>
+            <h3 class="text-base font-bold text-white mb-1">The False Dopamine Promise</h3>
+            <p class="text-xs text-slate-400 mb-4">
+              Comparing how you felt right <span class="text-slate-200 font-medium">before</span> caving in vs. how you actually felt <span class="text-slate-200 font-medium">after</span> scrolling.
+            </p>
+
+            <!-- Dominant Emotional Pairs -->
+            <div id="emotionalPairsContainer" class="space-y-2.5">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Before vs After Summary Comparison -->
+          <div class="mt-5 p-3 rounded-xl bg-indigo-950/25 border border-indigo-500/20 text-xs text-slate-300">
+            <div id="emotionInsightText">
+              <span class="font-semibold text-indigo-300">Reality Check:</span> Your brain expects relief when bored or stressed, but tracking proves how rarely scrolling actually makes you feel recharged.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CHRONOLOGICAL LAP HISTORY & RELAPSE JOURNAL -->
+    <section class="glass-card rounded-3xl p-5 sm:p-7 space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Detox Lap History & Relapse Reflections
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400">Every completed detox lap, how many hours you avoided social media, and your reflection log.</p>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="flex flex-wrap items-center gap-2.5">
+          <!-- Search Input -->
+          <div class="relative flex-1 sm:flex-initial">
+            <input
+              type="text"
+              id="searchLapsInput"
+              placeholder="Search triggers, emotions, notes..."
+              class="w-full sm:w-60 bg-slate-900/90 border border-slate-700/80 rounded-xl pl-8 pr-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            />
+            <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          <!-- Time of Day Filter -->
+          <select id="filterTimeBucketSelect" class="bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+            <option value="ALL">All Times of Day</option>
+            <option value="Morning">Morning (6am–12pm)</option>
+            <option value="Afternoon">Afternoon (12pm–5pm)</option>
+            <option value="Evening">Evening (5pm–10pm)</option>
+            <option value="Late Night">Late Night (10pm–6am)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Lap Timeline List -->
+      <div id="lapHistoryList" class="space-y-3">
+        <!-- Populated dynamically via JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-slate-900/80 py-6 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+      <div><span class="text-slate-300 font-semibold">Gaining Our Life Back</span> • Project: <code class="text-emerald-400">gaining-our-life-back</code></div>
+      <div class="flex items-center gap-2 font-mono">
+        <span>Cloud User ID:</span>
+        <span id="footerUserId" class="text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800 select-all">Initializing...</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: RELAPSE / LAP REFLECTION LOGGER MODAL                        -->
+  <!-- ===================================================================== -->
+  <div id="relapseModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+    <div class="glass-card w-full max-w-2xl rounded-3xl border border-slate-700/80 shadow-2xl overflow-hidden my-8 max-h-[92vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="p-5 sm:p-6 border-b border-slate-800 bg-gradient-to-r from-rose-950/40 via-slate-900 to-slate-900 flex items-start justify-between gap-4">
+        <div>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30 mb-2">
+            Lap Completed • Relapse Reflection
+          </span>
+          <h3 class="text-lg sm:text-xl font-bold text-white">Log Your Lap & Decode the Trigger</h3>
+          <p class="text-xs text-slate-400 mt-0.5">No judgment—just data. Understanding what happened right before and how you feel now breaks the habit loop.</p>
+        </div>
+        <button id="closeRelapseModalBtn" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Scrollable Form Body -->
+      <form id="relapseForm" class="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
+        <!-- Captured Streak Summary Banner -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-950/90 p-4 rounded-2xl border border-slate-800">
+          <div>
+            <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Hours Avoided Before Relapse</span>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span id="modalCapturedDurationText" class="font-mono text-2xl font-bold text-emerald-400">0h 00m</span>
+              <span id="modalCapturedHoursDecimal" class="font-mono text-xs text-slate-400">(0.00 hrs)</span>
+            </div>
+            <!-- Optional manual override if user forgot to click immediately -->
+            <div class="mt-2 flex items-center gap-2">
+              <label for="manualHoursOverride" class="text-[11px] text-slate-400">Edit hours if needed:</label>
+              <input type="number" id="manualHoursOverride" step="0.1" min="0" class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-white focus:outline-none focus:border-emerald-500" />
+              <span class="text-[11px] text-slate-500">hrs</span>
+            </div>
+          </div>
+
+          <div class="flex flex-col justify-between border-t sm:border-t-0 sm:border-l border-slate-800 pt-3 sm:pt-0 sm:pl-4">
+            <div>
+              <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">When Did You Relapse?</span>
+              <div id="modalCapturedTimestampText" class="text-sm font-semibold text-white mt-1">Today, 3:45 PM</div>
+            </div>
+            <div class="mt-2 flex items-center gap-2">
+              <span class="text-[11px] text-slate-400">Time Bucket:</span>
+              <span id="modalCapturedBucketBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                Afternoon
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. Platform / App Used -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+            1. Which platform or app pulled you in?
+          </label>
+          <div id="platformPillsContainer" class="flex flex-wrap gap-2">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- 2. What happened BEFORE you failed? (Triggers) -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-rose-300 mb-1">
+            2. What happened right BEFORE you failed? (Select all triggers that apply)
+          </label>
+          <p class="text-xs text-slate-400 mb-2.5">What were you doing or avoiding right before you opened the app?</p>
+          <div id="triggerPillsContainer" class="flex flex-wrap gap-2 mb-3">
+            <!-- Populated via JS -->
+          </div>
+          <input
+            type="text"
+            id="whatHappenedBeforeInput"
+            placeholder="Specific context (e.g., 'Got stuck debugging code', 'Lying in bed with phone next to me', 'Opened phone to check time')..."
+            class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
+          />
+        </div>
+
+        <!-- 3. How did you feel BEFORE doing that? -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/90">
+            <label class="block text-xs font-semibold uppercase tracking-wider text-amber-300 mb-1">
+              3. How did you feel BEFORE?
+            </label>
+            <p class="text-[11px] text-slate-400 mb-2.5">Your emotional state right before unlocking/opening:</p>
+            <div id="feelingBeforePillsContainer" class="flex flex-wrap gap-1.5 mb-3">
+              <!-- Populated via JS -->
+            </div>
+            <input
+              type="text"
+              id="feelingBeforeNoteInput"
+              placeholder="Optional note on how you felt before..."
+              class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+            />
+          </div>
+
+          <!-- 4. How did you feel AFTER doing that? -->
+          <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/90">
+            <label class="block text-xs font-semibold uppercase tracking-wider text-indigo-300 mb-1">
+              4. How did you feel AFTER?
+            </label>
+            <p class="text-[11px] text-slate-400 mb-2.5">Your emotional & mental state after scrolling:</p>
+            <div id="feelingAfterPillsContainer" class="flex flex-wrap gap-1.5 mb-3">
+              <!-- Populated via JS -->
+            </div>
+            <input
+              type="text"
+              id="feelingAfterNoteInput"
+              placeholder="Optional note on how you felt after..."
+              class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+        </div>
+
+        <!-- 5. How long did the relapse last & Next Time Strategy -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/90">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-emerald-300 mb-1">
+              5. How long did the relapse last?
+            </label>
+            <p class="text-[11px] text-slate-400 mb-2.5">Time spent scrolling before catching yourself:</p>
+            <div id="relapseDurationPillsContainer" class="flex flex-wrap gap-1.5">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+
+          <div>
+            <label for="nextTimePlanInput" class="block text-xs font-semibold uppercase tracking-wider text-emerald-300 mb-1">
+              6. What will I do differently next time?
+            </label>
+            <p class="text-[11px] text-slate-400 mb-2.5">Actionable friction or replacement habit:</p>
+            <input
+              type="text"
+              id="nextTimePlanInput"
+              placeholder="e.g., Leave phone on desk before bed, do 10 pushups, drink water..."
+              class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+        </div>
+
+        <!-- 6. Submit / Auto-Restart Next Lap -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+          <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
+            <input type="checkbox" id="autoRestartNextLapCheckbox" checked class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-emerald-500" />
+            <span class="text-xs sm:text-sm text-slate-200 font-medium">Immediately start new detox lap from 00:00:00</span>
+          </label>
+
+          <div class="flex items-center gap-2.5">
+            <button type="button" id="cancelRelapseModalBtn" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-medium transition cursor-pointer">
+              Cancel
+            </button>
+            <button type="submit" id="saveRelapseSubmitBtn" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs sm:text-sm shadow-lg shadow-emerald-950/50 transition cursor-pointer">
+              Save Lap Reflection & Reset Timer
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: CLOUD BACKUP & EXPORT MODAL                                  -->
+  <!-- ===================================================================== -->
+  <div id="backupModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="glass-card w-full max-w-lg rounded-3xl border border-slate-700/80 shadow-2xl overflow-hidden">
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-white">Cloud Data & Portable Backup</h3>
+          <p class="text-xs text-slate-400">Your logs are automatically saved in the cloud. Export anytime for safekeeping.</p>
+        </div>
+        <button id="closeBackupModalBtn" class="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white cursor-pointer">✕</button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div class="bg-slate-950/80 p-3.5 rounded-2xl border border-slate-800 text-xs space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400">Cloud Storage Status:</span>
+            <span id="backupModalCloudState" class="font-semibold text-emerald-400">Connected & Synced</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400">Total Logged Laps:</span>
+            <span id="backupModalLapCount" class="font-mono font-semibold text-white">0</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button id="exportCsvBtn" class="p-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-left transition cursor-pointer group">
+            <div class="text-xs font-bold text-emerald-400 group-hover:underline">Download CSV Spreadsheet</div>
+            <p class="text-[11px] text-slate-400 mt-1">Open in Excel, Google Sheets, or Notion</p>
+          </button>
+
+          <button id="exportJsonBtn" class="p-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-left transition cursor-pointer group">
+            <div class="text-xs font-bold text-sky-400 group-hover:underline">Download JSON Archive</div>
+            <p class="text-[11px] text-slate-400 mt-1">Complete structured data backup</p>
+          </button>
+        </div>
+
+        <button id="copyMarkdownReportBtn" class="w-full py-3 px-4 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <span>Copy Full Pattern Summary to Clipboard</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 3: FIREBASE CONSOLE SETUP & SECURITY RULES HELPER MODAL         -->
+  <!-- ===================================================================== -->
+  <div id="rulesHelperModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+    <div class="glass-card w-full max-w-2xl rounded-3xl border border-slate-700/80 shadow-2xl overflow-hidden my-8">
+      <div class="p-5 sm:p-6 border-b border-slate-800 flex items-center justify-between">
+        <div>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-1">
+            Project: gaining-our-life-back
+          </span>
+          <h3 class="text-base sm:text-lg font-bold text-white">Firebase Cloud Sync & Security Rules Checklist</h3>
+          <p class="text-xs text-slate-400">Your app is pre-configured with your Firebase keys. Make sure these 3 settings are enabled in your Firebase Console.</p>
+        </div>
+        <button id="closeRulesHelperModalBtn" class="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white cursor-pointer">✕</button>
+      </div>
+
+      <div class="p-5 sm:p-6 space-y-5 text-xs sm:text-sm text-slate-300 max-h-[78vh] overflow-y-auto">
+        <!-- Step 1 -->
+        <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-1.5">
+          <div class="font-bold text-white flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs flex items-center justify-center font-mono">1</span>
+            <span>Enable Google & Anonymous Sign-In</span>
+          </div>
+          <p class="text-xs text-slate-400">
+            In Firebase Console ➔ <strong>Build ➔ Authentication ➔ Sign-in method</strong>: enable both <strong>Google</strong> and <strong>Anonymous</strong> providers.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <div class="font-bold text-white flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs flex items-center justify-center font-mono">2</span>
+              <span>Paste Firestore Database Security Rules</span>
+            </div>
+            <button id="copyFirestoreRulesBtn" type="button" class="px-3 py-1 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs transition cursor-pointer">
+              Copy Rules
+            </button>
+          </div>
+          <p class="text-xs text-slate-400">
+            In Firebase Console ➔ <strong>Build ➔ Firestore Database ➔ Rules</strong>, paste these rules and click <strong>Publish</strong> so your signed-in account can read and write laps:
+          </p>
+          <pre id="firestoreRulesCode" class="bg-slate-900 p-3.5 rounded-xl border border-slate-700 font-mono text-[11px] text-emerald-300 overflow-x-auto select-all">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /artifacts/{appId}/users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}</pre>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-1.5">
+          <div class="font-bold text-white flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs flex items-center justify-center font-mono">3</span>
+            <span>Authorize Your Hosted Domain (GitHub Pages / Vercel)</span>
+          </div>
+          <p class="text-xs text-slate-400">
+            In Firebase Console ➔ <strong>Authentication ➔ Settings ➔ Authorized domains</strong>, click <strong>Add domain</strong> and add your live domain (e.g., <code>yourusername.github.io</code> or <code>localhost</code>).
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- APPLICATION LOGIC & FIREBASE CLOUD SYNC                               -->
+  <!-- ===================================================================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import {
+      getAuth,
+      signInAnonymously,
+      signInWithCustomToken,
+      onAuthStateChanged,
+      GoogleAuthProvider,
+      signInWithPopup,
+      linkWithPopup,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // -------------------------------------------------------------------------
+    // 0. USER'S PRE-CONFIGURED FIREBASE PROJECT ("gaining-our-life-back")
+    // -------------------------------------------------------------------------
+    const USER_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyDRteOAVEDDskM5SaPHujn2_nAPQi_KUwk",
+      authDomain: "gaining-our-life-back.firebaseapp.com",
+      projectId: "gaining-our-life-back",
+      storageBucket: "gaining-our-life-back.firebasestorage.app",
+      messagingSenderId: "528979959431",
+      appId: "1:528979959431:web:9c0160224283c08ef52222",
+      measurementId: "G-N7ZQJ369CN"
+    };
+    const STANDALONE_APP_ID = "gaining-our-life-back-v1";
+
+    // -------------------------------------------------------------------------
+    // 1. PRESET OPTIONS FOR QUICK REFLECTION LOGGING
+    // -------------------------------------------------------------------------
+    const PLATFORM_OPTIONS = [
+      "Instagram",
+      "YouTube / Shorts",
+      "TikTok / Reels",
+      "X / Twitter",
+      "Reddit",
+      "Facebook",
+      "LinkedIn",
+      "WhatsApp / Telegram",
+      "Other"
+    ];
+
+    const TRIGGER_OPTIONS = [
+      "Boredom",
+      "Muscle Memory / Phone Unlock",
+      "Stuck on a Hard Task",
+      "Procrastinating",
+      "In Bed / Waking or Sleeping",
+      "Notification",
+      "Stress / Overwhelmed",
+      "Lonely / Tired",
+      "Waiting / In Transit"
+    ];
+
+    const FEELING_BEFORE_OPTIONS = [
+      "Anxious",
+      "Restless",
+      "Bored",
+      "Brain-Fogged",
+      "Stressed",
+      "Curious",
+      "Tired",
+      "Urge / Craving"
+    ];
+
+    const FEELING_AFTER_OPTIONS = [
+      "Guilty",
+      "Drained",
+      "Regretful",
+      "Numb",
+      "Still Bored",
+      "Distracted",
+      "Relieved",
+      "Motivated to Reset"
+    ];
+
+    const RELAPSE_DURATION_OPTIONS = [
+      "< 5 mins",
+      "15 mins",
+      "30 mins",
+      "1+ hour"
+    ];
+
+    // -------------------------------------------------------------------------
+    // 2. APPLICATION STATE
+    // -------------------------------------------------------------------------
+    const state = {
+      // Cloud & Auth
+      user: null,
+      userId: null,
+      isCloudConnected: false,
+      usingFallbackEnvironment: false,
+      appId: STANDALONE_APP_ID,
+
+      // Stopwatch State (Cloud Synced)
+      timer: {
+        isRunning: false,
+        currentLapStartTime: null, // Epoch ms when current running segment started
+        accumulatedMs: 0,          // Previously accumulated ms if paused
+        streakInitialStartTime: null // Epoch ms when the lap originally began
+      },
+
+      // Captured state when opening Relapse Modal
+      pendingRelapse: {
+        durationMs: 0,
+        timestampMs: Date.now(),
+        timeBucket: "Afternoon",
+        selectedPlatform: "Instagram",
+        selectedTriggers: ["Boredom"],
+        selectedFeelingBefore: "Bored",
+        selectedFeelingAfter: "Regretful",
+        selectedRelapseDuration: "15 mins"
+      },
+
+      // Logged Laps (Cloud Synced)
+      laps: [],
+
+      // UI State
+      resetConfirmPending: false,
+      deleteConfirmLapId: null,
+      searchQuery: "",
+      filterBucket: "ALL"
+    };
+
+    // -------------------------------------------------------------------------
+    // 3. DOM ELEMENT REFERENCES
+    // -------------------------------------------------------------------------
+    const el = {
+      cloudStatusBadge: document.getElementById('cloudStatusBadge'),
+      cloudStatusDot: document.getElementById('cloudStatusDot'),
+      cloudStatusText: document.getElementById('cloudStatusText'),
+      googleSignInBtn: document.getElementById('googleSignInBtn'),
+      userProfileBar: document.getElementById('userProfileBar'),
+      userAvatarImg: document.getElementById('userAvatarImg'),
+      userDisplayName: document.getElementById('userDisplayName'),
+      userEmailText: document.getElementById('userEmailText'),
+      googleSignOutBtn: document.getElementById('googleSignOutBtn'),
+      footerUserId: document.getElementById('footerUserId'),
+
+      // Diagnostic & Rules Helper Modal
+      cloudDiagnosticBanner: document.getElementById('cloudDiagnosticBanner'),
+      cloudDiagnosticTitle: document.getElementById('cloudDiagnosticTitle'),
+      cloudDiagnosticMessage: document.getElementById('cloudDiagnosticMessage'),
+      diagnosticOpenRulesBtn: document.getElementById('diagnosticOpenRulesBtn'),
+      openRulesHelperBtn: document.getElementById('openRulesHelperBtn'),
+      rulesHelperModal: document.getElementById('rulesHelperModal'),
+      closeRulesHelperModalBtn: document.getElementById('closeRulesHelperModalBtn'),
+      copyFirestoreRulesBtn: document.getElementById('copyFirestoreRulesBtn'),
+      firestoreRulesCode: document.getElementById('firestoreRulesCode'),
+
+      // Stopwatch
+      streakLiveIndicator: document.getElementById('streakLiveIndicator'),
+      streakPulseDot: document.getElementById('streakPulseDot'),
+      streakStatusLabel: document.getElementById('streakStatusLabel'),
+      currentLapNumberBadge: document.getElementById('currentLapNumberBadge'),
+      timerDays: document.getElementById('timerDays'),
+      timerHours: document.getElementById('timerHours'),
+      timerMinutes: document.getElementById('timerMinutes'),
+      timerSeconds: document.getElementById('timerSeconds'),
+      currentLapTotalHours: document.getElementById('currentLapTotalHours'),
+      lapStartedAtBadge: document.getElementById('lapStartedAtBadge'),
+      pbProgressLabel: document.getElementById('pbProgressLabel'),
+      pbProgressBar: document.getElementById('pbProgressBar'),
+      toggleTimerBtn: document.getElementById('toggleTimerBtn'),
+      toggleTimerText: document.getElementById('toggleTimerText'),
+      relapseBtn: document.getElementById('relapseBtn'),
+      resetTimerBtn: document.getElementById('resetTimerBtn'),
+      resetTimerText: document.getElementById('resetTimerText'),
+
+      // Backdate
+      openBackdateBtn: document.getElementById('openBackdateBtn'),
+      backdateDrawer: document.getElementById('backdateDrawer'),
+      closeBackdateBtn: document.getElementById('closeBackdateBtn'),
+      customStartTimeInput: document.getElementById('customStartTimeInput'),
+      applyBackdateBtn: document.getElementById('applyBackdateBtn'),
+
+      // KPIs
+      kpiTotalCleanTime: document.getElementById('kpiTotalCleanTime'),
+      kpiTotalCleanSub: document.getElementById('kpiTotalCleanSub'),
+      kpiLongestLap: document.getElementById('kpiLongestLap'),
+      kpiLongestLapSub: document.getElementById('kpiLongestLapSub'),
+      kpiAverageLap: document.getElementById('kpiAverageLap'),
+      kpiAverageLapSub: document.getElementById('kpiAverageLapSub'),
+      kpiTotalRelapses: document.getElementById('kpiTotalRelapses'),
+      kpiTotalRelapsesSub: document.getElementById('kpiTotalRelapsesSub'),
+
+      // Analytics
+      vulnerabilitySummaryText: document.getElementById('vulnerabilitySummaryText'),
+      timeOfDayBucketsContainer: document.getElementById('timeOfDayBucketsContainer'),
+      vulnerabilityAdviceBox: document.getElementById('vulnerabilityAdviceBox'),
+      topTriggersContainer: document.getElementById('topTriggersContainer'),
+      topPlatformsContainer: document.getElementById('topPlatformsContainer'),
+      emotionalPairsContainer: document.getElementById('emotionalPairsContainer'),
+      emotionInsightText: document.getElementById('emotionInsightText'),
+      loadDemoDataBtn: document.getElementById('loadDemoDataBtn'),
+
+      // History
+      searchLapsInput: document.getElementById('searchLapsInput'),
+      filterTimeBucketSelect: document.getElementById('filterTimeBucketSelect'),
+      lapHistoryList: document.getElementById('lapHistoryList'),
+
+      // Relapse Modal
+      relapseModal: document.getElementById('relapseModal'),
+      closeRelapseModalBtn: document.getElementById('closeRelapseModalBtn'),
+      cancelRelapseModalBtn: document.getElementById('cancelRelapseModalBtn'),
+      relapseForm: document.getElementById('relapseForm'),
+      modalCapturedDurationText: document.getElementById('modalCapturedDurationText'),
+      modalCapturedHoursDecimal: document.getElementById('modalCapturedHoursDecimal'),
+      manualHoursOverride: document.getElementById('manualHoursOverride'),
+      modalCapturedTimestampText: document.getElementById('modalCapturedTimestampText'),
+      modalCapturedBucketBadge: document.getElementById('modalCapturedBucketBadge'),
+      platformPillsContainer: document.getElementById('platformPillsContainer'),
+      triggerPillsContainer: document.getElementById('triggerPillsContainer'),
+      whatHappenedBeforeInput: document.getElementById('whatHappenedBeforeInput'),
+      feelingBeforePillsContainer: document.getElementById('feelingBeforePillsContainer'),
+      feelingBeforeNoteInput: document.getElementById('feelingBeforeNoteInput'),
+      feelingAfterPillsContainer: document.getElementById('feelingAfterPillsContainer'),
+      feelingAfterNoteInput: document.getElementById('feelingAfterNoteInput'),
+      relapseDurationPillsContainer: document.getElementById('relapseDurationPillsContainer'),
+      nextTimePlanInput: document.getElementById('nextTimePlanInput'),
+      autoRestartNextLapCheckbox: document.getElementById('autoRestartNextLapCheckbox'),
+
+      // Backup Modal
+      openBackupModalBtn: document.getElementById('openBackupModalBtn'),
+      backupModal: document.getElementById('backupModal'),
+      closeBackupModalBtn: document.getElementById('closeBackupModalBtn'),
+      backupModalCloudState: document.getElementById('backupModalCloudState'),
+      backupModalLapCount: document.getElementById('backupModalLapCount'),
+      exportCsvBtn: document.getElementById('exportCsvBtn'),
+      exportJsonBtn: document.getElementById('exportJsonBtn'),
+      copyMarkdownReportBtn: document.getElementById('copyMarkdownReportBtn'),
+
+      // Toast
+      toastBanner: document.getElementById('toastBanner'),
+      toastMessage: document.getElementById('toastMessage')
+    };
+
+    // -------------------------------------------------------------------------
+    // 4. HELPER UTILITIES (TIME FORMATTING & BUCKETS)
+    // -------------------------------------------------------------------------
+    function showToast(message) {
+      el.toastMessage.textContent = message;
+      el.toastBanner.classList.remove('hidden');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        el.toastBanner.classList.add('hidden');
+      }, 3200);
+    }
+
+    function getElapsedMs() {
+      const { isRunning, currentLapStartTime, accumulatedMs } = state.timer;
+      if (isRunning && currentLapStartTime) {
+        return Math.max(0, accumulatedMs + (Date.now() - currentLapStartTime));
+      }
+      return Math.max(0, accumulatedMs);
+    }
+
+    function formatDurationCompact(ms) {
+      const totalSeconds = Math.floor(Math.max(0, ms) / 1000);
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      if (days > 0) {
+        return `${days}d ${hours}h ${minutes}m`;
+      }
+      if (hours > 0) {
+        return `${hours}h ${String(minutes).padStart(2, '0')}m`;
+      }
+      if (minutes > 0) {
+        return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
+      }
+      return `${seconds}s`;
+    }
+
+    function formatHoursLabel(ms) {
+      const hrs = ms / (1000 * 60 * 60);
+      if (hrs >= 48) {
+        return `${(hrs / 24).toFixed(1)} days (${hrs.toFixed(1)} hrs)`;
+      }
+      return `${hrs.toFixed(2)} hrs`;
+    }
+
+    function getTimeOfDayBucket(dateObj) {
+      const hour = dateObj.getHours();
+      if (hour >= 6 && hour < 12) return "Morning";
+      if (hour >= 12 && hour < 17) return "Afternoon";
+      if (hour >= 17 && hour < 22) return "Evening";
+      return "Late Night";
+    }
+
+    function formatDateTimeReadable(epochMs) {
+      if (!epochMs) return "";
+      const d = new Date(epochMs);
+      return d.toLocaleString([], {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. FIREBASE CLOUD INITIALIZATION & SYNC (STANDALONE + PREVIEW SUPPORT)
+    // -------------------------------------------------------------------------
+    let db = null;
+    let auth = null;
+    let unsubscribeTimer = null;
+    let unsubscribeLaps = null;
+
+    function showDiagnosticBanner(title, message) {
+      if (!el.cloudDiagnosticBanner) return;
+      el.cloudDiagnosticTitle.textContent = title;
+      el.cloudDiagnosticMessage.textContent = message;
+      el.cloudDiagnosticBanner.classList.remove('hidden');
+    }
+
+    function hideDiagnosticBanner() {
+      if (!el.cloudDiagnosticBanner) return;
+      el.cloudDiagnosticBanner.classList.add('hidden');
+    }
+
+    function updateAuthUI(user) {
+      const isGoogleLinked = user && !user.isAnonymous && (
+        (user.providerData && user.providerData.some(p => p.providerId === 'google.com')) ||
+        user.displayName ||
+        user.email
+      );
+
+      if (isGoogleLinked) {
+        el.googleSignInBtn.classList.add('hidden');
+        el.userProfileBar.classList.remove('hidden');
+        el.userProfileBar.classList.add('flex');
+
+        const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'Google Account');
+        const email = user.email || 'Google Cloud Synced';
+        const initials = encodeURIComponent(displayName.charAt(0).toUpperCase());
+        el.userAvatarImg.src = user.photoURL || `https://placehold.co/32x32/10b981/070b14?text=${initials}`;
+        el.userDisplayName.textContent = displayName;
+        el.userEmailText.textContent = email;
+      } else {
+        el.googleSignInBtn.classList.remove('hidden');
+        el.userProfileBar.classList.add('hidden');
+        el.userProfileBar.classList.remove('flex');
+      }
+    }
+
+    function updateCloudBadge(status, label) {
+      el.cloudStatusText.textContent = label;
+      el.cloudStatusDot.className = "w-2 h-2 rounded-full ";
+      if (status === 'online') {
+        el.cloudStatusDot.classList.add('bg-emerald-400');
+        el.backupModalCloudState.textContent = "Connected & Synced (Live)";
+        el.backupModalCloudState.className = "font-semibold text-emerald-400";
+      } else if (status === 'syncing') {
+        el.cloudStatusDot.classList.add('bg-amber-400', 'animate-pulse');
+      } else {
+        el.cloudStatusDot.classList.add('bg-rose-400');
+        el.backupModalCloudState.textContent = "Session Memory Mode (Click Cloud Setup)";
+        el.backupModalCloudState.className = "font-semibold text-amber-400";
+      }
+    }
+
+    async function handleGoogleSignIn() {
+      if (!auth) {
+        showToast("Cloud authentication is initializing or unavailable. Click 'Cloud Setup' for instructions.");
+        return;
+      }
+
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+
+      // Snapshot current guest laps and timer before switching/linking accounts
+      const guestLapsSnapshot = [...state.laps];
+      const guestTimerSnapshot = { ...state.timer };
+      const previousUid = state.user ? state.user.uid : null;
+
+      try {
+        updateCloudBadge('syncing', 'Signing in with Google...');
+        let resultUser = null;
+
+        if (auth.currentUser && auth.currentUser.isAnonymous) {
+          try {
+            // Attempt to upgrade anonymous UID directly to Google account
+            const linkResult = await linkWithPopup(auth.currentUser, provider);
+            resultUser = linkResult.user;
+            showToast(`Linked guest session to ${resultUser.displayName || resultUser.email || 'Google Account'}!`);
+          } catch (linkErr) {
+            // If Google account already exists, sign into it and migrate guest data
+            if (
+              linkErr.code === 'auth/credential-already-in-use' ||
+              linkErr.code === 'auth/email-already-in-use' ||
+              linkErr.code === 'auth/account-exists-with-different-credential'
+            ) {
+              const signInResult = await signInWithPopup(auth, provider);
+              resultUser = signInResult.user;
+              await migrateGuestDataToGoogleUser(resultUser.uid, previousUid, guestTimerSnapshot, guestLapsSnapshot);
+              showToast(`Signed in as ${resultUser.displayName || resultUser.email}! Guest data synced.`);
+            } else {
+              throw linkErr;
+            }
+          }
+        } else {
+          const signInResult = await signInWithPopup(auth, provider);
+          resultUser = signInResult.user;
+          if (previousUid && previousUid !== resultUser.uid) {
+            await migrateGuestDataToGoogleUser(resultUser.uid, previousUid, guestTimerSnapshot, guestLapsSnapshot);
+          } else if (!previousUid && (guestLapsSnapshot.length > 0 || guestTimerSnapshot.isRunning)) {
+            await migrateGuestDataToGoogleUser(resultUser.uid, 'guest-session', guestTimerSnapshot, guestLapsSnapshot);
+          }
+          showToast(`Signed in as ${resultUser.displayName || resultUser.email || 'Google User'}!`);
+        }
+
+        if (resultUser) {
+          state.user = resultUser;
+          state.userId = resultUser.uid;
+          state.isCloudConnected = true;
+          el.footerUserId.textContent = state.userId;
+          hideDiagnosticBanner();
+          updateAuthUI(resultUser);
+          updateCloudBadge('online', 'Google Cloud Synced');
+          setupFirestoreListeners();
+        }
+      } catch (err) {
+        console.error("Google Sign-In error:", err);
+        updateCloudBadge(state.isCloudConnected ? 'online' : 'offline', state.isCloudConnected ? 'Cloud Synced' : 'Session Mode');
+        if (err.code === 'auth/popup-closed-by-user') {
+          showToast("Google sign-in popup was closed before completing.");
+        } else if (err.code === 'auth/popup-blocked') {
+          showToast("Popup blocked by browser. Please allow popups for this site and try again.");
+        } else if (err.code === 'auth/unauthorized-domain') {
+          showDiagnosticBanner(
+            "Domain Not Yet Whitelisted in Firebase",
+            `Add "${window.location.hostname || 'your domain'}" under Firebase Console ➔ Authentication ➔ Settings ➔ Authorized domains.`
+          );
+          el.rulesHelperModal.classList.remove('hidden');
+        } else if (err.code === 'auth/operation-not-allowed') {
+          showDiagnosticBanner(
+            "Enable Google Provider in Firebase Console",
+            "Go to Firebase Console ➔ Authentication ➔ Sign-in method and enable 'Google'."
+          );
+          el.rulesHelperModal.classList.remove('hidden');
+        } else {
+          showToast(`Google Sign-In notice: ${err.message || 'Could not complete sign-in'}`);
+        }
+      }
+    }
+
+    async function migrateGuestDataToGoogleUser(newUid, oldUid, guestTimer, guestLaps) {
+      if (!db || !newUid || newUid === oldUid) return;
+      try {
+        // 1. Check if Google account already has an active timer; if not, copy guest timer
+        const targetTimerRef = doc(db, 'artifacts', state.appId, 'users', newUid, 'detox_state', 'active_timer');
+        const targetTimerSnap = await getDoc(targetTimerRef);
+        if (!targetTimerSnap.exists() && (guestTimer.isRunning || guestTimer.accumulatedMs > 0)) {
+          await setDoc(targetTimerRef, {
+            isRunning: guestTimer.isRunning,
+            currentLapStartTime: guestTimer.currentLapStartTime,
+            accumulatedMs: guestTimer.accumulatedMs,
+            streakInitialStartTime: guestTimer.streakInitialStartTime,
+            updatedAt: Date.now()
+          });
+        }
+
+        // 2. Copy any unsynced guest laps over to the Google UID collection
+        if (Array.isArray(guestLaps) && guestLaps.length > 0) {
+          const targetLapsCol = collection(db, 'artifacts', state.appId, 'users', newUid, 'detox_laps');
+          for (const lap of guestLaps) {
+            const { id, ...lapData } = lap;
+            await addDoc(targetLapsCol, lapData);
+          }
+        }
+      } catch (migrationErr) {
+        console.error("Error migrating guest data to Google account:", migrationErr);
+      }
+    }
+
+    async function handleGoogleSignOut() {
+      if (!auth) return;
+      try {
+        updateCloudBadge('syncing', 'Signing out...');
+        await signOut(auth);
+        state.user = null;
+        updateAuthUI(null);
+        // Attempt anonymous session fallback
+        try {
+          if (state.usingFallbackEnvironment && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+        } catch (anonErr) {
+          state.userId = "guest-" + crypto.randomUUID().slice(0, 8);
+          el.footerUserId.textContent = state.userId;
+          updateCloudBadge('offline', 'Signed Out • Guest Mode');
+        }
+        showToast("Signed out of Google account.");
+      } catch (err) {
+        console.error("Sign-out error:", err);
+        showToast("Error signing out. Please try again.");
+      }
+    }
+
+    async function initCloudSync() {
+      // Determine whether we are running inside the sandboxed preview with a custom token
+      // or running standalone with the user's "gaining-our-life-back" Firebase project
+      const hasPreviewToken = typeof __initial_auth_token !== 'undefined' && Boolean(__initial_auth_token);
+      const hasPreviewConfig = typeof __firebase_config !== 'undefined' && Boolean(__firebase_config);
+
+      let activeConfig = USER_FIREBASE_CONFIG;
+      if (hasPreviewToken && hasPreviewConfig) {
+        try {
+          activeConfig = JSON.parse(__firebase_config);
+          state.appId = typeof __app_id !== 'undefined' ? __app_id : STANDALONE_APP_ID;
+          state.usingFallbackEnvironment = true;
+        } catch (e) {
+          activeConfig = USER_FIREBASE_CONFIG;
+          state.appId = STANDALONE_APP_ID;
+        }
+      } else {
+        activeConfig = USER_FIREBASE_CONFIG;
+        state.appId = STANDALONE_APP_ID;
+      }
+
+      try {
+        const app = initializeApp(activeConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        updateCloudBadge('syncing', 'Connecting Cloud...');
+
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            state.user = user;
+            state.userId = user.uid;
+            state.isCloudConnected = true;
+            el.footerUserId.textContent = state.userId;
+            updateAuthUI(user);
+            updateCloudBadge('online', user.isAnonymous ? 'Cloud Synced • Guest' : 'Google Cloud Synced');
+            setupFirestoreListeners();
+          } else {
+            updateAuthUI(null);
+          }
+        });
+
+        // RULE 3: Authenticate before performing any Firestore queries
+        if (!auth.currentUser) {
+          if (state.usingFallbackEnvironment && hasPreviewToken) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            try {
+              await signInAnonymously(auth);
+            } catch (anonError) {
+              // If the user hasn't enabled "Anonymous" sign-in in their Firebase console yet,
+              // keep the stopwatch running smoothly in-session and prompt them to click "Sign in with Google"
+              console.warn("Anonymous auth not enabled yet in Firebase Console; waiting for Google Sign-In:", anonError.code);
+              state.userId = "guest-click-google-signin";
+              el.footerUserId.textContent = "Sign in with Google to sync";
+              updateCloudBadge('offline', 'Sign in with Google to Sync');
+              startStopwatchIfFirstVisit();
+              renderAll();
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Cloud initialization error:", err);
+        state.userId = "session-" + crypto.randomUUID().slice(0, 8);
+        el.footerUserId.textContent = state.userId;
+        updateCloudBadge('offline', 'Session Mode');
+        startStopwatchIfFirstVisit();
+        renderAll();
+      }
+    }
+
+    function setupFirestoreListeners() {
+      if (!state.user || !db) return;
+
+      // Detach any prior listeners when switching accounts
+      if (typeof unsubscribeTimer === 'function') unsubscribeTimer();
+      if (typeof unsubscribeLaps === 'function') unsubscribeLaps();
+
+      // RULE 1: Strict Paths (/artifacts/${appId}/users/${userId}/...)
+      const timerDocRef = doc(db, 'artifacts', state.appId, 'users', state.userId, 'detox_state', 'active_timer');
+      unsubscribeTimer = onSnapshot(
+        timerDocRef,
+        (docSnap) => {
+          hideDiagnosticBanner();
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            state.timer = {
+              isRunning: Boolean(data.isRunning),
+              currentLapStartTime: data.currentLapStartTime || null,
+              accumulatedMs: Number(data.accumulatedMs || 0),
+              streakInitialStartTime: data.streakInitialStartTime || data.currentLapStartTime || Date.now()
+            };
+          } else {
+            const now = Date.now();
+            state.timer = {
+              isRunning: true,
+              currentLapStartTime: now,
+              accumulatedMs: 0,
+              streakInitialStartTime: now
+            };
+            saveTimerStateToCloud();
+          }
+          renderStopwatchUI();
+          renderKPIsAndAnalytics();
+        },
+        (error) => {
+          console.error("Error listening to timer state:", error);
+          updateCloudBadge('offline', 'Rules Setup Needed');
+          if (error.code === 'permission-denied') {
+            showDiagnosticBanner(
+              "Firestore Security Rules Need Publishing",
+              "Your Firebase project 'gaining-our-life-back' connected, but Firestore blocked access. Click 'View Fix & Copy Rules' to publish your security rules."
+            );
+          }
+          startStopwatchIfFirstVisit();
+          renderAll();
+        }
+      );
+
+      // 2. Listen to logged relapse laps collection (RULE 2: Simple collection query, sort in JS memory)
+      const lapsColRef = collection(db, 'artifacts', state.appId, 'users', state.userId, 'detox_laps');
+      unsubscribeLaps = onSnapshot(
+        lapsColRef,
+        (querySnapshot) => {
+          const loadedLaps = [];
+          querySnapshot.forEach((docItem) => {
+            loadedLaps.push({
+              id: docItem.id,
+              ...docItem.data()
+            });
+          });
+          loadedLaps.sort((a, b) => (b.relapsedAtMs || 0) - (a.relapsedAtMs || 0));
+          state.laps = loadedLaps;
+          renderAll();
+        },
+        (error) => {
+          console.error("Error listening to detox laps:", error);
+        }
+      );
+    }
+
+    async function saveTimerStateToCloud() {
+      renderStopwatchUI();
+      if (!state.user || !db) return;
+      try {
+        updateCloudBadge('syncing', 'Syncing...');
+        const timerDocRef = doc(db, 'artifacts', state.appId, 'users', state.userId, 'detox_state', 'active_timer');
+        await setDoc(timerDocRef, {
+          isRunning: state.timer.isRunning,
+          currentLapStartTime: state.timer.currentLapStartTime,
+          accumulatedMs: state.timer.accumulatedMs,
+          streakInitialStartTime: state.timer.streakInitialStartTime,
+          updatedAt: Date.now()
+        });
+        updateCloudBadge('online', 'Cloud Synced • Live');
+      } catch (err) {
+        console.error("Failed to save timer state:", err);
+        updateCloudBadge('offline', 'Sync Error');
+      }
+    }
+
+    async function addLapRecordToCloud(lapRecord) {
+      if (!state.user || !db) {
+        state.laps.unshift({ id: 'local-' + Date.now(), ...lapRecord });
+        renderAll();
+        return;
+      }
+      try {
+        updateCloudBadge('syncing', 'Saving Lap...');
+        const lapsColRef = collection(db, 'artifacts', state.appId, 'users', state.userId, 'detox_laps');
+        await addDoc(lapsColRef, lapRecord);
+        updateCloudBadge('online', 'Cloud Synced • Live');
+      } catch (err) {
+        console.error("Failed to add lap record:", err);
+        updateCloudBadge('offline', 'Save Error');
+      }
+    }
+
+    async function deleteLapFromCloud(lapId) {
+      if (!state.user || !db) {
+        state.laps = state.laps.filter(l => l.id !== lapId);
+        renderAll();
+        return;
+      }
+      try {
+        updateCloudBadge('syncing', 'Deleting...');
+        const lapDocRef = doc(db, 'artifacts', state.appId, 'users', state.userId, 'detox_laps', lapId);
+        await deleteDoc(lapDocRef);
+        updateCloudBadge('online', 'Cloud Synced • Live');
+        showToast("Deleted lap entry from cloud");
+      } catch (err) {
+        console.error("Failed to delete lap:", err);
+      }
+    }
+
+    function startStopwatchIfFirstVisit() {
+      if (!state.timer.isRunning && state.timer.accumulatedMs === 0) {
+        const now = Date.now();
+        state.timer.isRunning = true;
+        state.timer.currentLapStartTime = now;
+        state.timer.streakInitialStartTime = now;
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. STOPWATCH ACTIONS & REAL-TIME TICKER
+    // -------------------------------------------------------------------------
+    function toggleStopwatch() {
+      const now = Date.now();
+      if (state.timer.isRunning) {
+        // Pause the stopwatch
+        state.timer.accumulatedMs += Math.max(0, now - (state.timer.currentLapStartTime || now));
+        state.timer.currentLapStartTime = null;
+        state.timer.isRunning = false;
+        showToast("Detox timer paused • State saved to cloud");
+      } else {
+        // Start or Resume
+        if (state.timer.accumulatedMs === 0) {
+          state.timer.streakInitialStartTime = now;
+        }
+        state.timer.currentLapStartTime = now;
+        state.timer.isRunning = true;
+        showToast("Detox streak active • Cloud timer running");
+      }
+      saveTimerStateToCloud();
+    }
+
+    function handleResetClick() {
+      if (!state.resetConfirmPending) {
+        state.resetConfirmPending = true;
+        el.resetTimerText.textContent = "Confirm Reset?";
+        el.resetTimerBtn.classList.add('border-rose-500', 'text-rose-300');
+        clearTimeout(window.__resetConfirmTimeout);
+        window.__resetConfirmTimeout = setTimeout(() => {
+          state.resetConfirmPending = false;
+          el.resetTimerText.textContent = "Reset";
+          el.resetTimerBtn.classList.remove('border-rose-500', 'text-rose-300');
+        }, 3500);
+        return;
+      }
+
+      // Confirmed Reset
+      state.resetConfirmPending = false;
+      el.resetTimerText.textContent = "Reset";
+      el.resetTimerBtn.classList.remove('border-rose-500', 'text-rose-300');
+
+      const now = Date.now();
+      state.timer = {
+        isRunning: true,
+        currentLapStartTime: now,
+        accumulatedMs: 0,
+        streakInitialStartTime: now
+      };
+      saveTimerStateToCloud();
+      showToast("Stopwatch reset to 00:00:00");
+    }
+
+    function renderStopwatchTick() {
+      const elapsedMs = getElapsedMs();
+      const totalSeconds = Math.floor(elapsedMs / 1000);
+
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      el.timerDays.textContent = String(days).padStart(2, '0');
+      el.timerHours.textContent = String(hours).padStart(2, '0');
+      el.timerMinutes.textContent = String(minutes).padStart(2, '0');
+      el.timerSeconds.textContent = String(seconds).padStart(2, '0');
+
+      const totalHoursDecimal = (elapsedMs / (1000 * 60 * 60)).toFixed(2);
+      el.currentLapTotalHours.textContent = `${totalHoursDecimal} hrs`;
+
+      // Update Personal Best progress bar in real time
+      updatePersonalBestBar(elapsedMs);
+    }
+
+    function updatePersonalBestBar(currentElapsedMs) {
+      let maxPastLapMs = 0;
+      state.laps.forEach(l => {
+        if ((l.durationMs || 0) > maxPastLapMs) {
+          maxPastLapMs = l.durationMs;
+        }
+      });
+
+      if (maxPastLapMs <= 0) {
+        // No past relapses yet: compare against a 24-hour milestone
+        const target24h = 24 * 3600 * 1000;
+        const pct = Math.min(100, (currentElapsedMs / target24h) * 100);
+        el.pbProgressBar.style.width = `${pct.toFixed(1)}%`;
+        el.pbProgressLabel.textContent = `${pct.toFixed(1)}% of First 24h Milestone`;
+      } else if (currentElapsedMs >= maxPastLapMs) {
+        el.pbProgressBar.style.width = `100%`;
+        el.pbProgressLabel.textContent = `NEW PERSONAL BEST! (${formatDurationCompact(currentElapsedMs)})`;
+      } else {
+        const pct = Math.min(100, (currentElapsedMs / maxPastLapMs) * 100);
+        el.pbProgressBar.style.width = `${pct.toFixed(1)}%`;
+        el.pbProgressLabel.textContent = `${pct.toFixed(1)}% of Record (${formatDurationCompact(maxPastLapMs)})`;
+      }
+    }
+
+    function renderStopwatchUI() {
+      renderStopwatchTick();
+      const nextLapNum = state.laps.length + 1;
+      el.currentLapNumberBadge.textContent = `Lap #${nextLapNum}`;
+
+      if (state.timer.isRunning) {
+        el.streakStatusLabel.textContent = "ACTIVE DETOX STREAK";
+        el.streakPulseDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+        el.streakLiveIndicator.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+        el.toggleTimerText.textContent = "Pause Detox Timer";
+        el.toggleTimerBtn.className = "flex-1 py-3.5 px-6 rounded-2xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 transition cursor-pointer";
+      } else {
+        const hasElapsed = getElapsedMs() > 0;
+        el.streakStatusLabel.textContent = hasElapsed ? "TIMER PAUSED" : "READY TO START";
+        el.streakPulseDot.className = "w-2 h-2 rounded-full bg-amber-400";
+        el.streakLiveIndicator.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30";
+        el.toggleTimerText.textContent = hasElapsed ? "Resume Detox Lap" : "Start Detox Lap";
+        el.toggleTimerBtn.className = "flex-1 py-3.5 px-6 rounded-2xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-950/60 transition cursor-pointer";
+      }
+
+      if (state.timer.streakInitialStartTime) {
+        el.lapStartedAtBadge.textContent = `Streak started: ${formatDateTimeReadable(state.timer.streakInitialStartTime)}`;
+      } else {
+        el.lapStartedAtBadge.textContent = "Streak not started yet";
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. RELAPSE REFLECTION MODAL LOGIC
+    // -------------------------------------------------------------------------
+    function openRelapseModal() {
+      const capturedMs = getElapsedMs();
+      const now = Date.now();
+      const bucket = getTimeOfDayBucket(new Date(now));
+
+      state.pendingRelapse = {
+        durationMs: capturedMs,
+        timestampMs: now,
+        timeBucket: bucket,
+        selectedPlatform: state.pendingRelapse.selectedPlatform || "Instagram",
+        selectedTriggers: ["Boredom"],
+        selectedFeelingBefore: "Bored",
+        selectedFeelingAfter: "Regretful",
+        selectedRelapseDuration: "15 mins"
+      };
+
+      const hoursDecimal = (capturedMs / (1000 * 60 * 60)).toFixed(2);
+      el.modalCapturedDurationText.textContent = formatDurationCompact(capturedMs);
+      el.modalCapturedHoursDecimal.textContent = `(${hoursDecimal} hrs)`;
+      el.manualHoursOverride.value = hoursDecimal;
+      el.modalCapturedTimestampText.textContent = formatDateTimeReadable(now);
+      el.modalCapturedBucketBadge.textContent = bucket;
+
+      el.whatHappenedBeforeInput.value = "";
+      el.feelingBeforeNoteInput.value = "";
+      el.feelingAfterNoteInput.value = "";
+      if (el.nextTimePlanInput) el.nextTimePlanInput.value = "";
+
+      renderModalPills();
+      el.relapseModal.classList.remove('hidden');
+    }
+
+    function closeRelapseModal() {
+      el.relapseModal.classList.add('hidden');
+    }
+
+    function renderModalPills() {
+      // 1. Platforms (Single select)
+      el.platformPillsContainer.innerHTML = PLATFORM_OPTIONS.map(plat => {
+        const active = state.pendingRelapse.selectedPlatform === plat;
+        return `
+          <button type="button" data-platform="${plat}" class="px-3 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+            active
+              ? 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-sm'
+              : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
+          }">
+            ${plat}
+          </button>
+        `;
+      }).join('');
+
+      // 2. Triggers (Multi-select)
+      el.triggerPillsContainer.innerHTML = TRIGGER_OPTIONS.map(trig => {
+        const active = state.pendingRelapse.selectedTriggers.includes(trig);
+        return `
+          <button type="button" data-trigger="${trig}" class="px-3 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+            active
+              ? 'bg-rose-500/25 border-rose-400 text-rose-200 shadow-sm'
+              : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
+          }">
+            ${active ? '✓ ' : ''}${trig}
+          </button>
+        `;
+      }).join('');
+
+      // 3. Feeling Before (Single select)
+      el.feelingBeforePillsContainer.innerHTML = FEELING_BEFORE_OPTIONS.map(feel => {
+        const active = state.pendingRelapse.selectedFeelingBefore === feel;
+        return `
+          <button type="button" data-before="${feel}" class="px-2.5 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+            active
+              ? 'bg-amber-500/25 border-amber-400 text-amber-200 shadow-sm'
+              : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
+          }">
+            ${feel}
+          </button>
+        `;
+      }).join('');
+
+      // 4. Feeling After (Single select)
+      el.feelingAfterPillsContainer.innerHTML = FEELING_AFTER_OPTIONS.map(feel => {
+        const active = state.pendingRelapse.selectedFeelingAfter === feel;
+        return `
+          <button type="button" data-after="${feel}" class="px-2.5 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+            active
+              ? 'bg-indigo-500/25 border-indigo-400 text-indigo-200 shadow-sm'
+              : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
+          }">
+            ${feel}
+          </button>
+        `;
+      }).join('');
+
+      // 5. Relapse Duration (Single select)
+      if (el.relapseDurationPillsContainer) {
+        el.relapseDurationPillsContainer.innerHTML = RELAPSE_DURATION_OPTIONS.map(dur => {
+          const active = state.pendingRelapse.selectedRelapseDuration === dur;
+          return `
+            <button type="button" data-relapse-duration="${dur}" class="px-2.5 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+              active
+                ? 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-sm'
+                : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
+            }">
+              ${dur}
+            </button>
+          `;
+        }).join('');
+      }
+    }
+
+    async function handleRelapseFormSubmit(e) {
+      e.preventDefault();
+
+      // Check if user manually edited the hours avoided field
+      const overrideVal = parseFloat(el.manualHoursOverride.value);
+      const originalHours = parseFloat((state.pendingRelapse.durationMs / (1000 * 60 * 60)).toFixed(2));
+      let finalDurationMs = state.pendingRelapse.durationMs;
+
+      if (!isNaN(overrideVal) && overrideVal >= 0 && Math.abs(overrideVal - originalHours) > 0.01) {
+        finalDurationMs = Math.round(overrideVal * 3600 * 1000);
+      }
+
+      const finalHours = Number((finalDurationMs / (1000 * 60 * 60)).toFixed(2));
+      const now = Date.now();
+
+      const lapRecord = {
+        durationMs: finalDurationMs,
+        hoursAvoided: finalHours,
+        startedAtMs: state.timer.streakInitialStartTime || (now - finalDurationMs),
+        relapsedAtMs: state.pendingRelapse.timestampMs || now,
+        timeOfDayBucket: state.pendingRelapse.timeBucket,
+        platform: state.pendingRelapse.selectedPlatform,
+        triggers: state.pendingRelapse.selectedTriggers.length > 0 ? state.pendingRelapse.selectedTriggers : ["Unspecified"],
+        whatHappenedBefore: el.whatHappenedBeforeInput.value.trim(),
+        feelingBefore: state.pendingRelapse.selectedFeelingBefore,
+        feelingBeforeNote: el.feelingBeforeNoteInput.value.trim(),
+        feelingAfter: state.pendingRelapse.selectedFeelingAfter,
+        feelingAfterNote: el.feelingAfterNoteInput.value.trim(),
+        relapseDuration: state.pendingRelapse.selectedRelapseDuration || "15 mins",
+        nextTimePlan: el.nextTimePlanInput ? el.nextTimePlanInput.value.trim() : ""
+      };
+
+      // Close modal & reset stopwatch for next lap
+      closeRelapseModal();
+
+      const shouldAutoRestart = el.autoRestartNextLapCheckbox.checked;
+      state.timer = {
+        isRunning: shouldAutoRestart,
+        currentLapStartTime: shouldAutoRestart ? now : null,
+        accumulatedMs: 0,
+        streakInitialStartTime: shouldAutoRestart ? now : null
+      };
+
+      await Promise.all([
+        addLapRecordToCloud(lapRecord),
+        saveTimerStateToCloud()
+      ]);
+
+      showToast(`Logged Lap (${formatDurationCompact(finalDurationMs)} avoided) & started next streak!`);
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. PATTERN RECOGNITION & ANALYTICS ENGINE
+    // -------------------------------------------------------------------------
+    function renderKPIsAndAnalytics() {
+      const laps = state.laps;
+      const currentElapsedMs = getElapsedMs();
+
+      // 1. Total Clean Time
+      const pastTotalMs = laps.reduce((acc, l) => acc + (Number(l.durationMs) || 0), 0);
+      const grandTotalMs = pastTotalMs + currentElapsedMs;
+      el.kpiTotalCleanTime.textContent = formatHoursLabel(grandTotalMs);
+      el.kpiTotalCleanSub.textContent = `${(pastTotalMs / 3600000).toFixed(1)}h past laps + ${(currentElapsedMs / 3600000).toFixed(1)}h current`;
+
+      // 2. Longest Lap
+      const maxPastMs = laps.reduce((max, l) => Math.max(max, Number(l.durationMs) || 0), 0);
+      const longestOverallMs = Math.max(maxPastMs, currentElapsedMs);
+      el.kpiLongestLap.textContent = formatDurationCompact(longestOverallMs);
+      el.kpiLongestLapSub.textContent = `${(longestOverallMs / 3600000).toFixed(2)} hours personal record`;
+
+      // 3. Average Lap Duration
+      if (laps.length > 0) {
+        const avgMs = pastTotalMs / laps.length;
+        el.kpiAverageLap.textContent = formatDurationCompact(avgMs);
+        el.kpiAverageLapSub.textContent = `Avg ${(avgMs / 3600000).toFixed(2)} hrs before relapse`;
+      } else {
+        el.kpiAverageLap.textContent = "—";
+        el.kpiAverageLapSub.textContent = "Complete 1 lap to calculate";
+      }
+
+      // 4. Total Relapses Logged
+      el.kpiTotalRelapses.textContent = String(laps.length);
+      el.backupModalLapCount.textContent = String(laps.length);
+
+      // Render the 3 Pattern Cards
+      renderVulnerabilityWindow(laps);
+      renderTopTriggersAndPlatforms(laps);
+      renderEmotionalLoop(laps);
+    }
+
+    function renderVulnerabilityWindow(laps) {
+      const buckets = [
+        { key: "Morning", label: "Morning (6am–12pm)", count: 0 },
+        { key: "Afternoon", label: "Afternoon (12pm–5pm)", count: 0 },
+        { key: "Evening", label: "Evening (5pm–10pm)", count: 0 },
+        { key: "Late Night", label: "Late Night (10pm–6am)", count: 0 }
+      ];
+
+      laps.forEach(l => {
+        const found = buckets.find(b => b.key === l.timeOfDayBucket);
+        if (found) found.count += 1;
+      });
+
+      const total = laps.length || 1;
+      let peakBucket = buckets[0];
+      buckets.forEach(b => {
+        if (b.count > peakBucket.count) peakBucket = b;
+      });
+
+      if (laps.length === 0) {
+        el.vulnerabilitySummaryText.textContent = "Log relapses to pinpoint what time of day your willpower drops.";
+      } else {
+        const peakPct = Math.round((peakBucket.count / laps.length) * 100);
+        el.vulnerabilitySummaryText.innerHTML = `<span class="text-amber-300 font-semibold">${peakPct}% of your relapses</span> happen during the <span class="text-white font-semibold">${peakBucket.key}</span> window.`;
+        el.vulnerabilityAdviceBox.innerHTML = `<span class="font-semibold text-amber-300">Actionable Fix:</span> Your highest danger zone is <span class="text-white font-semibold">${peakBucket.label}</span>. Put your phone in another room or enable strict app blockers during this window.`;
+      }
+
+      el.timeOfDayBucketsContainer.innerHTML = buckets.map(b => {
+        const pct = laps.length > 0 ? Math.round((b.count / total) * 100) : 0;
+        const isPeak = laps.length > 0 && b.key === peakBucket.key && b.count > 0;
+        return `
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="${isPeak ? 'text-amber-300 font-semibold' : 'text-slate-300'}">${b.label}</span>
+              <span class="font-mono text-slate-400">${b.count} (${pct}%)</span>
+            </div>
+            <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+              <div class="h-full rounded-full transition-all duration-500 ${isPeak ? 'bg-amber-400' : 'bg-slate-600'}" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTopTriggersAndPlatforms(laps) {
+      if (laps.length === 0) {
+        el.topTriggersContainer.innerHTML = `
+          <div class="text-xs text-slate-500 py-6 text-center border border-dashed border-slate-800 rounded-2xl">
+            No triggers logged yet. Click "I Relapsed" whenever you slip up to uncover your top triggers.
+          </div>
+        `;
+        el.topPlatformsContainer.innerHTML = `<span class="text-xs text-slate-500">No platform data yet</span>`;
+        return;
+      }
+
+      const triggerCounts = {};
+      const platformCounts = {};
+
+      laps.forEach(l => {
+        (l.triggers || []).forEach(t => {
+          triggerCounts[t] = (triggerCounts[t] || 0) + 1;
+        });
+        if (l.platform) {
+          platformCounts[l.platform] = (platformCounts[l.platform] || 0) + 1;
+        }
+      });
+
+      const sortedTriggers = Object.entries(triggerCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+      el.topTriggersContainer.innerHTML = sortedTriggers.map(([trig, count], idx) => {
+        const pct = Math.round((count / laps.length) * 100);
+        return `
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="${idx === 0 ? 'text-rose-300 font-semibold' : 'text-slate-300'}">${idx + 1}. ${trig}</span>
+              <span class="font-mono text-slate-400">${count}x (${pct}%)</span>
+            </div>
+            <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+              <div class="h-full rounded-full ${idx === 0 ? 'bg-rose-500' : 'bg-rose-500/50'}" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const sortedPlatforms = Object.entries(platformCounts).sort((a, b) => b[1] - a[1]);
+      el.topPlatformsContainer.innerHTML = sortedPlatforms.map(([plat, count]) => `
+        <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-xs text-slate-200 font-medium">
+          ${plat} <span class="text-rose-400 font-mono ml-1">${count}</span>
+        </span>
+      `).join('');
+    }
+
+    function renderEmotionalLoop(laps) {
+      if (laps.length === 0) {
+        el.emotionalPairsContainer.innerHTML = `
+          <div class="text-xs text-slate-500 py-6 text-center border border-dashed border-slate-800 rounded-2xl">
+            Your "Before ➔ After" emotional loops will appear here once you log a lap.
+          </div>
+        `;
+        return;
+      }
+
+      const pairCounts = {};
+      let negativeAfterCount = 0;
+      const negativeFeelings = ["Regretful", "Brain-Fogged", "Still Bored", "Guilty", "Drained / Worse", "Anxious", "Unsatisfied", "Numb"];
+
+      laps.forEach(l => {
+        const before = l.feelingBefore || "Unspecified";
+        const after = l.feelingAfter || "Unspecified";
+        const key = `${before}___${after}`;
+        pairCounts[key] = (pairCounts[key] || 0) + 1;
+        if (negativeFeelings.includes(after)) {
+          negativeAfterCount += 1;
+        }
+      });
+
+      const sortedPairs = Object.entries(pairCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 4);
+
+      el.emotionalPairsContainer.innerHTML = sortedPairs.map(([key, count]) => {
+        const [before, after] = key.split('___');
+        const pct = Math.round((count / laps.length) * 100);
+        return `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 font-medium">${before}</span>
+              <span class="text-slate-500 font-bold">➔</span>
+              <span class="px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-medium">${after}</span>
+            </div>
+            <span class="font-mono text-slate-400 shrink-0 ml-2">${count}x (${pct}%)</span>
+          </div>
+        `;
+      }).join('');
+
+      const negPct = Math.round((negativeAfterCount / laps.length) * 100);
+      el.emotionInsightText.innerHTML = `
+        <span class="font-semibold text-indigo-300">Pattern Proof:</span> In <span class="text-white font-bold">${negPct}% of your relapses</span>, scrolling left you feeling regretful, brain-fogged, or still bored afterward. Remember this next time the urge hits!
+      `;
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. RENDER LAP HISTORY TIMELINE
+    // -------------------------------------------------------------------------
+    function renderLapHistory() {
+      const query = state.searchQuery.toLowerCase().trim();
+      const bucketFilter = state.filterBucket;
+
+      // Assign chronological Lap # based on oldest = #1
+      const totalCount = state.laps.length;
+      const numberedLaps = state.laps.map((lap, index) => ({
+        ...lap,
+        lapNumber: totalCount - index
+      }));
+
+      const filtered = numberedLaps.filter(lap => {
+        if (bucketFilter !== 'ALL' && lap.timeOfDayBucket !== bucketFilter) {
+          return false;
+        }
+        if (!query) return true;
+        const haystack = [
+          lap.platform,
+          ...(lap.triggers || []),
+          lap.whatHappenedBefore,
+          lap.feelingBefore,
+          lap.feelingBeforeNote,
+          lap.feelingAfter,
+          lap.feelingAfterNote,
+          lap.timeOfDayBucket
+        ].join(' ').toLowerCase();
+        return haystack.includes(query);
+      });
+
+      if (filtered.length === 0) {
+        el.lapHistoryList.innerHTML = `
+          <div class="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-800 bg-slate-950/40">
+            <p class="text-sm font-semibold text-slate-300">No relapse laps match your current view</p>
+            <p class="text-xs text-slate-500 mt-1">Keep your current detox stopwatch running, or click "+ Load Sample Relapse Logs" above to preview how pattern analysis works.</p>
+          </div>
+        `;
+        return;
+      }
+
+      el.lapHistoryList.innerHTML = filtered.map(lap => {
+        const isConfirmingDelete = state.deleteConfirmLapId === lap.id;
+        const triggersHtml = (lap.triggers || []).map(t => `
+          <span class="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-300 border border-rose-500/25 text-[11px] font-medium">
+            ${escapeHtml(t)}
+          </span>
+        `).join('');
+
+        return `
+          <div class="bg-slate-950/75 hover:bg-slate-950 border border-slate-800/90 rounded-2xl p-4 sm:p-5 transition">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 font-mono text-xs font-bold text-slate-300">
+                  Lap #${lap.lapNumber}
+                </span>
+                <span class="px-3 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 font-mono text-xs sm:text-sm font-bold text-emerald-300">
+                  Avoided: ${formatDurationCompact(lap.durationMs)} (${Number(lap.hoursAvoided || 0).toFixed(2)} hrs)
+                </span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 text-xs font-medium">
+                  ${escapeHtml(lap.platform || 'Social Media')}
+                </span>
+                ${
+                  lap.relapseDuration
+                    ? `<span class="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-300 border border-rose-500/20 text-[11px] font-mono">
+                        Relapse lasted: ${escapeHtml(lap.relapseDuration)}
+                      </span>`
+                    : ''
+                }
+              </div>
+
+              <div class="flex items-center justify-between sm:justify-end gap-2.5 text-xs text-slate-400">
+                <span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                  ${escapeHtml(lap.timeOfDayBucket || 'Day')}
+                </span>
+                <span>${formatDateTimeReadable(lap.relapsedAtMs)}</span>
+                <button
+                  type="button"
+                  data-delete-lap="${lap.id}"
+                  class="px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer ${
+                    isConfirmingDelete
+                      ? 'bg-rose-600 text-white'
+                      : 'bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800'
+                  }"
+                >
+                  ${isConfirmingDelete ? 'Confirm Delete?' : 'Delete'}
+                </button>
+              </div>
+            </div>
+
+            <!-- Triggers & Emotional Shift Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3.5 text-xs">
+              <div class="space-y-2">
+                <div class="text-slate-400 font-medium">What happened before failing (Triggers):</div>
+                <div class="flex flex-wrap gap-1.5">${triggersHtml}</div>
+                ${
+                  lap.whatHappenedBefore
+                    ? `<p class="text-slate-200 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800/80 italic">"${escapeHtml(lap.whatHappenedBefore)}"</p>`
+                    : ''
+                }
+              </div>
+
+              <div class="space-y-2">
+                <div class="text-slate-400 font-medium">Emotional Shift (Before ➔ After):</div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold">
+                    Before: ${escapeHtml(lap.feelingBefore || 'N/A')}
+                  </span>
+                  <span class="text-slate-500 font-bold">➔</span>
+                  <span class="px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-semibold">
+                    After: ${escapeHtml(lap.feelingAfter || 'N/A')}
+                  </span>
+                </div>
+                ${
+                  (lap.feelingBeforeNote || lap.feelingAfterNote || lap.nextTimePlan)
+                    ? `<div class="text-slate-300 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800/80 space-y-1">
+                        ${lap.feelingBeforeNote ? `<div><span class="text-amber-400 font-medium">Before note:</span> ${escapeHtml(lap.feelingBeforeNote)}</div>` : ''}
+                        ${lap.feelingAfterNote ? `<div><span class="text-indigo-400 font-medium">After note:</span> ${escapeHtml(lap.feelingAfterNote)}</div>` : ''}
+                        ${lap.nextTimePlan ? `<div><span class="text-emerald-400 font-medium">Next time plan:</span> ${escapeHtml(lap.nextTimePlan)}</div>` : ''}
+                      </div>`
+                    : ''
+                }
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function renderAll() {
+      renderStopwatchUI();
+      renderKPIsAndAnalytics();
+      renderLapHistory();
+    }
+
+    // -------------------------------------------------------------------------
+    // 10. SAMPLE DEMO DATA LOADER & EXPORT FUNCTIONS
+    // -------------------------------------------------------------------------
+    async function loadSampleLogs() {
+      const now = Date.now();
+      const hr = 3600 * 1000;
+
+      const sampleEntries = [
+        {
+          durationMs: 6.5 * hr,
+          hoursAvoided: 6.5,
+          startedAtMs: now - 52 * hr,
+          relapsedAtMs: now - 45.5 * hr,
+          timeOfDayBucket: "Late Night",
+          platform: "Instagram",
+          triggers: ["In Bed / Waking or Sleeping", "Tired / Low Energy", "Muscle Memory / Habit"],
+          whatHappenedBefore: "Brought phone to bed to set alarm, thumb automatically tapped Instagram.",
+          feelingBefore: "Drained / Tired",
+          feelingBeforeNote: "Exhausted after long day, wanted 5 mins of distraction.",
+          feelingAfter: "Regretful",
+          feelingAfterNote: "Scrolled reels for 45 mins and lost sleep."
+        },
+        {
+          durationMs: 14.2 * hr,
+          hoursAvoided: 14.2,
+          startedAtMs: now - 44 * hr,
+          relapsedAtMs: now - 29.8 * hr,
+          timeOfDayBucket: "Afternoon",
+          platform: "YouTube / Shorts",
+          triggers: ["Stuck on a Hard Task", "Procrastinating Work"],
+          whatHappenedBefore: "Hit a roadblock on a difficult project task and opened a new browser tab.",
+          feelingBefore: "Stressed",
+          feelingBeforeNote: "Felt mentally blocked and wanted quick relief.",
+          feelingAfter: "Brain-Fogged",
+          feelingAfterNote: "Task was still waiting for me, plus my focus was scattered."
+        },
+        {
+          durationMs: 19.75 * hr,
+          hoursAvoided: 19.75,
+          startedAtMs: now - 29 * hr,
+          relapsedAtMs: now - 9.25 * hr,
+          timeOfDayBucket: "Late Night",
+          platform: "Reddit",
+          triggers: ["Boredom", "Tired / Low Energy"],
+          whatHappenedBefore: "Finished dinner and sat on the couch without a plan for the evening.",
+          feelingBefore: "Bored",
+          feelingBeforeNote: "Restless and under-stimulated.",
+          feelingAfter: "Still Bored",
+          feelingAfterNote: "Mindlessly refreshed threads and didn't even enjoy it."
+        }
+      ];
+
+      for (const item of sampleEntries) {
+        await addLapRecordToCloud(item);
+      }
+      showToast("Loaded 3 sample relapse logs to demonstrate pattern insights!");
+    }
+
+    function exportCSV() {
+      if (state.laps.length === 0) {
+        showToast("No laps to export yet");
+        return;
+      }
+      const headers = [
+        "Lap_Number",
+        "Hours_Avoided",
+        "Duration_Formatted",
+        "Relapsed_At",
+        "Time_Of_Day_Bucket",
+        "Platform",
+        "Triggers",
+        "What_Happened_Before",
+        "Feeling_Before",
+        "Feeling_Before_Note",
+        "Feeling_After",
+        "Feeling_After_Note"
+      ];
+
+      const total = state.laps.length;
+      const rows = state.laps.map((l, idx) => [
+        total - idx,
+        l.hoursAvoided || 0,
+        `"${formatDurationCompact(l.durationMs)}"`,
+        `"${new Date(l.relapsedAtMs).toISOString()}"`,
+        `"${l.timeOfDayBucket || ''}"`,
+        `"${l.platform || ''}"`,
+        `"${(l.triggers || []).join('; ')}"`,
+        `"${(l.whatHappenedBefore || '').replace(/"/g, '""')}"`,
+        `"${l.feelingBefore || ''}"`,
+        `"${(l.feelingBeforeNote || '').replace(/"/g, '""')}"`,
+        `"${l.feelingAfter || ''}"`,
+        `"${(l.feelingAfterNote || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `detox-pulse-laps-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Downloaded CSV backup!");
+    }
+
+    function exportJSON() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        currentStreakTimer: state.timer,
+        laps: state.laps
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `detox-pulse-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Downloaded JSON backup!");
+    }
+
+    function copySummaryToClipboard() {
+      const elapsed = formatDurationCompact(getElapsedMs());
+      const lines = [
+        `=== SOCIAL MEDIA DETOX & RELAPSE PATTERN REPORT ===`,
+        `Current Clean Streak: ${elapsed}`,
+        `Total Relapses Logged: ${state.laps.length}`,
+        ``,
+        `--- RECENT LAPS ---`,
+        ...state.laps.slice(0, 10).map((l, i) =>
+          `Lap #${state.laps.length - i}: Avoided ${formatDurationCompact(l.durationMs)} (${l.hoursAvoided}h) | Failed in ${l.timeOfDayBucket} on ${l.platform} | Trigger: ${(l.triggers || []).join(', ')} | Felt ${l.feelingBefore} -> ${l.feelingAfter}`
+        )
+      ];
+
+      const textarea = document.createElement('textarea');
+      textarea.value = lines.join('\n');
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      showToast("Copied summary report to clipboard!");
+    }
+
+    // -------------------------------------------------------------------------
+    // 11. EVENT LISTENERS & INITIALIZATION
+    // -------------------------------------------------------------------------
+    function bindEvents() {
+      el.googleSignInBtn.addEventListener('click', handleGoogleSignIn);
+      el.googleSignOutBtn.addEventListener('click', handleGoogleSignOut);
+
+      el.toggleTimerBtn.addEventListener('click', toggleStopwatch);
+      el.relapseBtn.addEventListener('click', openRelapseModal);
+      el.resetTimerBtn.addEventListener('click', handleResetClick);
+
+      // Backdate Drawer
+      el.openBackdateBtn.addEventListener('click', () => {
+        el.backdateDrawer.classList.toggle('hidden');
+      });
+      el.closeBackdateBtn.addEventListener('click', () => {
+        el.backdateDrawer.classList.add('hidden');
+      });
+      el.applyBackdateBtn.addEventListener('click', () => {
+        const val = el.customStartTimeInput.value;
+        if (!val) {
+          showToast("Please pick a valid start date and time");
+          return;
+        }
+        const chosenMs = new Date(val).getTime();
+        if (isNaN(chosenMs) || chosenMs > Date.now()) {
+          showToast("Start time must be in the past");
+          return;
+        }
+        state.timer = {
+          isRunning: true,
+          currentLapStartTime: chosenMs,
+          accumulatedMs: 0,
+          streakInitialStartTime: chosenMs
+        };
+        el.backdateDrawer.classList.add('hidden');
+        saveTimerStateToCloud();
+        showToast("Updated streak start time & synced to cloud!");
+      });
+
+      // Modal Events
+      el.closeRelapseModalBtn.addEventListener('click', closeRelapseModal);
+      el.cancelRelapseModalBtn.addEventListener('click', closeRelapseModal);
+      el.relapseForm.addEventListener('submit', handleRelapseFormSubmit);
+
+      // Pill Selection Delegation inside Relapse Modal
+      el.platformPillsContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-platform]');
+        if (!btn) return;
+        state.pendingRelapse.selectedPlatform = btn.getAttribute('data-platform');
+        renderModalPills();
+      });
+
+      el.triggerPillsContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-trigger]');
+        if (!btn) return;
+        const trig = btn.getAttribute('data-trigger');
+        const list = state.pendingRelapse.selectedTriggers;
+        if (list.includes(trig)) {
+          state.pendingRelapse.selectedTriggers = list.filter(item => item !== trig);
+        } else {
+          state.pendingRelapse.selectedTriggers.push(trig);
+        }
+        renderModalPills();
+      });
+
+      el.feelingBeforePillsContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-before]');
+        if (!btn) return;
+        state.pendingRelapse.selectedFeelingBefore = btn.getAttribute('data-before');
+        renderModalPills();
+      });
+
+      el.feelingAfterPillsContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-after]');
+        if (!btn) return;
+        state.pendingRelapse.selectedFeelingAfter = btn.getAttribute('data-after');
+        renderModalPills();
+      });
+
+      if (el.relapseDurationPillsContainer) {
+        el.relapseDurationPillsContainer.addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-relapse-duration]');
+          if (!btn) return;
+          state.pendingRelapse.selectedRelapseDuration = btn.getAttribute('data-relapse-duration');
+          renderModalPills();
+        });
+      }
+
+      // Cloud Setup & Firestore Rules Modal
+      const openRulesModal = () => el.rulesHelperModal.classList.remove('hidden');
+      const closeRulesModal = () => el.rulesHelperModal.classList.add('hidden');
+      if (el.openRulesHelperBtn) el.openRulesHelperBtn.addEventListener('click', openRulesModal);
+      if (el.cloudStatusBadge) el.cloudStatusBadge.addEventListener('click', openRulesModal);
+      if (el.diagnosticOpenRulesBtn) el.diagnosticOpenRulesBtn.addEventListener('click', openRulesModal);
+      if (el.closeRulesHelperModalBtn) el.closeRulesHelperModalBtn.addEventListener('click', closeRulesModal);
+      if (el.copyFirestoreRulesBtn) {
+        el.copyFirestoreRulesBtn.addEventListener('click', () => {
+          const textarea = document.createElement('textarea');
+          textarea.value = el.firestoreRulesCode.textContent;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          showToast("Copied Firestore Security Rules to clipboard!");
+        });
+      }
+
+      // Search & Filter
+      el.searchLapsInput.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value;
+        renderLapHistory();
+      });
+      el.filterTimeBucketSelect.addEventListener('change', (e) => {
+        state.filterBucket = e.target.value;
+        renderLapHistory();
+      });
+
+      // Delete Lap Delegation
+      el.lapHistoryList.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-delete-lap]');
+        if (!btn) return;
+        const lapId = btn.getAttribute('data-delete-lap');
+        if (state.deleteConfirmLapId === lapId) {
+          state.deleteConfirmLapId = null;
+          deleteLapFromCloud(lapId);
+        } else {
+          state.deleteConfirmLapId = lapId;
+          renderLapHistory();
+          clearTimeout(window.__deleteLapTimeout);
+          window.__deleteLapTimeout = setTimeout(() => {
+            state.deleteConfirmLapId = null;
+            renderLapHistory();
+          }, 3500);
+        }
+      });
+
+      // Demo Data & Backup Modal
+      el.loadDemoDataBtn.addEventListener('click', loadSampleLogs);
+      el.openBackupModalBtn.addEventListener('click', () => el.backupModal.classList.remove('hidden'));
+      el.closeBackupModalBtn.addEventListener('click', () => el.backupModal.classList.add('hidden'));
+      el.exportCsvBtn.addEventListener('click', exportCSV);
+      el.exportJsonBtn.addEventListener('click', exportJSON);
+      el.copyMarkdownReportBtn.addEventListener('click', copySummaryToClipboard);
+    }
+
+    // Start live 1-second stopwatch loop & cloud sync
+    window.addEventListener('DOMContentLoaded', () => {
+      bindEvents();
+      initCloudSync();
+      setInterval(() => {
+        renderStopwatchTick();
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
