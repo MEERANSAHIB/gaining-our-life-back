@@ -86,6 +86,15 @@ function queryElements() {
     installAppBtn: document.getElementById('installAppBtn'),
     footerUserId: document.getElementById('footerUserId'),
 
+    // Mobile Header Overflow Menu
+    mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+    mobileMenuDropdown: document.getElementById('mobileMenuDropdown'),
+    mobileSignInBtn: document.getElementById('mobileSignInBtn'),
+    mobileCloudSetupBtn: document.getElementById('mobileCloudSetupBtn'),
+    mobileBackupBtn: document.getElementById('mobileBackupBtn'),
+    mobileInstallItem: document.getElementById('mobileInstallItem'),
+    mobileInstallBtn: document.getElementById('mobileInstallBtn'),
+
     // Tab Navigation Buttons
     navTabs: document.querySelectorAll('[data-tab-target]'),
     viewStopwatch: document.getElementById('view-stopwatch'),
@@ -227,6 +236,31 @@ function showToast(message) {
   window.__toastTimer = setTimeout(() => {
     el.toastBanner.classList.add('hidden');
   }, 3200);
+}
+
+function triggerHaptic(type = 'start') {
+  if (typeof navigator === 'undefined' || !('vibrate' in navigator)) return;
+  try {
+    switch (type) {
+      case 'start':
+        navigator.vibrate(40);
+        break;
+      case 'pause':
+        navigator.vibrate([40, 40, 40]);
+        break;
+      case 'relapse':
+        navigator.vibrate(100);
+        break;
+      case 'success':
+        navigator.vibrate([50, 40, 50, 40, 100]);
+        break;
+      case 'tap':
+        navigator.vibrate(25);
+        break;
+    }
+  } catch (err) {
+    // Vibration ignored if unavailable or blocked
+  }
 }
 
 function getElapsedMs() {
@@ -552,6 +586,7 @@ function toggleStopwatch() {
     state.timer.accumulatedMs += Math.max(0, now - (state.timer.currentLapStartTime || now));
     state.timer.currentLapStartTime = null;
     state.timer.isRunning = false;
+    triggerHaptic('pause');
     showToast("Detox timer paused • State saved locally & cloud");
   } else {
     if (state.timer.accumulatedMs === 0) {
@@ -559,6 +594,7 @@ function toggleStopwatch() {
     }
     state.timer.currentLapStartTime = now;
     state.timer.isRunning = true;
+    triggerHaptic('start');
     showToast("Detox streak active • Live timer running");
   }
   saveTimerStateToCloud();
@@ -567,6 +603,7 @@ function toggleStopwatch() {
 function handleResetClick() {
   if (!state.resetConfirmPending) {
     state.resetConfirmPending = true;
+    triggerHaptic('tap');
     if (el.resetTimerText) el.resetTimerText.textContent = "Confirm Reset?";
     if (el.resetTimerBtn) el.resetTimerBtn.classList.add('border-rose-500', 'text-rose-300');
     clearTimeout(window.__resetConfirmTimeout);
@@ -579,6 +616,7 @@ function handleResetClick() {
   }
 
   state.resetConfirmPending = false;
+  triggerHaptic('relapse');
   if (el.resetTimerText) el.resetTimerText.textContent = "Reset";
   if (el.resetTimerBtn) el.resetTimerBtn.classList.remove('border-rose-500', 'text-rose-300');
 
@@ -763,6 +801,7 @@ async function handleRelapseFormSubmit(e) {
   };
 
   closeRelapseModal();
+  triggerHaptic('relapse');
 
   const shouldAutoRestart = el.autoRestartNextLapCheckbox ? el.autoRestartNextLapCheckbox.checked : true;
   state.timer = {
@@ -800,6 +839,7 @@ function closeUrgeSurfer() {
 
 async function handleUrgeDefeated() {
   closeUrgeSurfer();
+  triggerHaptic('success');
   state.urgesDefeated = (state.urgesDefeated || 0) + 1;
   window.DetoxStorage.saveStats(state.urgesDefeated);
   renderKPIsAndAnalytics();
@@ -809,6 +849,7 @@ async function handleUrgeDefeated() {
 
 function handleUrgeRelapsed() {
   closeUrgeSurfer();
+  triggerHaptic('tap');
   openRelapseModal();
 }
 
@@ -1515,6 +1556,9 @@ function bindEvents() {
       el.installAppBtn.classList.remove('hidden');
       el.installAppBtn.classList.add('inline-flex');
     }
+    if (el.mobileInstallItem) {
+      el.mobileInstallItem.classList.remove('hidden');
+    }
   });
 
   if (el.installAppBtn) {
@@ -1525,6 +1569,7 @@ function bindEvents() {
         if (outcome === 'accepted') {
           showToast("LifeBack added to home screen! 📲");
           el.installAppBtn.classList.add('hidden');
+          if (el.mobileInstallItem) el.mobileInstallItem.classList.add('hidden');
         }
         deferredInstallPrompt = null;
       } else {
@@ -1532,6 +1577,93 @@ function bindEvents() {
       }
     });
   }
+
+  // Mobile Header Overflow Menu Actions
+  if (el.mobileMenuBtn && el.mobileMenuDropdown) {
+    el.mobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      el.mobileMenuDropdown.classList.toggle('hidden');
+    });
+    document.addEventListener('click', (e) => {
+      if (!el.mobileMenuDropdown.classList.contains('hidden') && !el.mobileMenuDropdown.contains(e.target) && e.target !== el.mobileMenuBtn) {
+        el.mobileMenuDropdown.classList.add('hidden');
+      }
+    });
+  }
+  if (el.mobileSignInBtn) {
+    el.mobileSignInBtn.addEventListener('click', () => {
+      if (el.mobileMenuDropdown) el.mobileMenuDropdown.classList.add('hidden');
+      handleGoogleSignIn();
+    });
+  }
+  if (el.mobileCloudSetupBtn) {
+    el.mobileCloudSetupBtn.addEventListener('click', () => {
+      if (el.mobileMenuDropdown) el.mobileMenuDropdown.classList.add('hidden');
+      if (el.rulesHelperModal) el.rulesHelperModal.classList.remove('hidden');
+    });
+  }
+  if (el.mobileBackupBtn) {
+    el.mobileBackupBtn.addEventListener('click', () => {
+      if (el.mobileMenuDropdown) el.mobileMenuDropdown.classList.add('hidden');
+      if (el.backupModal) el.backupModal.classList.remove('hidden');
+    });
+  }
+  if (el.mobileInstallBtn) {
+    el.mobileInstallBtn.addEventListener('click', () => {
+      if (el.mobileMenuDropdown) el.mobileMenuDropdown.classList.add('hidden');
+      if (el.installAppBtn) el.installAppBtn.click();
+    });
+  }
+
+  // Backdrop click dismiss for all modals
+  [el.relapseModal, el.backupModal, el.rulesHelperModal, el.urgeSurferModal].forEach(modal => {
+    if (!modal) return;
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        if (modal === el.urgeSurferModal) {
+          closeUrgeSurfer();
+        } else {
+          modal.classList.add('hidden');
+        }
+      }
+    });
+  });
+
+  // Swipe gesture navigation between tabs
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+
+  document.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    // Don't intercept when touching inputs, sliders, scrollable pre, or open modals
+    if (e.target.closest('input, textarea, select, pre, button, .overflow-y-auto, .overflow-x-auto, #backdateDrawer, #relapseModal, #backupModal, #rulesHelperModal, #urgeSurferModal')) return;
+    const t = e.touches[0];
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+    touchStartTime = Date.now();
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (e.changedTouches.length !== 1) return;
+    if (e.target.closest('input, textarea, select, pre, button, .overflow-y-auto, .overflow-x-auto, #backdateDrawer, #relapseModal, #backupModal, #rulesHelperModal, #urgeSurferModal')) return;
+    const t = e.changedTouches[0];
+    const deltaX = t.clientX - touchStartX;
+    const deltaY = t.clientY - touchStartY;
+    const deltaTime = Date.now() - touchStartTime;
+
+    if (deltaTime < 500 && Math.abs(deltaX) > 55 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+      const tabs = ['stopwatch', 'analytics', 'journal'];
+      const currentIndex = tabs.indexOf(state.activeTab);
+      if (deltaX < 0 && currentIndex < tabs.length - 1) {
+        triggerHaptic('tap');
+        switchTab(tabs[currentIndex + 1]);
+      } else if (deltaX > 0 && currentIndex > 0) {
+        triggerHaptic('tap');
+        switchTab(tabs[currentIndex - 1]);
+      }
+    }
+  }, { passive: true });
 }
 
 // -------------------------------------------------------------------------

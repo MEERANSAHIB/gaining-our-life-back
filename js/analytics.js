@@ -25,8 +25,8 @@ window.DetoxAnalytics = {
     });
 
     if (laps.length === 0) {
-      if (summaryEl) summaryEl.textContent = "Log relapses to pinpoint what time of day your willpower drops.";
-      if (adviceEl) adviceEl.innerHTML = `<span class="font-semibold text-amber-300">Pattern Tip:</span> Knowing your peak relapse window lets you set phone blocks 30 minutes before that window starts.`;
+      if (summaryEl) summaryEl.textContent = "Your clean streak is running. When you complete a lap, your peak danger window will appear here.";
+      if (adviceEl) adviceEl.innerHTML = `<span class="font-semibold text-emerald-400">Momentum:</span> You haven't relapsed yet — that's real progress. Keep the streak alive!`;
     } else {
       const peakPct = Math.round((peakBucket.count / laps.length) * 100);
       if (summaryEl) {
@@ -59,11 +59,12 @@ window.DetoxAnalytics = {
 
     if (laps.length === 0) {
       triggersEl.innerHTML = `
-        <div class="text-xs text-slate-500 py-6 text-center border border-dashed border-slate-800 rounded-2xl">
-          No triggers logged yet. Click "I Relapsed" whenever you slip up to uncover your top triggers.
+        <div class="text-xs text-slate-400 py-6 px-3 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-950/40">
+          <p class="font-semibold text-slate-300">Clean streak running</p>
+          <p class="text-slate-500 mt-1">If you slip up, honest logging reveals your top habit triggers.</p>
         </div>
       `;
-      if (platformsEl) platformsEl.innerHTML = `<span class="text-xs text-slate-500">No platform data yet</span>`;
+      if (platformsEl) platformsEl.innerHTML = `<span class="text-xs text-slate-500">None logged yet</span>`;
       return;
     }
 
@@ -113,8 +114,9 @@ window.DetoxAnalytics = {
 
     if (laps.length === 0) {
       containerEl.innerHTML = `
-        <div class="text-xs text-slate-500 py-6 text-center border border-dashed border-slate-800 rounded-2xl">
-          Your "Before ➔ After" emotional loops will appear here once you log a lap.
+        <div class="text-xs text-slate-400 py-6 px-3 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-950/40">
+          <p class="font-semibold text-slate-300">Emotional shift loop</p>
+          <p class="text-slate-500 mt-1">Tracks how algorithmic feeds promise relief but leave regret.</p>
         </div>
       `;
       return;
