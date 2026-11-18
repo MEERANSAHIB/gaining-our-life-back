@@ -7,9 +7,9 @@
 // when the CDN is offline or blocked (airplane mode, Brave Shields, firewalls).
 const FIREBASE_VERSION = "11.6.1";
 let initializeApp,
-  getAuth, signInAnonymously, signInWithCredential, onAuthStateChanged,
+  getAuth, signInWithCredential, onAuthStateChanged,
   GoogleAuthProvider, signInWithPopup, signInWithRedirect,
-  getRedirectResult, signOut,
+  getRedirectResult, signOut, setPersistence, browserLocalPersistence,
   getFirestore, doc, addDoc, setDoc, deleteDoc, onSnapshot, collection;
 
 async function loadFirebase() {
@@ -21,9 +21,9 @@ async function loadFirebase() {
   ]);
   ({ initializeApp } = appMod);
   ({
-    getAuth, signInAnonymously, signInWithCredential, onAuthStateChanged,
+    getAuth, signInWithCredential, onAuthStateChanged,
     GoogleAuthProvider, signInWithPopup, signInWithRedirect,
-    getRedirectResult, signOut
+    getRedirectResult, signOut, setPersistence, browserLocalPersistence
   } = authMod);
   ({ getFirestore, doc, addDoc, setDoc, deleteDoc, onSnapshot, collection } = fsMod);
 }
@@ -1073,7 +1073,13 @@ function setupFirestoreListeners() {
     (error) => {
       console.error("Error listening to timer state:", error);
       updateCloudBadge('offline', 'Rules Setup Needed');
-      startStopwatchIfFirstVisit();
+      if (el.cloudDiagnosticBanner) {
+        if (el.cloudDiagnosticTitle) el.cloudDiagnosticTitle.textContent = 'Firestore Permission Denied';
+        if (el.cloudDiagnosticMessage) {
+          el.cloudDiagnosticMessage.textContent = 'Signed in as Google account, but Firestore rules rejected access. Click "Cloud Setup" in the menu to copy and deploy the required rules.';
+        }
+        el.cloudDiagnosticBanner.classList.remove('hidden');
+      }
       renderAll();
     }
   );
@@ -1087,7 +1093,7 @@ function setupFirestoreListeners() {
         loadedLaps.push({ id: docItem.id, ...docItem.data() });
       });
 
-      // Sync any local or guest laps that are not yet in the cloud database
+      // Sync any local laps that are not yet in the cloud database
       for (const localLap of state.laps) {
         if (!loadedLaps.some(cl => cl.relapsedAtMs === localLap.relapsedAtMs)) {
           const { id, ...lapData } = localLap;
@@ -1103,6 +1109,16 @@ function setupFirestoreListeners() {
     },
     (error) => {
       console.error("Error listening to laps:", error);
+      if (error && error.code === 'permission-denied') {
+        updateCloudBadge('offline', 'Rules Setup Needed');
+        if (el.cloudDiagnosticBanner) {
+          if (el.cloudDiagnosticTitle) el.cloudDiagnosticTitle.textContent = 'Firestore Permission Denied';
+          if (el.cloudDiagnosticMessage) {
+            el.cloudDiagnosticMessage.textContent = 'Signed in as Google account, but Firestore rules rejected access. Click "Cloud Setup" in the menu to copy and deploy the required rules.';
+          }
+          el.cloudDiagnosticBanner.classList.remove('hidden');
+        }
+      }
     }
   );
 }
@@ -1134,7 +1150,7 @@ async function handleGoogleSignIn(forceRedirect = false) {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
 
-  // 1. Proactive Detection: Brave Shields & Mobile browsers block popups by default
+  // 1. Proactive Detection: Brave Shields blocks popups aggressively
   let isBrave = false;
   if (navigator.brave && typeof navigator.brave.isBrave === 'function') {
     try {
@@ -1143,10 +1159,9 @@ async function handleGoogleSignIn(forceRedirect = false) {
       isBrave = false;
     }
   }
-  const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-  // If Brave, mobile device, or explicitly requested redirect, route directly to zero-popup redirect
-  if (forceRedirect || isBrave || isMobile) {
+  // If Brave or explicitly requested redirect, route directly to zero-popup redirect
+  if (forceRedirect || isBrave) {
     try {
       await executeGoogleRedirect(provider);
       return;
@@ -1163,7 +1178,7 @@ async function handleGoogleSignIn(forceRedirect = false) {
     }
   }
 
-  // 2. Standard Desktop Browsers: Attempt popup first for instant in-page auth
+  // 2. Standard flow: Attempt popup first for seamless in-page auth without page unload
   try {
     updateCloudBadge('syncing', 'Signing in with Google...');
     const signInResult = await signInWithPopup(auth, provider);
@@ -1182,7 +1197,27 @@ async function handleGoogleSignIn(forceRedirect = false) {
   } catch (err) {
     console.warn("Popup sign-in note:", err);
 
-    // 3. Seamless Silent Fallback: If browser/extension blocks the popup, fall back immediately to redirect
+    if (err.code === 'auth/credential-already-in-use') {
+      const credential = GoogleAuthProvider.credentialFromError(err);
+      if (credential) {
+        try {
+          const credRes = await signInWithCredential(auth, credential);
+          state.user = credRes.user;
+          state.userId = credRes.user.uid;
+          state.isCloudConnected = true;
+          if (el.footerUserId) el.footerUserId.textContent = state.userId;
+          updateAuthUI(credRes.user);
+          updateCloudBadge('online', 'Google Cloud Synced');
+          showToast(`Signed in as ${credRes.user.displayName || credRes.user.email}!`);
+          setupFirestoreListeners();
+          return;
+        } catch (credErr) {
+          console.error("Sign-in with credential error:", credErr);
+        }
+      }
+    }
+
+    // 3. Fallback: If browser/extension blocks the popup, fall back immediately to redirect
     if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
       try {
         await executeGoogleRedirect(provider);
@@ -1198,7 +1233,7 @@ async function handleGoogleSignIn(forceRedirect = false) {
       }
     }
 
-    updateCloudBadge('offline', state.user ? 'Google Cloud Synced' : 'Session Mode');
+    updateCloudBadge(state.user ? 'online' : 'offline', state.user ? 'Google Cloud Synced' : 'Local Storage Mode');
 
     if (err.code === 'auth/unauthorized-domain') {
       const domain = window.location.hostname || 'your domain';
@@ -1227,14 +1262,11 @@ async function handleGoogleSignOut() {
     }
     await signOut(auth);
     state.user = null;
+    state.userId = "local";
+    state.isCloudConnected = false;
     updateAuthUI(null);
-    try {
-      await signInAnonymously(auth);
-    } catch (e) {
-      state.userId = "guest-" + crypto.randomUUID().slice(0, 8);
-      if (el.footerUserId) el.footerUserId.textContent = state.userId;
-      updateCloudBadge('offline', 'Guest Session');
-    }
+    if (el.footerUserId) el.footerUserId.textContent = "Local Storage Mode";
+    updateCloudBadge('offline', 'Local Storage Mode');
     showToast("Signed out of Google account.");
   } catch (err) {
     console.error("Sign-out error:", err);
@@ -1248,6 +1280,15 @@ async function initCloudSync() {
     auth = getAuth(app);
     db = getFirestore(app);
 
+    // Set local persistence so user remains signed in across sessions
+    try {
+      if (typeof setPersistence === 'function' && browserLocalPersistence) {
+        await setPersistence(auth, browserLocalPersistence);
+      }
+    } catch (persistErr) {
+      console.warn("Persistence setup note:", persistErr);
+    }
+
     updateCloudBadge('syncing', 'Connecting Cloud...');
 
     // Wait for existing auth session to be restored from IndexedDB / persistence
@@ -1255,10 +1296,19 @@ async function initCloudSync() {
       await auth.authStateReady();
     }
 
+    // Clean up any lingering anonymous sessions from earlier versions so they never pollute Google auth
+    if (auth.currentUser && auth.currentUser.isAnonymous) {
+      try {
+        await signOut(auth);
+      } catch (cleanErr) {
+        console.warn("Sign out anonymous session note:", cleanErr);
+      }
+    }
+
     // Process redirect sign-in completion (when returning from Google redirect)
     try {
       const redirectResult = await getRedirectResult(auth);
-      if (redirectResult && redirectResult.user) {
+      if (redirectResult && redirectResult.user && !redirectResult.user.isAnonymous) {
         state.user = redirectResult.user;
         state.userId = redirectResult.user.uid;
         state.isCloudConnected = true;
@@ -1270,7 +1320,24 @@ async function initCloudSync() {
       }
     } catch (redirectErr) {
       console.warn("Redirect check note:", redirectErr);
-      if (redirectErr.code === 'auth/unauthorized-domain') {
+      if (redirectErr.code === 'auth/credential-already-in-use') {
+        const credential = GoogleAuthProvider.credentialFromError(redirectErr);
+        if (credential) {
+          try {
+            const credRes = await signInWithCredential(auth, credential);
+            state.user = credRes.user;
+            state.userId = credRes.user.uid;
+            state.isCloudConnected = true;
+            if (el.footerUserId) el.footerUserId.textContent = state.userId;
+            updateAuthUI(credRes.user);
+            updateCloudBadge('online', 'Google Cloud Synced');
+            showToast(`Signed in as ${credRes.user.displayName || credRes.user.email}!`);
+            setupFirestoreListeners();
+          } catch (credErr) {
+            console.error("Sign-in with credential error:", credErr);
+          }
+        }
+      } else if (redirectErr.code === 'auth/unauthorized-domain') {
         const domain = window.location.hostname || 'your domain';
         showToast(`Domain unauthorized: Add ${domain} to Firebase Authorized Domains`);
         if (el.rulesHelperModal) el.rulesHelperModal.classList.remove('hidden');
@@ -1280,30 +1347,39 @@ async function initCloudSync() {
     }
 
     onAuthStateChanged(auth, (user) => {
-      if (user) {
+      if (user && !user.isAnonymous) {
         state.user = user;
         state.userId = user.uid;
         state.isCloudConnected = true;
         if (el.footerUserId) el.footerUserId.textContent = state.userId;
         updateAuthUI(user);
-        updateCloudBadge('online', user.isAnonymous ? 'Cloud Synced • Guest' : 'Google Cloud Synced');
+        updateCloudBadge('online', 'Google Cloud Synced');
         setupFirestoreListeners();
       } else {
+        state.user = null;
+        state.userId = "local";
+        state.isCloudConnected = false;
+        if (el.footerUserId) el.footerUserId.textContent = "Local Storage Mode";
         updateAuthUI(null);
+        updateCloudBadge('offline', 'Local Storage Mode');
       }
     });
 
-    if (!auth.currentUser) {
-      try {
-        await signInAnonymously(auth);
-      } catch (anonErr) {
-        console.warn("Anonymous auth not enabled or failed:", anonErr);
-        state.userId = "guest-" + crypto.randomUUID().slice(0, 8);
-        if (el.footerUserId) el.footerUserId.textContent = "Sign in to sync";
-        updateCloudBadge('offline', 'Local Storage Mode');
-        startStopwatchIfFirstVisit();
-        renderAll();
-      }
+    if (auth.currentUser && !auth.currentUser.isAnonymous) {
+      state.user = auth.currentUser;
+      state.userId = auth.currentUser.uid;
+      state.isCloudConnected = true;
+      if (el.footerUserId) el.footerUserId.textContent = state.userId;
+      updateAuthUI(auth.currentUser);
+      updateCloudBadge('online', 'Google Cloud Synced');
+      setupFirestoreListeners();
+    } else {
+      state.user = null;
+      state.userId = "local";
+      state.isCloudConnected = false;
+      if (el.footerUserId) el.footerUserId.textContent = "Local Storage Mode";
+      updateAuthUI(null);
+      updateCloudBadge('offline', 'Local Storage Mode');
     }
   } catch (err) {
     console.warn("Firebase init note:", err);
@@ -1315,8 +1391,10 @@ async function initCloudSync() {
       }
       el.cloudDiagnosticBanner.classList.remove('hidden');
     }
-    state.userId = "session-" + crypto.randomUUID().slice(0, 8);
-    if (el.footerUserId) el.footerUserId.textContent = state.userId;
+    state.user = null;
+    state.userId = "local";
+    state.isCloudConnected = false;
+    if (el.footerUserId) el.footerUserId.textContent = "Local Storage Mode";
     updateCloudBadge('offline', 'Local Storage Mode');
     startStopwatchIfFirstVisit();
     renderAll();
