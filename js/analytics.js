@@ -89,7 +89,7 @@ window.DetoxAnalytics = {
       return `
         <div>
           <div class="flex items-center justify-between text-xs mb-1">
-            <span class="${idx === 0 ? 'text-rose-300 font-semibold' : 'text-slate-300'}">${idx + 1}. ${trig}</span>
+            <span class="${idx === 0 ? 'text-rose-300 font-semibold' : 'text-slate-300'}">${idx + 1}. ${window.DetoxConstants.escapeHtml(trig)}</span>
             <span class="font-mono text-slate-400">${count}x (${pct}%)</span>
           </div>
           <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
@@ -146,9 +146,9 @@ window.DetoxAnalytics = {
       return `
         <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs">
           <div class="flex items-center gap-2 flex-wrap">
-            <span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 font-medium">${before}</span>
+            <span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 font-medium">${window.DetoxConstants.escapeHtml(before)}</span>
             <span class="text-slate-500 font-bold">➔</span>
-            <span class="px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-medium">${after}</span>
+            <span class="px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-medium">${window.DetoxConstants.escapeHtml(after)}</span>
           </div>
           <span class="font-mono text-slate-400 shrink-0 ml-2">${count}x (${pct}%)</span>
         </div>

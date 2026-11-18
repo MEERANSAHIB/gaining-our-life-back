@@ -527,7 +527,7 @@ function renderLapHistory() {
             <span>${window.DetoxConstants.formatDateTimeReadable(lap.relapsedAtMs)}</span>
             <button
               type="button"
-              data-delete-lap="${lap.id}"
+              data-delete-lap="${window.DetoxConstants.escapeHtml(lap.id)}"
               class="px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer ${
                 isConfirmingDelete
                   ? 'bg-rose-600 text-white'
@@ -1274,6 +1274,38 @@ async function initCloudSync() {
 // -------------------------------------------------------------------------
 // Backup & JSON File Import
 // -------------------------------------------------------------------------
+// Imported files are untrusted: coerce every field to a safe type and length.
+function sanitizeImportedLap(lap) {
+  const str = (v, max = 300) => (typeof v === 'string' ? v.slice(0, max) : '');
+  const num = (v, fallback) => (Number.isFinite(Number(v)) && Number(v) >= 0 ? Number(v) : fallback);
+  const validBuckets = ["Morning", "Afternoon", "Evening", "Late Night"];
+
+  const now = Date.now();
+  const durationMs = num(lap.durationMs, 0);
+  const relapsedAtMs = num(lap.relapsedAtMs, now);
+
+  return {
+    durationMs,
+    hoursAvoided: Number((durationMs / 3600000).toFixed(2)),
+    startedAtMs: num(lap.startedAtMs, relapsedAtMs - durationMs),
+    relapsedAtMs,
+    timeOfDayBucket: validBuckets.includes(lap.timeOfDayBucket)
+      ? lap.timeOfDayBucket
+      : window.DetoxConstants.getTimeOfDayBucket(new Date(relapsedAtMs)),
+    platform: str(lap.platform, 60) || "Other",
+    triggers: Array.isArray(lap.triggers)
+      ? lap.triggers.map(t => str(t, 60)).filter(Boolean).slice(0, 12)
+      : ["Unspecified"],
+    whatHappenedBefore: str(lap.whatHappenedBefore),
+    feelingBefore: str(lap.feelingBefore, 40) || "Unspecified",
+    feelingBeforeNote: str(lap.feelingBeforeNote),
+    feelingAfter: str(lap.feelingAfter, 40) || "Unspecified",
+    feelingAfterNote: str(lap.feelingAfterNote),
+    relapseDuration: str(lap.relapseDuration, 20),
+    nextTimePlan: str(lap.nextTimePlan)
+  };
+}
+
 function handleJsonFileImport(file) {
   if (!file) return;
   const reader = new FileReader();
@@ -1293,22 +1325,7 @@ function handleJsonFileImport(file) {
           (lap.relapsedAtMs && existing.relapsedAtMs === lap.relapsedAtMs)
         );
         if (!exists) {
-          const importedRecord = {
-            durationMs: Number(lap.durationMs || 0),
-            hoursAvoided: Number(lap.hoursAvoided || ((lap.durationMs || 0) / 3600000).toFixed(2)),
-            startedAtMs: lap.startedAtMs || Date.now(),
-            relapsedAtMs: lap.relapsedAtMs || Date.now(),
-            timeOfDayBucket: lap.timeOfDayBucket || "Afternoon",
-            platform: lap.platform || "Other",
-            triggers: Array.isArray(lap.triggers) ? lap.triggers : ["Imported"],
-            whatHappenedBefore: lap.whatHappenedBefore || "",
-            feelingBefore: lap.feelingBefore || "Bored",
-            feelingBeforeNote: lap.feelingBeforeNote || "",
-            feelingAfter: lap.feelingAfter || "Regretful",
-            feelingAfterNote: lap.feelingAfterNote || "",
-            relapseDuration: lap.relapseDuration || "15 mins",
-            nextTimePlan: lap.nextTimePlan || ""
-          };
+          const importedRecord = sanitizeImportedLap(lap);
           await addLapRecordToCloud(importedRecord);
           newCount++;
         }
