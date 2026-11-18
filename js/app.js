@@ -51,11 +51,11 @@ const state = {
     durationMs: 0,
     timestampMs: Date.now(),
     timeBucket: "Afternoon",
-    selectedPlatform: "Instagram",
-    selectedTriggers: ["Boredom"],
-    selectedFeelingBefore: "Bored",
-    selectedFeelingAfter: "Regretful",
-    selectedRelapseDuration: "15 mins"
+    selectedPlatform: null,
+    selectedTriggers: [],
+    selectedFeelingBefore: null,
+    selectedFeelingAfter: null,
+    selectedRelapseDuration: null
   },
 
   resetConfirmPending: false,
@@ -452,7 +452,9 @@ function renderKPIsAndAnalytics() {
 
   // 8. Heatmap & Milestones
   window.DetoxAnalytics.renderConsistencyHeatmap(state.timer, laps, el.consistencyHeatmapGrid);
-  window.DetoxAnalytics.renderMilestones(grandTotalMs, el.milestonesContainer);
+  // Milestones are about a single clean streak (as the badges and README describe),
+  // not cumulative time across laps.
+  window.DetoxAnalytics.renderMilestones(longestOverallMs, el.milestonesContainer);
 }
 
 // -------------------------------------------------------------------------
@@ -653,11 +655,12 @@ function openRelapseModal() {
     durationMs: capturedMs,
     timestampMs: now,
     timeBucket: bucket,
-    selectedPlatform: state.pendingRelapse.selectedPlatform || "Instagram",
-    selectedTriggers: ["Boredom"],
-    selectedFeelingBefore: "Bored",
-    selectedFeelingAfter: "Regretful",
-    selectedRelapseDuration: "15 mins"
+    // Nothing is pre-selected: pre-filled answers would skew the pattern analytics.
+    selectedPlatform: null,
+    selectedTriggers: [],
+    selectedFeelingBefore: null,
+    selectedFeelingAfter: null,
+    selectedRelapseDuration: null
   };
 
   const hoursDecimal = (capturedMs / (1000 * 60 * 60)).toFixed(2);
@@ -769,6 +772,15 @@ function renderModalPills() {
 async function handleRelapseFormSubmit(e) {
   e.preventDefault();
 
+  const missing = [];
+  if (!state.pendingRelapse.selectedPlatform) missing.push('the app or site');
+  if (!state.pendingRelapse.selectedFeelingBefore) missing.push('how you felt before');
+  if (!state.pendingRelapse.selectedFeelingAfter) missing.push('how you feel now');
+  if (missing.length > 0) {
+    showToast(`Please choose ${missing.join(', ')}`);
+    return;
+  }
+
   const overrideVal = parseFloat(el.manualHoursOverride.value);
   const originalHours = parseFloat((state.pendingRelapse.durationMs / (1000 * 60 * 60)).toFixed(2));
   let finalDurationMs = state.pendingRelapse.durationMs;
@@ -798,7 +810,7 @@ async function handleRelapseFormSubmit(e) {
     feelingBeforeNote: el.feelingBeforeNoteInput ? el.feelingBeforeNoteInput.value.trim() : "",
     feelingAfter: state.pendingRelapse.selectedFeelingAfter,
     feelingAfterNote: el.feelingAfterNoteInput ? el.feelingAfterNoteInput.value.trim() : "",
-    relapseDuration: state.pendingRelapse.selectedRelapseDuration || "15 mins",
+    relapseDuration: state.pendingRelapse.selectedRelapseDuration || "",
     nextTimePlan: el.nextTimePlanInput ? el.nextTimePlanInput.value.trim() : ""
   };
 

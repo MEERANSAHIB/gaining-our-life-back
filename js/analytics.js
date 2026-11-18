@@ -124,7 +124,7 @@ window.DetoxAnalytics = {
 
     const pairCounts = {};
     let negativeAfterCount = 0;
-    const negativeFeelings = ["Regretful", "Brain-Fogged", "Still Bored", "Guilty", "Drained", "Anxious", "Numb"];
+    const negativeFeelings = window.DetoxConstants.NEGATIVE_AFTER_FEELINGS;
 
     laps.forEach(l => {
       const before = l.feelingBefore || "Unspecified";

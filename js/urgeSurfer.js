@@ -14,7 +14,7 @@ window.DetoxUrgeSurfer = {
     // 1. Generate dynamic reality check from actual user data
     if (elements.realityCheckText) {
       if (laps && laps.length > 0) {
-        const negativeAfterFeelings = ["Regretful", "Brain-Fogged", "Still Bored", "Guilty", "Drained", "Anxious", "Numb"];
+        const negativeAfterFeelings = window.DetoxConstants.NEGATIVE_AFTER_FEELINGS;
         const counts = {};
         let totalNeg = 0;
 
@@ -32,7 +32,7 @@ window.DetoxUrgeSurfer = {
 
         if (topFeel && negPct > 0) {
           elements.realityCheckText.innerHTML = `
-            In <strong class="text-amber-300 font-bold">${negPct}% of your past relapses</strong>, scrolling left you feeling <strong class="text-white font-bold underline">${window.DetoxConstants.escapeHtml(topFeel)}</strong>. Your brain craves quick dopamine, but your own data proves scrolling will only leave you depleted.
+            In <strong class="text-amber-300 font-bold">${negPct}% of your past relapses</strong>, scrolling left you feeling <strong class="text-white font-bold underline">${window.DetoxConstants.escapeHtml(topFeel)}</strong>. Your own log shows scrolling usually doesn't deliver the relief it promises.
           `;
         } else {
           elements.realityCheckText.innerHTML = `
@@ -41,7 +41,7 @@ window.DetoxUrgeSurfer = {
         }
       } else {
         elements.realityCheckText.innerHTML = `
-          Behavioral studies prove that cravings spike like a wave and naturally recede within 60–90 seconds if you observe them without touching your phone. Protect your streak!
+          Urges tend to rise, peak and fade like a wave when you observe them instead of acting on them. Give this one 90 seconds before you decide. Protect your streak!
         `;
       }
     }

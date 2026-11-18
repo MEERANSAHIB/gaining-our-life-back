@@ -75,9 +75,16 @@ window.DetoxConstants = {
     "1+ hour"
   ],
 
+  // "After" feelings that count as the scroll not delivering relief
+  // (shared by the pattern analytics and the urge surfer reality check).
+  NEGATIVE_AFTER_FEELINGS: [
+    "Regretful", "Brain-Fogged", "Still Bored", "Guilty",
+    "Drained", "Distracted", "Anxious", "Numb"
+  ],
+
   MILESTONES: [
     { id: 'm1', icon: '🥉', title: 'Day One Hero', targetHours: 24, desc: '24 hours social-free' },
-    { id: 'm2', icon: '🥈', title: 'Dopamine Reset', targetHours: 72, desc: '3 full days clean' },
+    { id: 'm2', icon: '🥈', title: 'Three-Day Reset', targetHours: 72, desc: '3 full days clean' },
     { id: 'm3', icon: '🥇', title: 'One Week Warrior', targetHours: 168, desc: '7 days freedom' },
     { id: 'm4', icon: '💎', title: 'Habit Breaker', targetHours: 336, desc: '14 days mastered' },
     { id: 'm5', icon: '👑', title: 'Life Reclaimed', targetHours: 720, desc: '30 days transformed' }
