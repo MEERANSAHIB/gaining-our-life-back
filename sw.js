@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lifeback-detox-cache-v8';
+const CACHE_NAME = 'lifeback-detox-cache-v9';
 const STATIC_ASSETS = [
   './',
   './index.html',

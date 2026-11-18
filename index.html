@@ -123,7 +123,16 @@
             </svg>
           </button>
           <!-- Mobile dropdown menu -->
-          <div id="mobileMenuDropdown" class="hidden absolute right-0 top-full mt-2 w-52 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 z-50">
+          <div id="mobileMenuDropdown" class="hidden absolute right-0 top-full mt-2 w-56 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 z-50">
+            <div id="mobileUserItem" class="hidden px-4 py-2.5 border-b border-slate-800/80 mb-1">
+              <div class="flex items-center gap-2.5">
+                <img id="mobileUserAvatar" src="https://placehold.co/32x32/10b981/070b14?text=U" alt="Profile" class="w-7 h-7 rounded-full border border-emerald-500/40 object-cover" />
+                <div class="flex flex-col text-left leading-tight min-w-0 flex-1">
+                  <span id="mobileUserDisplayName" class="text-xs font-semibold text-white truncate">Google User</span>
+                  <span id="mobileUserEmail" class="text-[10px] text-slate-400 truncate">user@gmail.com</span>
+                </div>
+              </div>
+            </div>
             <button id="mobileSignInBtn" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-slate-200 hover:bg-slate-800 transition cursor-pointer text-left">
               <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
@@ -131,7 +140,13 @@
                 <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
                 <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5L1.6 17c1.9 3.9 5.8 7 10.4 7z"/>
               </svg>
-              Sign in with Google
+              <span>Sign in with Google</span>
+            </button>
+            <button id="mobileSignOutBtn" class="hidden w-full items-center gap-2.5 px-4 py-2.5 text-xs text-rose-300 hover:bg-rose-500/10 transition cursor-pointer text-left">
+              <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+              </svg>
+              <span>Sign Out</span>
             </button>
             <button id="mobileCloudSetupBtn" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-slate-200 hover:bg-slate-800 transition cursor-pointer text-left">
               <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

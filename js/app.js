@@ -8,8 +8,8 @@
 const FIREBASE_VERSION = "11.6.1";
 let initializeApp,
   getAuth, signInAnonymously, signInWithCredential, onAuthStateChanged,
-  GoogleAuthProvider, signInWithPopup, linkWithPopup, signInWithRedirect,
-  linkWithRedirect, getRedirectResult, signOut,
+  GoogleAuthProvider, signInWithPopup, signInWithRedirect,
+  getRedirectResult, signOut,
   getFirestore, doc, addDoc, setDoc, deleteDoc, onSnapshot, collection;
 
 async function loadFirebase() {
@@ -22,8 +22,8 @@ async function loadFirebase() {
   ({ initializeApp } = appMod);
   ({
     getAuth, signInAnonymously, signInWithCredential, onAuthStateChanged,
-    GoogleAuthProvider, signInWithPopup, linkWithPopup, signInWithRedirect,
-    linkWithRedirect, getRedirectResult, signOut
+    GoogleAuthProvider, signInWithPopup, signInWithRedirect,
+    getRedirectResult, signOut
   } = authMod);
   ({ getFirestore, doc, addDoc, setDoc, deleteDoc, onSnapshot, collection } = fsMod);
 }
@@ -91,7 +91,12 @@ function queryElements() {
     // Mobile Header Overflow Menu
     mobileMenuBtn: document.getElementById('mobileMenuBtn'),
     mobileMenuDropdown: document.getElementById('mobileMenuDropdown'),
+    mobileUserItem: document.getElementById('mobileUserItem'),
+    mobileUserAvatar: document.getElementById('mobileUserAvatar'),
+    mobileUserDisplayName: document.getElementById('mobileUserDisplayName'),
+    mobileUserEmail: document.getElementById('mobileUserEmail'),
     mobileSignInBtn: document.getElementById('mobileSignInBtn'),
+    mobileSignOutBtn: document.getElementById('mobileSignOutBtn'),
     mobileCloudSetupBtn: document.getElementById('mobileCloudSetupBtn'),
     mobileBackupBtn: document.getElementById('mobileBackupBtn'),
     mobileInstallItem: document.getElementById('mobileInstallItem'),
@@ -889,29 +894,73 @@ function updateCloudBadge(status, label) {
 }
 
 function updateAuthUI(user) {
-  if (!el.googleSignInBtn || !el.userProfileBar) return;
-
   const isGoogleLinked = user && !user.isAnonymous && (
     (user.providerData && user.providerData.some(p => p.providerId === 'google.com')) ||
     user.displayName ||
     user.email
   );
 
-  if (isGoogleLinked) {
-    el.googleSignInBtn.classList.add('hidden');
-    el.userProfileBar.classList.remove('hidden');
-    el.userProfileBar.classList.add('flex');
+  const displayName = user && (user.displayName || (user.email ? user.email.split('@')[0] : 'Google Account'));
+  const email = user && (user.email || 'Cloud Synced');
+  const initials = displayName ? encodeURIComponent(displayName.charAt(0).toUpperCase()) : 'U';
+  const photo = (user && user.photoURL) || `https://placehold.co/32x32/10b981/070b14?text=${initials}`;
 
-    const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'Google Account');
-    const email = user.email || 'Cloud Synced';
-    const initials = encodeURIComponent(displayName.charAt(0).toUpperCase());
-    if (el.userAvatarImg) el.userAvatarImg.src = user.photoURL || `https://placehold.co/32x32/10b981/070b14?text=${initials}`;
+  if (isGoogleLinked) {
+    if (el.googleSignInBtn) {
+      el.googleSignInBtn.classList.add('hidden');
+      el.googleSignInBtn.style.display = 'none';
+    }
+    if (el.userProfileBar) {
+      el.userProfileBar.classList.remove('hidden');
+      el.userProfileBar.classList.add('flex');
+      el.userProfileBar.style.display = 'flex';
+    }
+    if (el.userAvatarImg) el.userAvatarImg.src = photo;
     if (el.userDisplayName) el.userDisplayName.textContent = displayName;
     if (el.userEmailText) el.userEmailText.textContent = email;
+
+    // Mobile Menu updates
+    if (el.mobileSignInBtn) {
+      el.mobileSignInBtn.classList.add('hidden');
+      el.mobileSignInBtn.style.display = 'none';
+    }
+    if (el.mobileUserItem) {
+      el.mobileUserItem.classList.remove('hidden');
+      el.mobileUserItem.style.display = 'block';
+    }
+    if (el.mobileSignOutBtn) {
+      el.mobileSignOutBtn.classList.remove('hidden');
+      el.mobileSignOutBtn.classList.add('flex');
+      el.mobileSignOutBtn.style.display = 'flex';
+    }
+    if (el.mobileUserAvatar) el.mobileUserAvatar.src = photo;
+    if (el.mobileUserDisplayName) el.mobileUserDisplayName.textContent = displayName;
+    if (el.mobileUserEmail) el.mobileUserEmail.textContent = email;
   } else {
-    el.googleSignInBtn.classList.remove('hidden');
-    el.userProfileBar.classList.add('hidden');
-    el.userProfileBar.classList.remove('flex');
+    if (el.googleSignInBtn) {
+      el.googleSignInBtn.classList.remove('hidden');
+      el.googleSignInBtn.style.display = '';
+    }
+    if (el.userProfileBar) {
+      el.userProfileBar.classList.add('hidden');
+      el.userProfileBar.classList.remove('flex');
+      el.userProfileBar.style.display = 'none';
+    }
+
+    // Mobile Menu updates
+    if (el.mobileSignInBtn) {
+      el.mobileSignInBtn.classList.remove('hidden');
+      el.mobileSignInBtn.style.display = 'flex';
+    }
+    if (el.mobileUserItem) {
+      el.mobileUserItem.classList.add('hidden');
+      el.mobileUserItem.style.display = 'none';
+    }
+    if (el.mobileSignOutBtn) {
+      el.mobileSignOutBtn.classList.add('hidden');
+      el.mobileSignOutBtn.classList.remove('flex');
+      el.mobileSignOutBtn.style.display = 'none';
+    }
   }
 }
 
@@ -1038,8 +1087,8 @@ function setupFirestoreListeners() {
         loadedLaps.push({ id: docItem.id, ...docItem.data() });
       });
 
-      const localOnlyLaps = state.laps.filter(l => String(l.id).startsWith('local-'));
-      for (const localLap of localOnlyLaps) {
+      // Sync any local or guest laps that are not yet in the cloud database
+      for (const localLap of state.laps) {
         if (!loadedLaps.some(cl => cl.relapsedAtMs === localLap.relapsedAtMs)) {
           const { id, ...lapData } = localLap;
           addDoc(lapsColRef, lapData).catch(e => console.error("Sync error:", e));
@@ -1068,11 +1117,7 @@ async function executeGoogleRedirect(provider) {
   window.DetoxStorage.saveStats(state.urgesDefeated);
   window.DetoxStorage.saveActiveTab(state.activeTab);
 
-  if (auth.currentUser && auth.currentUser.isAnonymous) {
-    await linkWithRedirect(auth.currentUser, provider);
-  } else {
-    await signInWithRedirect(auth, provider);
-  }
+  await signInWithRedirect(auth, provider);
 }
 
 async function handleGoogleSignIn(forceRedirect = false) {
@@ -1108,10 +1153,11 @@ async function handleGoogleSignIn(forceRedirect = false) {
     } catch (rErr) {
       console.error("Direct redirect sign-in error:", rErr);
       if (rErr.code === 'auth/unauthorized-domain') {
-        showToast("Domain unauthorized: Add meeransahib.github.io to Firebase Authorized Domains");
+        const domain = window.location.hostname || 'your domain';
+        showToast(`Domain unauthorized: Add ${domain} to Firebase Authorized Domains`);
         if (el.rulesHelperModal) el.rulesHelperModal.classList.remove('hidden');
       } else {
-        showToast(`Google Sign-In: ${rErr.message}`);
+        showToast(`Google Sign-In: ${rErr.message || 'Redirect error'}`);
       }
       return;
     }
@@ -1120,30 +1166,8 @@ async function handleGoogleSignIn(forceRedirect = false) {
   // 2. Standard Desktop Browsers: Attempt popup first for instant in-page auth
   try {
     updateCloudBadge('syncing', 'Signing in with Google...');
-    let resultUser = null;
-
-    if (auth.currentUser && auth.currentUser.isAnonymous) {
-      try {
-        const linkResult = await linkWithPopup(auth.currentUser, provider);
-        resultUser = linkResult.user;
-        showToast(`Linked session to ${resultUser.displayName || resultUser.email}!`);
-      } catch (linkErr) {
-        if (
-          linkErr.code === 'auth/credential-already-in-use' ||
-          linkErr.code === 'auth/email-already-in-use'
-        ) {
-          const signInResult = await signInWithPopup(auth, provider);
-          resultUser = signInResult.user;
-          showToast(`Signed in as ${resultUser.displayName || resultUser.email}!`);
-        } else {
-          throw linkErr;
-        }
-      }
-    } else {
-      const signInResult = await signInWithPopup(auth, provider);
-      resultUser = signInResult.user;
-      showToast(`Signed in as ${resultUser.displayName || resultUser.email}!`);
-    }
+    const signInResult = await signInWithPopup(auth, provider);
+    const resultUser = signInResult.user;
 
     if (resultUser) {
       state.user = resultUser;
@@ -1152,12 +1176,13 @@ async function handleGoogleSignIn(forceRedirect = false) {
       if (el.footerUserId) el.footerUserId.textContent = state.userId;
       updateAuthUI(resultUser);
       updateCloudBadge('online', 'Google Cloud Synced');
+      showToast(`Signed in as ${resultUser.displayName || resultUser.email}!`);
       setupFirestoreListeners();
     }
   } catch (err) {
     console.warn("Popup sign-in note:", err);
 
-    // 3. Seamless Silent Fallback: If ANY browser/extension blocks the popup, fall back immediately to redirect without alarming the user
+    // 3. Seamless Silent Fallback: If browser/extension blocks the popup, fall back immediately to redirect
     if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
       try {
         await executeGoogleRedirect(provider);
@@ -1165,17 +1190,19 @@ async function handleGoogleSignIn(forceRedirect = false) {
       } catch (fallbackErr) {
         console.error("Silent redirect fallback error:", fallbackErr);
         if (fallbackErr.code === 'auth/unauthorized-domain') {
-          showToast("Domain unauthorized: Add meeransahib.github.io to Firebase Authorized Domains");
+          const domain = window.location.hostname || 'your domain';
+          showToast(`Domain unauthorized: Add ${domain} to Firebase Authorized Domains`);
           if (el.rulesHelperModal) el.rulesHelperModal.classList.remove('hidden');
           return;
         }
       }
     }
 
-    updateCloudBadge('offline', 'Session Mode');
+    updateCloudBadge('offline', state.user ? 'Google Cloud Synced' : 'Session Mode');
 
     if (err.code === 'auth/unauthorized-domain') {
-      showToast("Domain unauthorized: Add meeransahib.github.io to Firebase Console > Auth > Settings > Authorized Domains");
+      const domain = window.location.hostname || 'your domain';
+      showToast(`Domain unauthorized: Add ${domain} to Firebase Console > Auth > Settings > Authorized Domains`);
       if (el.rulesHelperModal) el.rulesHelperModal.classList.remove('hidden');
       return;
     }
@@ -1190,6 +1217,14 @@ async function handleGoogleSignOut() {
   if (!auth) return;
   try {
     updateCloudBadge('syncing', 'Signing out...');
+    if (typeof unsubscribeTimer === 'function') {
+      unsubscribeTimer();
+      unsubscribeTimer = null;
+    }
+    if (typeof unsubscribeLaps === 'function') {
+      unsubscribeLaps();
+      unsubscribeLaps = null;
+    }
     await signOut(auth);
     state.user = null;
     updateAuthUI(null);
@@ -1215,7 +1250,12 @@ async function initCloudSync() {
 
     updateCloudBadge('syncing', 'Connecting Cloud...');
 
-    // Process redirect sign-in completion (when returning from Google without popups)
+    // Wait for existing auth session to be restored from IndexedDB / persistence
+    if (typeof auth.authStateReady === 'function') {
+      await auth.authStateReady();
+    }
+
+    // Process redirect sign-in completion (when returning from Google redirect)
     try {
       const redirectResult = await getRedirectResult(auth);
       if (redirectResult && redirectResult.user) {
@@ -1229,27 +1269,13 @@ async function initCloudSync() {
         setupFirestoreListeners();
       }
     } catch (redirectErr) {
-      console.warn("Redirect check error:", redirectErr);
-      if (redirectErr.code === 'auth/credential-already-in-use') {
-        const credential = GoogleAuthProvider.credentialFromError(redirectErr);
-        if (credential) {
-          try {
-            const credRes = await signInWithCredential(auth, credential);
-            state.user = credRes.user;
-            state.userId = credRes.user.uid;
-            state.isCloudConnected = true;
-            if (el.footerUserId) el.footerUserId.textContent = state.userId;
-            updateAuthUI(credRes.user);
-            updateCloudBadge('online', 'Google Cloud Synced');
-            showToast(`Signed in as ${credRes.user.displayName || credRes.user.email}!`);
-            setupFirestoreListeners();
-          } catch (credErr) {
-            console.error("Sign-in with credential error:", credErr);
-          }
-        }
-      } else if (redirectErr.code === 'auth/unauthorized-domain') {
-        showToast("Domain unauthorized: Add meeransahib.github.io to Firebase Authorized Domains");
+      console.warn("Redirect check note:", redirectErr);
+      if (redirectErr.code === 'auth/unauthorized-domain') {
+        const domain = window.location.hostname || 'your domain';
+        showToast(`Domain unauthorized: Add ${domain} to Firebase Authorized Domains`);
         if (el.rulesHelperModal) el.rulesHelperModal.classList.remove('hidden');
+      } else if (redirectErr.code !== 'auth/popup-closed-by-user') {
+        showToast(`Google Sign-In: ${redirectErr.message || 'Redirect error'}`);
       }
     }
 
@@ -1271,9 +1297,10 @@ async function initCloudSync() {
       try {
         await signInAnonymously(auth);
       } catch (anonErr) {
-        state.userId = "guest-click-google-signin";
+        console.warn("Anonymous auth not enabled or failed:", anonErr);
+        state.userId = "guest-" + crypto.randomUUID().slice(0, 8);
         if (el.footerUserId) el.footerUserId.textContent = "Sign in to sync";
-        updateCloudBadge('offline', 'Sign in with Google to Sync');
+        updateCloudBadge('offline', 'Local Storage Mode');
         startStopwatchIfFirstVisit();
         renderAll();
       }
@@ -1638,6 +1665,12 @@ function bindEvents() {
     el.mobileSignInBtn.addEventListener('click', () => {
       if (el.mobileMenuDropdown) el.mobileMenuDropdown.classList.add('hidden');
       handleGoogleSignIn();
+    });
+  }
+  if (el.mobileSignOutBtn) {
+    el.mobileSignOutBtn.addEventListener('click', () => {
+      if (el.mobileMenuDropdown) el.mobileMenuDropdown.classList.add('hidden');
+      handleGoogleSignOut();
     });
   }
   if (el.mobileCloudSetupBtn) {
