@@ -70,6 +70,8 @@ let db = null;
 let auth = null;
 let unsubscribeTimer = null;
 let unsubscribeLaps = null;
+let cloudInitPromise = null;
+let cloudInitError = null;
 
 function queryElements() {
   el = {
@@ -1074,8 +1076,13 @@ async function executeGoogleRedirect(provider) {
 }
 
 async function handleGoogleSignIn(forceRedirect = false) {
+  // Tapped while Firebase is still starting up: wait briefly instead of failing.
+  if (!auth && cloudInitPromise) {
+    await Promise.race([cloudInitPromise, new Promise(resolve => setTimeout(resolve, 5000))]);
+  }
   if (!auth) {
-    showToast("Cloud authentication initializing or unavailable. Click 'Cloud Setup' for help.");
+    const reason = cloudInitError ? `: ${cloudInitError.slice(0, 140)}` : '';
+    showToast(`Cloud sync unavailable${reason}`);
     return;
   }
 
@@ -1273,6 +1280,14 @@ async function initCloudSync() {
     }
   } catch (err) {
     console.warn("Firebase init note:", err);
+    cloudInitError = [err && err.code, err && err.message].filter(Boolean).join(' - ') || String(err);
+    if (el.cloudDiagnosticBanner) {
+      if (el.cloudDiagnosticTitle) el.cloudDiagnosticTitle.textContent = 'Cloud sync could not start';
+      if (el.cloudDiagnosticMessage) {
+        el.cloudDiagnosticMessage.textContent = `Your data is safe in local storage. Reason: ${cloudInitError.slice(0, 200)}`;
+      }
+      el.cloudDiagnosticBanner.classList.remove('hidden');
+    }
     state.userId = "session-" + crypto.randomUUID().slice(0, 8);
     if (el.footerUserId) el.footerUserId.textContent = state.userId;
     updateCloudBadge('offline', 'Local Storage Mode');
@@ -1380,7 +1395,9 @@ function bindEvents() {
   }
 
   // Google Sign-In & Out
-  if (el.googleSignInBtn) el.googleSignInBtn.addEventListener('click', handleGoogleSignIn);
+  // Arrow wrapper: passing the handler directly would hand it the click event as
+  // `forceRedirect` (always truthy) and permanently skip the popup flow.
+  if (el.googleSignInBtn) el.googleSignInBtn.addEventListener('click', () => handleGoogleSignIn());
   if (el.googleSignOutBtn) el.googleSignOutBtn.addEventListener('click', handleGoogleSignOut);
 
   // Stopwatch Controls
@@ -1727,7 +1744,7 @@ window.addEventListener('DOMContentLoaded', () => {
   switchTab(cached.activeTab || 'stopwatch');
 
   // Connect Firebase in background
-  initCloudSync();
+  cloudInitPromise = initCloudSync();
 
   // Start real-time 1-second ticker
   setInterval(() => {
