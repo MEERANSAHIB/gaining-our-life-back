@@ -306,10 +306,10 @@ function switchTab(targetTab) {
         const icon = btn.querySelector('.tab-icon');
         if (isTarget) {
           btn.className = "mobile-tab-btn flex flex-col items-center justify-center gap-1 text-emerald-400 font-semibold cursor-pointer py-1 transition";
-          if (icon) icon.className = "tab-icon w-5 h-5 text-emerald-400";
+          if (icon) icon.setAttribute('class', "tab-icon w-5 h-5 text-emerald-400");
         } else {
           btn.className = "mobile-tab-btn flex flex-col items-center justify-center gap-1 text-slate-400 font-medium cursor-pointer py-1 transition";
-          if (icon) icon.className = "tab-icon w-5 h-5 text-slate-400";
+          if (icon) icon.setAttribute('class', "tab-icon w-5 h-5 text-slate-400");
         }
       } else {
         // Desktop segmented button
