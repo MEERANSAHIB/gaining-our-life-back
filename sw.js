@@ -50,6 +50,25 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Tailwind Play CDN: stale-while-revalidate, caching opaque cross-origin
+  // responses too, so the UI stays styled when offline.
+  if (url.hostname === 'cdn.tailwindcss.com') {
+    event.respondWith(
+      caches.open(CACHE_NAME).then((cache) =>
+        cache.match(event.request).then((cached) => {
+          const network = fetch(event.request).then((res) => {
+            if (res && (res.ok || res.type === 'opaque')) {
+              cache.put(event.request, res.clone());
+            }
+            return res;
+          }).catch(() => cached);
+          return cached || network;
+        })
+      )
+    );
+    return;
+  }
+
   // Navigation requests: return cached index.html if offline
   if (event.request.mode === 'navigate') {
     event.respondWith(

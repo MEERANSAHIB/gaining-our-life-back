@@ -2,31 +2,31 @@
 // Gaining Our Life Back — Main Application Orchestrator
 // =========================================================================
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import {
-  getAuth,
-  signInAnonymously,
-  signInWithCustomToken,
-  signInWithCredential,
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
-  linkWithPopup,
-  signInWithRedirect,
-  linkWithRedirect,
-  getRedirectResult,
-  signOut
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  addDoc,
-  setDoc,
-  deleteDoc,
-  onSnapshot,
-  collection
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+// Firebase is loaded lazily (see loadFirebase) instead of with static imports,
+// so the stopwatch, journal and analytics keep working from localStorage even
+// when the CDN is offline or blocked (airplane mode, Brave Shields, firewalls).
+const FIREBASE_VERSION = "11.6.1";
+let initializeApp,
+  getAuth, signInAnonymously, signInWithCredential, onAuthStateChanged,
+  GoogleAuthProvider, signInWithPopup, linkWithPopup, signInWithRedirect,
+  linkWithRedirect, getRedirectResult, signOut,
+  getFirestore, doc, addDoc, setDoc, deleteDoc, onSnapshot, collection;
+
+async function loadFirebase() {
+  const base = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}`;
+  const [appMod, authMod, fsMod] = await Promise.all([
+    import(`${base}/firebase-app.js`),
+    import(`${base}/firebase-auth.js`),
+    import(`${base}/firebase-firestore.js`)
+  ]);
+  ({ initializeApp } = appMod);
+  ({
+    getAuth, signInAnonymously, signInWithCredential, onAuthStateChanged,
+    GoogleAuthProvider, signInWithPopup, linkWithPopup, signInWithRedirect,
+    linkWithRedirect, getRedirectResult, signOut
+  } = authMod);
+  ({ getFirestore, doc, addDoc, setDoc, deleteDoc, onSnapshot, collection } = fsMod);
+}
 
 // Application State
 const state = {
@@ -1194,6 +1194,7 @@ async function handleGoogleSignOut() {
 
 async function initCloudSync() {
   try {
+    await loadFirebase();
     const app = initializeApp(window.DetoxConstants.USER_FIREBASE_CONFIG);
     auth = getAuth(app);
     db = getFirestore(app);
