@@ -177,9 +177,14 @@ window.DetoxAnalytics = {
       let cleanMsForDay = 0;
 
       // Current running streak
+      // The streak's end is derived from the same elapsed time the stopwatch shows,
+      // so a paused timer stops accruing clean time on the heatmap too.
       const { isRunning, streakInitialStartTime } = timer;
       if (streakInitialStartTime && streakInitialStartTime <= dayEndMs) {
-        const streakEnd = isRunning ? Date.now() : (timer.currentLapStartTime || Date.now());
+        const runningMs = isRunning && timer.currentLapStartTime
+          ? Math.max(0, Date.now() - timer.currentLapStartTime)
+          : 0;
+        const streakEnd = streakInitialStartTime + Math.max(0, Number(timer.accumulatedMs) || 0) + runningMs;
         const overlapStart = Math.max(dayStartMs, streakInitialStartTime);
         const overlapEnd = Math.min(dayEndMs, streakEnd);
         if (overlapEnd > overlapStart) {

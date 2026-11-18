@@ -98,23 +98,35 @@ window.DetoxStorage = {
       "Feeling_Before",
       "Feeling_Before_Note",
       "Feeling_After",
-      "Feeling_After_Note"
+      "Feeling_After_Note",
+      "Relapse_Duration",
+      "Next_Time_Plan"
     ];
+
+    // Quote every text cell, double embedded quotes, and neutralize leading
+    // =, +, -, @ so spreadsheets don't treat user text as a formula.
+    const cell = (value) => {
+      let s = String(value ?? '');
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+      return `"${s.replace(/"/g, '""')}"`;
+    };
 
     const total = laps.length;
     const rows = laps.map((l, idx) => [
       total - idx,
-      l.hoursAvoided || 0,
-      `"${window.DetoxConstants.formatDurationCompact(l.durationMs)}"`,
-      `"${new Date(l.relapsedAtMs).toISOString()}"`,
-      `"${l.timeOfDayBucket || ''}"`,
-      `"${l.platform || ''}"`,
-      `"${(l.triggers || []).join('; ')}"`,
-      `"${(l.whatHappenedBefore || '').replace(/"/g, '""')}"`,
-      `"${l.feelingBefore || ''}"`,
-      `"${(l.feelingBeforeNote || '').replace(/"/g, '""')}"`,
-      `"${l.feelingAfter || ''}"`,
-      `"${(l.feelingAfterNote || '').replace(/"/g, '""')}"`
+      Number(l.hoursAvoided) || 0,
+      cell(window.DetoxConstants.formatDurationCompact(l.durationMs)),
+      cell(new Date(l.relapsedAtMs).toISOString()),
+      cell(l.timeOfDayBucket),
+      cell(l.platform),
+      cell((l.triggers || []).join('; ')),
+      cell(l.whatHappenedBefore),
+      cell(l.feelingBefore),
+      cell(l.feelingBeforeNote),
+      cell(l.feelingAfter),
+      cell(l.feelingAfterNote),
+      cell(l.relapseDuration),
+      cell(l.nextTimePlan)
     ]);
 
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
