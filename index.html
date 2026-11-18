@@ -714,7 +714,7 @@
           <div id="customPlatformContainer" class="mt-2.5 hidden">
             <input
               type="text"
-              id="customPlatformInput"
+              id="customPlatformInput" maxlength="60"
               placeholder="Enter custom platform or website name..."
               class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
             />
@@ -731,7 +731,7 @@
           </div>
           <input
             type="text"
-            id="whatHappenedBeforeInput"
+            id="whatHappenedBeforeInput" maxlength="300"
             placeholder="Context: Where were you? (e.g. In bed before sleep, stuck on hard coding bug, waiting for Uber)..."
             class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
           />
@@ -749,7 +749,7 @@
             </div>
             <input
               type="text"
-              id="feelingBeforeNoteInput"
+              id="feelingBeforeNoteInput" maxlength="300"
               placeholder="Optional notes on before mindset..."
               class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
             />
@@ -765,7 +765,7 @@
             </div>
             <input
               type="text"
-              id="feelingAfterNoteInput"
+              id="feelingAfterNoteInput" maxlength="300"
               placeholder="Optional notes on after feeling..."
               class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
             />
@@ -788,7 +788,7 @@
             What will you do differently next time this trigger strikes?
           </label>
           <textarea
-            id="nextTimePlanInput"
+            id="nextTimePlanInput" maxlength="300"
             rows="2"
             placeholder="e.g. Put phone in drawer, open Urge Surfer 90s, do 20 pushups, drink a tall glass of cold water..."
             class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
@@ -912,8 +912,43 @@
           <pre id="firestoreRulesCode" class="bg-slate-900 p-3.5 rounded-xl border border-slate-700 font-mono text-[11px] text-emerald-300 overflow-x-auto select-all">rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /artifacts/{appId}/users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    match /artifacts/{appId}/users/{userId} {
+      function isOwner() {
+        return request.auth != null &amp;&amp; request.auth.uid == userId;
+      }
+      function shortStr(v, n) {
+        return v is string &amp;&amp; v.size() &lt;= n;
+      }
+
+      match /detox_state/active_timer {
+        allow read, delete: if isOwner();
+        allow create, update: if isOwner()
+          &amp;&amp; request.resource.data.keys().hasOnly([
+            'isRunning', 'currentLapStartTime', 'accumulatedMs',
+            'streakInitialStartTime', 'urgesDefeated', 'updatedAt'])
+          &amp;&amp; request.resource.data.isRunning is bool
+          &amp;&amp; request.resource.data.accumulatedMs is number
+          &amp;&amp; request.resource.data.urgesDefeated is number;
+      }
+
+      match /detox_laps/{lapId} {
+        allow read, delete: if isOwner();
+        allow create, update: if isOwner()
+          &amp;&amp; request.resource.data.keys().hasOnly([
+            'durationMs', 'hoursAvoided', 'startedAtMs', 'relapsedAtMs',
+            'timeOfDayBucket', 'platform', 'triggers', 'whatHappenedBefore',
+            'feelingBefore', 'feelingBeforeNote', 'feelingAfter',
+            'feelingAfterNote', 'relapseDuration', 'nextTimePlan'])
+          &amp;&amp; request.resource.data.durationMs is number
+          &amp;&amp; request.resource.data.relapsedAtMs is number
+          &amp;&amp; shortStr(request.resource.data.platform, 100)
+          &amp;&amp; request.resource.data.triggers is list
+          &amp;&amp; request.resource.data.triggers.size() &lt;= 12
+          &amp;&amp; shortStr(request.resource.data.whatHappenedBefore, 500)
+          &amp;&amp; shortStr(request.resource.data.feelingBeforeNote, 500)
+          &amp;&amp; shortStr(request.resource.data.feelingAfterNote, 500)
+          &amp;&amp; shortStr(request.resource.data.nextTimePlan, 500);
+      }
     }
   }
 }</pre>
@@ -970,6 +1005,16 @@ service cloud.firestore {
         <p id="urgeRealityCheckText" class="text-xs text-slate-200 leading-relaxed">
           Remember how you feel every time you scroll: guilty, drained, and distracted. Your real life is waiting on the other side of this 90-second wave.
         </p>
+      </div>
+
+      <!-- Replacement micro-habits -->
+      <div class="mt-4 text-left">
+        <div class="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-2">Do one of these while the wave passes:</div>
+        <ul class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-300">
+          <li class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">💧 Drink a glass of cold water</li>
+          <li class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">🙆 Stand up and stretch</li>
+          <li class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">🪟 Look out a window for 30 seconds</li>
+        </ul>
       </div>
 
       <!-- Urge Surfer Decision Buttons -->
