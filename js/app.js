@@ -245,9 +245,6 @@ function triggerHaptic(type = 'start') {
       case 'start':
         navigator.vibrate(40);
         break;
-      case 'pause':
-        navigator.vibrate([40, 40, 40]);
-        break;
       case 'relapse':
         navigator.vibrate(100);
         break;
@@ -378,11 +375,13 @@ function renderStopwatchUI() {
       el.streakStatusLabel.textContent = "ACTIVE DETOX STREAK";
       if (el.streakPulseDot) el.streakPulseDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
       if (el.streakLiveIndicator) el.streakLiveIndicator.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-      if (el.toggleTimerText) el.toggleTimerText.textContent = "Pause Detox Timer";
-      if (el.toggleTimerBtn) el.toggleTimerBtn.className = "flex-1 py-3.5 px-6 rounded-2xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 transition cursor-pointer";
+      // No pause control while a lap is running; Reset takes the full row.
+      if (el.toggleTimerBtn) el.toggleTimerBtn.classList.add('hidden');
+      if (el.resetTimerBtn) el.resetTimerBtn.classList.add('flex-1');
     } else {
       const hasElapsed = getElapsedMs() > 0;
-      el.streakStatusLabel.textContent = hasElapsed ? "TIMER PAUSED" : "READY TO START";
+      el.streakStatusLabel.textContent = hasElapsed ? "READY TO RESUME" : "READY TO START";
+      if (el.resetTimerBtn) el.resetTimerBtn.classList.remove('flex-1');
       if (el.streakPulseDot) el.streakPulseDot.className = "w-2 h-2 rounded-full bg-amber-400";
       if (el.streakLiveIndicator) el.streakLiveIndicator.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30";
       if (el.toggleTimerText) el.toggleTimerText.textContent = hasElapsed ? "Resume Detox Lap" : "Start Detox Lap";
@@ -582,23 +581,19 @@ function renderAll() {
 // -------------------------------------------------------------------------
 // Stopwatch Actions
 // -------------------------------------------------------------------------
+// There is no pause: a detox lap only ever runs. The button is hidden while the
+// timer is running and only starts a lap (or resumes one that was paused in an
+// older version of the app).
 function toggleStopwatch() {
+  if (state.timer.isRunning) return;
   const now = Date.now();
-  if (state.timer.isRunning) {
-    state.timer.accumulatedMs += Math.max(0, now - (state.timer.currentLapStartTime || now));
-    state.timer.currentLapStartTime = null;
-    state.timer.isRunning = false;
-    triggerHaptic('pause');
-    showToast("Detox timer paused • State saved locally & cloud");
-  } else {
-    if (state.timer.accumulatedMs === 0) {
-      state.timer.streakInitialStartTime = now;
-    }
-    state.timer.currentLapStartTime = now;
-    state.timer.isRunning = true;
-    triggerHaptic('start');
-    showToast("Detox streak active • Live timer running");
+  if (state.timer.accumulatedMs === 0) {
+    state.timer.streakInitialStartTime = now;
   }
+  state.timer.currentLapStartTime = now;
+  state.timer.isRunning = true;
+  triggerHaptic('start');
+  showToast("Detox streak active • Live timer running");
   saveTimerStateToCloud();
 }
 
