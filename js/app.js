@@ -666,6 +666,8 @@ function openRelapseModal() {
   if (el.manualHoursOverride) el.manualHoursOverride.value = hoursDecimal;
   if (el.modalCapturedTimestampText) el.modalCapturedTimestampText.textContent = window.DetoxConstants.formatDateTimeReadable(now);
   if (el.modalCapturedBucketBadge) el.modalCapturedBucketBadge.textContent = bucket;
+  const nextLapNumberEl = document.getElementById('nextLapNumberText');
+  if (nextLapNumberEl) nextLapNumberEl.textContent = String(state.laps.length + 2);
 
   if (el.whatHappenedBeforeInput) el.whatHappenedBeforeInput.value = "";
   if (el.feelingBeforeNoteInput) el.feelingBeforeNoteInput.value = "";

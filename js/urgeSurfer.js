@@ -6,8 +6,9 @@ window.DetoxUrgeSurfer = {
   intervalId: null,
   remainingSeconds: 90,
 
-  startSession(laps, elements, onComplete) {
+  startSession(laps, elements) {
     this.remainingSeconds = 90;
+    if (elements.defeatedBtn) elements.defeatedBtn.classList.remove('animate-pulse');
     this.updateDisplay(elements);
 
     // 1. Generate dynamic reality check from actual user data
@@ -63,7 +64,6 @@ window.DetoxUrgeSurfer = {
         if (elements.defeatedBtn) {
           elements.defeatedBtn.classList.add('animate-pulse');
         }
-        if (typeof onComplete === 'function') onComplete();
       }
     }, 1000);
   },
