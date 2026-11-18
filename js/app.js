@@ -382,17 +382,26 @@ function renderStopwatchUI() {
       el.streakStatusLabel.textContent = "ACTIVE DETOX STREAK";
       if (el.streakPulseDot) el.streakPulseDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
       if (el.streakLiveIndicator) el.streakLiveIndicator.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-      // No pause control while a lap is running; Reset takes the full row.
+      // Lap is running: hide Start button, prominently show Relapse & Reflect button
       if (el.toggleTimerBtn) el.toggleTimerBtn.classList.add('hidden');
-      if (el.resetTimerBtn) el.resetTimerBtn.classList.add('flex-1');
+      if (el.relapseBtn) {
+        el.relapseBtn.classList.remove('hidden');
+        el.relapseBtn.classList.add('flex');
+      }
     } else {
       const hasElapsed = getElapsedMs() > 0;
       el.streakStatusLabel.textContent = hasElapsed ? "READY TO RESUME" : "READY TO START";
-      if (el.resetTimerBtn) el.resetTimerBtn.classList.remove('flex-1');
       if (el.streakPulseDot) el.streakPulseDot.className = "w-2 h-2 rounded-full bg-amber-400";
       if (el.streakLiveIndicator) el.streakLiveIndicator.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30";
       if (el.toggleTimerText) el.toggleTimerText.textContent = hasElapsed ? "Resume Detox Lap" : "Start Detox Lap";
-      if (el.toggleTimerBtn) el.toggleTimerBtn.className = "flex-1 py-3.5 px-6 rounded-2xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-950/60 transition cursor-pointer";
+      // Lap stopped: show Start button, hide Relapse button
+      if (el.toggleTimerBtn) {
+        el.toggleTimerBtn.classList.remove('hidden');
+      }
+      if (el.relapseBtn) {
+        el.relapseBtn.classList.add('hidden');
+        el.relapseBtn.classList.remove('flex');
+      }
     }
   }
 
@@ -608,21 +617,21 @@ function handleResetClick() {
   if (!state.resetConfirmPending) {
     state.resetConfirmPending = true;
     triggerHaptic('tap');
-    if (el.resetTimerText) el.resetTimerText.textContent = "Confirm Reset?";
-    if (el.resetTimerBtn) el.resetTimerBtn.classList.add('border-rose-500', 'text-rose-300');
+    if (el.resetTimerText) el.resetTimerText.textContent = "Confirm Discard?";
+    if (el.resetTimerBtn) el.resetTimerBtn.classList.add('text-rose-400', 'font-bold');
     clearTimeout(window.__resetConfirmTimeout);
     window.__resetConfirmTimeout = setTimeout(() => {
       state.resetConfirmPending = false;
-      if (el.resetTimerText) el.resetTimerText.textContent = "Reset";
-      if (el.resetTimerBtn) el.resetTimerBtn.classList.remove('border-rose-500', 'text-rose-300');
+      if (el.resetTimerText) el.resetTimerText.textContent = "Discard lap & reset to 00:00";
+      if (el.resetTimerBtn) el.resetTimerBtn.classList.remove('text-rose-400', 'font-bold');
     }, 3500);
     return;
   }
 
   state.resetConfirmPending = false;
   triggerHaptic('relapse');
-  if (el.resetTimerText) el.resetTimerText.textContent = "Reset";
-  if (el.resetTimerBtn) el.resetTimerBtn.classList.remove('border-rose-500', 'text-rose-300');
+  if (el.resetTimerText) el.resetTimerText.textContent = "Discard lap & reset to 00:00";
+  if (el.resetTimerBtn) el.resetTimerBtn.classList.remove('text-rose-400', 'font-bold');
 
   const now = Date.now();
   state.timer = {

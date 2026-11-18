@@ -3,9 +3,9 @@
    ========================================================================= */
 
 :root {
-  --bg-main: #090b10;
-  --card-bg: #11141d;
-  --card-border: rgba(255, 255, 255, 0.08);
+  --bg-main: #080d0c;
+  --card-bg: #101715;
+  --card-border: rgba(255, 255, 255, 0.07);
   --card-hover: rgba(255, 255, 255, 0.12);
   --accent-emerald: #10b981;
   --accent-emerald-subtle: rgba(16, 185, 129, 0.12);
@@ -14,7 +14,7 @@
 body {
   background-color: var(--bg-main);
   color: #f1f5f9;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -29,13 +29,13 @@ body {
 }
 
 .glass-card-emerald {
-  background: #0d141e;
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  background: #0d1715;
+  border: 1px solid rgba(16, 185, 129, 0.22);
   box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.5);
 }
 
 .glass-card-rose {
-  background: #171016;
+  background: #171113;
   border: 1px solid rgba(244, 63, 94, 0.25);
 }
 
