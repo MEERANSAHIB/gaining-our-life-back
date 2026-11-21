@@ -1,78 +1,54 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" data-daypart="night">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gaining Our Life Back — Social Media Detox Stopwatch & Relapse Pattern Tracker</title>
-  
-  <!-- PWA & Mobile Web App Meta -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Gaining Our Life Back: social media detox timer and relapse pattern tracker</title>
+
+  <!-- PWA & mobile web app -->
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <meta name="theme-color" content="#070b14" />
+  <meta name="theme-color" content="#0B0F20" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="LifeBack" />
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Plus Jakarta Sans (Editorial UI), Fraunces (Mindful Serif), & JetBrains Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
-            serif: ['"Fraunces"', 'Georgia', 'serif'],
-            mono: ['"JetBrains Mono"', 'monospace'],
-          },
-          colors: {
-            slate: {
-              850: '#111817',
-              950: '#080d0c'
-            }
-          }
-        }
-      }
-    };
-  </script>
-
-  <!-- Modular Application Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css" />
+  <!-- Fonts are self-hosted; styles are built locally (npm run build:css). No CDN needed. -->
+  <link rel="preload" href="fonts/archivo-latin-wdth.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/instrument-sans-latin-wght.woff2" as="font" type="font/woff2" crossorigin />
+  <script src="js/theme.js"></script>
+  <link rel="stylesheet" href="css/app.css" />
 </head>
 
-<body class="min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-slate-950">
+<body class="min-h-screen flex flex-col">
 
-  <!-- Top Navigation & Cloud Status Header -->
-  <header class="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-3">
-      <!-- Brand -->
-      <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-950/60 border border-emerald-400/30">
-          <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5 text-slate-950" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
-          </svg>
-        </div>
-        <h1 class="text-base sm:text-xl font-serif font-medium tracking-tight text-white">Gaining Our <span class="text-emerald-400 italic font-semibold">Life Back</span></h1>
+  <!-- ===================================================================== -->
+  <!-- HEADER                                                                -->
+  <!-- ===================================================================== -->
+  <header class="sticky top-0 z-30 bg-ground/90 backdrop-blur-md border-b border-line">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <!-- Mark: a lamp disc rising over a horizon -->
+        <svg class="shrink-0" width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+          <circle cx="16" cy="16" r="16" fill="rgb(var(--c-lamp))"></circle>
+          <rect x="0" y="19" width="32" height="13" fill="rgb(var(--c-ground))"></rect>
+          <rect x="0" y="19" width="32" height="2" fill="rgb(var(--c-ground))"></rect>
+        </svg>
+        <h1 class="title !text-[1.35rem] sm:!text-[1.6rem] truncate">Gaining Our Life Back</h1>
       </div>
 
-      <!-- Cloud Status & Quick Actions -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Cloud Sync Status Pill (Desktop only) -->
-        <button id="cloudStatusBadge" type="button" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-xs font-medium text-slate-300 transition cursor-pointer" title="Click to view Firebase Cloud Connection & Security Rules">
-          <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-          <span id="cloudStatusText">Connecting Cloud...</span>
+      <div class="flex items-center gap-2">
+        <!-- Cloud sync state (desktop) -->
+        <button id="cloudStatusBadge" type="button" class="hidden md:inline-flex items-center gap-2 px-3 min-h-[40px] rounded-full border border-line text-sm text-mute hover:text-ink hover:bg-surface transition" title="Cloud sync details and setup">
+          <span id="cloudStatusDot" class="dot bg-faint dot-live"></span>
+          <span id="cloudStatusText">Connecting</span>
         </button>
 
-        <!-- Google Sign-In Button (Visible when Guest / Anonymous) -->
-        <button id="googleSignInBtn" class="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-semibold text-xs shadow-md transition cursor-pointer">
-          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+        <!-- Sign in -->
+        <button id="googleSignInBtn" type="button" class="hidden sm:inline-flex btn btn-quiet btn-sm">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
             <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
             <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
             <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
@@ -81,61 +57,47 @@
           <span>Sign in with Google</span>
         </button>
 
-        <!-- Signed-In Google User Profile Pill (Hidden when Guest) -->
-        <div id="userProfileBar" class="hidden items-center gap-2 pl-2 pr-1.5 py-1 rounded-xl bg-slate-900/90 border border-slate-700/80">
-          <img id="userAvatarImg" src="https://placehold.co/32x32/10b981/070b14?text=G" alt="Profile" class="w-6 h-6 rounded-full object-cover border border-emerald-500/40" onerror="this.src='https://placehold.co/32x32/10b981/070b14?text=U'" />
-          <div class="hidden sm:flex flex-col leading-tight max-w-[140px]">
-            <span id="userDisplayName" class="text-[11px] font-semibold text-white truncate">Google User</span>
-            <span id="userEmailText" class="text-[10px] text-emerald-400 truncate">Synced</span>
+        <!-- Signed-in profile -->
+        <div id="userProfileBar" class="hidden items-center gap-2 pl-1.5 pr-1.5 py-1 rounded-full border border-line">
+          <img id="userAvatarImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23F2B705'/%3E%3C/svg%3E" alt="" class="w-7 h-7 rounded-full object-cover" referrerpolicy="no-referrer" />
+          <div class="hidden sm:flex flex-col leading-tight max-w-[150px]">
+            <span id="userDisplayName" class="text-xs font-semibold text-ink truncate">Google user</span>
+            <span id="userEmailText" class="text-[11px] text-mute truncate">Synced</span>
           </div>
-          <button id="googleSignOutBtn" class="ml-1 px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-500/30 text-[11px] font-medium transition cursor-pointer" title="Sign Out">
-            Sign Out
-          </button>
+          <button id="googleSignOutBtn" type="button" class="btn btn-quiet btn-sm !min-h-[32px] !px-3 !text-xs" title="Sign out">Sign out</button>
         </div>
 
-        <!-- Desktop-only action buttons -->
-        <button id="openRulesHelperBtn" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 text-xs font-medium transition cursor-pointer" title="Firebase Console Setup & Security Rules">
-          <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span class="hidden xl:inline">Cloud Setup</span>
+        <!-- Desktop actions -->
+        <button id="openRulesHelperBtn" type="button" class="hidden sm:inline-flex icon-btn" title="Cloud setup and security rules" aria-label="Cloud setup">
+          <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+        </button>
+        <button id="openBackupModalBtn" type="button" class="hidden sm:inline-flex icon-btn" title="Backup and export" aria-label="Backup and export">
+          <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        </button>
+        <button id="themeToggleBtn" type="button" data-theme-toggle class="hidden sm:inline-flex icon-btn" title="Theme: follows the hour (tap to change)" aria-label="Change theme">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 010 18z" fill="currentColor"/></svg>
+        </button>
+        <button id="installAppBtn" type="button" class="hidden btn btn-lamp btn-sm" title="Install as an app">
+          <span>Install</span>
         </button>
 
-        <button id="installAppBtn" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition cursor-pointer" title="Install as mobile/desktop app">
-          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 18h16" />
-          </svg>
-          <span class="hidden sm:inline">Install App</span>
-        </button>
-
-        <button id="openBackupModalBtn" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 text-xs font-medium transition cursor-pointer">
-          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          <span class="hidden sm:inline">Backup & Export</span>
-        </button>
-
-        <!-- Mobile overflow menu button -->
+        <!-- Mobile overflow -->
         <div class="relative sm:hidden">
-          <button id="mobileMenuBtn" type="button" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 transition cursor-pointer" title="Menu">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
-            </svg>
+          <button id="mobileMenuBtn" type="button" class="icon-btn" title="Menu" aria-label="Menu">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="18.5" r="1.7"/></svg>
           </button>
-          <!-- Mobile dropdown menu -->
-          <div id="mobileMenuDropdown" class="hidden absolute right-0 top-full mt-2 w-56 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 z-50">
-            <div id="mobileUserItem" class="hidden px-4 py-2.5 border-b border-slate-800/80 mb-1">
-              <div class="flex items-center gap-2.5">
-                <img id="mobileUserAvatar" src="https://placehold.co/32x32/10b981/070b14?text=U" alt="Profile" class="w-7 h-7 rounded-full border border-emerald-500/40 object-cover" />
+          <div id="mobileMenuDropdown" class="hidden absolute right-0 top-full mt-2 w-64 bg-raised border border-line rounded-2xl shadow-2xl py-2 z-50">
+            <div id="mobileUserItem" class="hidden px-4 py-3 border-b border-line mb-1">
+              <div class="flex items-center gap-3">
+                <img id="mobileUserAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23F2B705'/%3E%3C/svg%3E" alt="" class="w-8 h-8 rounded-full object-cover" referrerpolicy="no-referrer" />
                 <div class="flex flex-col text-left leading-tight min-w-0 flex-1">
-                  <span id="mobileUserDisplayName" class="text-xs font-semibold text-white truncate">Google User</span>
-                  <span id="mobileUserEmail" class="text-[10px] text-slate-400 truncate">user@gmail.com</span>
+                  <span id="mobileUserDisplayName" class="text-sm font-semibold text-ink truncate">Google user</span>
+                  <span id="mobileUserEmail" class="text-xs text-mute truncate">user@gmail.com</span>
                 </div>
               </div>
             </div>
-            <button id="mobileSignInBtn" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-slate-200 hover:bg-slate-800 transition cursor-pointer text-left">
-              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+            <button id="mobileSignInBtn" type="button" class="w-full flex items-center gap-3 px-4 min-h-[48px] text-sm text-ink hover:bg-surface transition text-left">
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
                 <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
                 <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
@@ -143,32 +105,15 @@
               </svg>
               <span>Sign in with Google</span>
             </button>
-            <button id="mobileSignOutBtn" class="hidden w-full items-center gap-2.5 px-4 py-2.5 text-xs text-rose-300 hover:bg-rose-500/10 transition cursor-pointer text-left">
-              <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-              </svg>
-              <span>Sign Out</span>
-            </button>
-            <button id="mobileCloudSetupBtn" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-slate-200 hover:bg-slate-800 transition cursor-pointer text-left">
-              <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              Cloud Setup
-            </button>
-            <button id="mobileBackupBtn" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-slate-200 hover:bg-slate-800 transition cursor-pointer text-left">
-              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Backup & Export
+            <button id="mobileSignOutBtn" type="button" class="hidden w-full items-center gap-3 px-4 min-h-[48px] text-sm text-ink hover:bg-surface transition text-left">Sign out</button>
+            <button id="mobileCloudSetupBtn" type="button" class="w-full flex items-center gap-3 px-4 min-h-[48px] text-sm text-ink hover:bg-surface transition text-left">Cloud setup</button>
+            <button id="mobileBackupBtn" type="button" class="w-full flex items-center gap-3 px-4 min-h-[48px] text-sm text-ink hover:bg-surface transition text-left">Backup and export</button>
+            <button id="mobileThemeBtn" type="button" data-theme-toggle class="w-full flex items-center justify-between gap-3 px-4 min-h-[48px] text-sm text-ink hover:bg-surface transition text-left">
+              <span>Theme</span>
+              <span class="text-mute text-xs" data-theme-label>Follows the hour</span>
             </button>
             <div id="mobileInstallItem" class="hidden">
-              <button id="mobileInstallBtn" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-emerald-300 hover:bg-slate-800 transition cursor-pointer text-left">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 18h16" />
-                </svg>
-                Install App
-              </button>
+              <button id="mobileInstallBtn" type="button" class="w-full flex items-center gap-3 px-4 min-h-[48px] text-sm text-lamp-text font-semibold hover:bg-surface transition text-left">Install app</button>
             </div>
           </div>
         </div>
@@ -176,757 +121,494 @@
     </div>
   </header>
 
-  <!-- Main Content Container -->
-  <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 pb-28 md:pb-8">
+  <!-- ===================================================================== -->
+  <!-- MAIN                                                                  -->
+  <!-- ===================================================================== -->
+  <main class="relative flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 sm:pt-8 pb-28 md:pb-12">
 
-    <!-- Cloud Permission / Setup Alert Banner -->
-    <div id="cloudDiagnosticBanner" class="hidden rounded-2xl bg-amber-950/50 border border-amber-500/40 p-4 text-xs sm:text-sm text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
-      <div class="flex items-start gap-3">
-        <span class="text-xl">⚠️</span>
+    <!-- Cloud banner: only shows when something needs attention -->
+    <div id="cloudDiagnosticBanner" class="hidden mb-6 border-l-4 border-lamp bg-surface rounded-r-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <h4 id="cloudDiagnosticTitle" class="font-semibold text-ink">Cloud sync needs attention</h4>
+        <p id="cloudDiagnosticMessage" class="text-mute text-sm mt-1 max-w-[62ch]">
+          Your timer is safe in this browser. To sync across devices, enable Google sign-in and publish the Firestore rules in Firebase Console.
+        </p>
+      </div>
+      <button id="diagnosticOpenRulesBtn" type="button" class="btn btn-lamp btn-sm shrink-0">See setup steps</button>
+    </div>
+
+    <!-- Toast -->
+    <div id="toastBanner" class="fixed left-4 right-4 bottom-24 md:left-auto md:right-6 md:bottom-6 z-50 hidden md:max-w-sm" role="status" aria-live="polite">
+      <div class="bg-ink text-ground rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-3">
+        <span id="toastIcon" class="dot bg-lamp shrink-0"></span>
+        <div class="text-sm font-medium" id="toastMessage">Saved</div>
+      </div>
+    </div>
+
+    <!-- Desktop tabs -->
+    <div class="hidden md:flex items-end justify-between border-b border-line mb-8" role="tablist">
+      <div class="flex gap-8">
+        <button data-tab-target="stopwatch" role="tab" aria-selected="true" class="desktop-tab-btn tab is-active">Today</button>
+        <button data-tab-target="analytics" role="tab" aria-selected="false" class="desktop-tab-btn tab">Patterns</button>
+        <button data-tab-target="journal" role="tab" aria-selected="false" class="desktop-tab-btn tab">Journal</button>
+      </div>
+      <button type="button" onclick="document.getElementById('openUrgeSurferBtn').click()" class="link-btn !text-tide-text hover:!text-tide-text mb-2 inline-flex items-center gap-2 font-semibold">
+        <span class="dot bg-tide dot-live"></span>
+        <span>Urge to scroll? Start the 90-second wave</span>
+      </button>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 1: TODAY                                                       -->
+    <!-- =================================================================== -->
+    <div id="view-stopwatch">
+      <section class="hero lg:grid lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-14 lg:items-end py-2 sm:py-6">
+        <div class="hero-disc" aria-hidden="true"></div>
+
+        <!-- Left: the time -->
         <div>
-          <h4 id="cloudDiagnosticTitle" class="font-bold text-white">Firebase Cloud Action Needed</h4>
-          <p id="cloudDiagnosticMessage" class="text-amber-200/90 mt-0.5">
-            Your timer is running safely in offline local storage. To sync across all devices, enable Anonymous Auth and publish your Firestore Rules in Firebase Console.
+          <div class="flex items-center flex-wrap gap-x-4 gap-y-1">
+            <span id="streakLiveIndicator" class="status status-live">
+              <span id="streakPulseDot" class="dot dot-live"></span>
+              <span id="streakStatusLabel">Streak running</span>
+            </span>
+            <span id="currentLapNumberBadge" class="text-mute text-sm font-medium">Lap 1</span>
+            <span id="cravingsDefeatedBadge" class="hidden sm:inline text-tide-text text-sm font-medium">
+              <span id="cravingsDefeatedText">0 urges surfed</span>
+            </span>
+          </div>
+
+          <!-- Days + hours are the headline; minutes + seconds keep moving beside them -->
+          <h2 class="sr-only">Time since your last slip</h2>
+          <div class="mt-5 sm:mt-7 select-all" aria-live="off">
+            <div class="numeral hero-days text-ink flex items-baseline flex-wrap">
+              <span id="timerDays">0</span><span class="unit">d</span>
+              <span id="timerHours">0</span><span class="unit">h</span>
+            </div>
+            <div class="numeral hero-clock text-lamp-text mt-2 sm:mt-3 flex items-baseline">
+              <span id="timerMinutes">00</span><span class="unit">m</span>
+              <span id="timerSeconds">00</span><span class="unit">s</span>
+            </div>
+          </div>
+
+          <p class="mt-5 text-mute text-[0.95rem]">
+            <span id="currentLapTotalHours" class="text-ink font-semibold tabular-nums">0.00 hrs</span> banked this lap
           </p>
-        </div>
-      </div>
-      <button id="diagnosticOpenRulesBtn" type="button" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-semibold text-xs shrink-0 transition cursor-pointer">
-        View Copyable Rules & Steps
-      </button>
-    </div>
-
-    <!-- Global Toast Banner -->
-    <div id="toastBanner" class="fixed bottom-20 md:bottom-5 right-5 z-50 hidden transform transition-all duration-300 max-w-sm">
-      <div class="glass-card bg-slate-900/95 border border-emerald-500/40 rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-3">
-        <div id="toastIcon" class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-        </div>
-        <div class="text-xs sm:text-sm font-medium text-slate-100" id="toastMessage">Saved to cloud</div>
-      </div>
-    </div>
-
-    <!-- Desktop Segmented Tab Navigation (Hidden on mobile; bottom bar used instead) -->
-    <div class="hidden md:flex items-center justify-between border-b border-slate-800/80 pb-3">
-      <div class="inline-flex p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800/80 shadow-xl backdrop-blur-md gap-1">
-        <button data-tab-target="stopwatch" class="desktop-tab-btn px-3.5 py-1.5 rounded-xl font-bold text-xs bg-emerald-500 text-slate-950 shadow-md shadow-emerald-950/40 transition cursor-pointer flex items-center gap-1.5">
-          <span>Focus</span>
-        </button>
-        <button data-tab-target="analytics" class="desktop-tab-btn px-3.5 py-1.5 rounded-xl font-medium text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition cursor-pointer flex items-center gap-1.5">
-          <span>Patterns</span>
-        </button>
-        <button data-tab-target="journal" class="desktop-tab-btn px-3.5 py-1.5 rounded-xl font-medium text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition cursor-pointer flex items-center gap-1.5">
-          <span>Journal</span>
-        </button>
-      </div>
-
-      <!-- Quick Urge Surfer Lifeline Trigger Pill -->
-      <button onclick="document.getElementById('openUrgeSurferBtn').click()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold transition cursor-pointer">
-        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-        <span>Urge Surfer 90s</span>
-      </button>
-    </div>
-
-    <!-- =================================================================== -->
-    <!-- TAB VIEW 1: FOCUS & STOPWATCH (Live Detox Lifeline)                -->
-    <!-- =================================================================== -->
-    <div id="view-stopwatch" class="space-y-6">
-
-      <!-- HERO SECTION: LIVE DETOX STOPWATCH (CURRENT LAP) -->
-      <section class="glass-card-emerald rounded-3xl p-5 sm:p-7 shadow-2xl relative overflow-hidden">
-        <!-- Top Status Row -->
-        <div class="flex items-center justify-between gap-2 mb-4 sm:mb-6">
-          <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            <span id="streakLiveIndicator" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              <span id="streakPulseDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-              <span id="streakStatusLabel">ACTIVE DETOX LAP</span>
-            </span>
-            <span id="currentLapNumberBadge" class="px-2 py-0.5 rounded-full text-[11px] font-mono font-medium bg-slate-900/90 text-slate-300 border border-slate-700/80">
-              Lap #1
-            </span>
-            <span id="cravingsDefeatedBadge" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-              <span>🌊</span>
-              <span id="cravingsDefeatedText">0 Urges Surfed</span>
-            </span>
-          </div>
-
-          <!-- Adjust start time backdate trigger -->
-          <button id="openBackdateBtn" class="text-[11px] text-slate-400 hover:text-emerald-300 bg-slate-900/80 hover:bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-800 transition flex items-center gap-1 cursor-pointer" title="Adjust start time">
-            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <span class="hidden sm:inline">Backdate Start</span>
-            <span class="sm:hidden">Adjust</span>
-          </button>
+          <p id="lapStartedAtBadge" class="text-faint text-sm mt-0.5">Streak not started yet</p>
         </div>
 
-        <!-- Sleek Digital Stopwatch Display (DD : HH : MM : SS) -->
-        <div class="py-3 sm:py-5 flex flex-col items-center justify-center">
-          <div class="grid grid-cols-4 gap-1 sm:gap-3.5 max-w-sm sm:max-w-md w-full text-center select-all">
-            <!-- Days -->
-            <div class="flex flex-col items-center">
-              <span id="timerDays" class="font-mono text-4xl sm:text-5xl md:text-6xl font-bold text-slate-100 tabular-nums tracking-tight">00</span>
-              <span class="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wider mt-1">Days</span>
+        <!-- Right: where you stand and what to do -->
+        <div class="mt-9 lg:mt-0">
+          <div>
+            <div class="flex items-baseline justify-between gap-4 text-sm">
+              <span class="text-mute">Against your best lap</span>
+              <span id="pbProgressLabel" class="text-ink font-semibold tabular-nums text-right">0% of 24h milestone</span>
             </div>
-            <!-- Hours -->
-            <div class="flex flex-col items-center">
-              <span id="timerHours" class="font-mono text-4xl sm:text-5xl md:text-6xl font-bold text-slate-100 tabular-nums tracking-tight">00</span>
-              <span class="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wider mt-1">Hours</span>
-            </div>
-            <!-- Minutes -->
-            <div class="flex flex-col items-center">
-              <span id="timerMinutes" class="font-mono text-4xl sm:text-5xl md:text-6xl font-bold text-emerald-400 tabular-nums tracking-tight">00</span>
-              <span class="text-[10px] sm:text-xs font-medium text-emerald-500/90 uppercase tracking-wider mt-1">Mins</span>
-            </div>
-            <!-- Seconds -->
-            <div class="flex flex-col items-center">
-              <span id="timerSeconds" class="font-mono text-4xl sm:text-5xl md:text-6xl font-bold text-emerald-400 tabular-nums tracking-tight">00</span>
-              <span class="text-[10px] sm:text-xs font-medium text-emerald-500/90 uppercase tracking-wider mt-1">Secs</span>
+            <div class="meter mt-2.5" role="presentation">
+              <div id="pbProgressBar" style="width: 0%"></div>
             </div>
           </div>
 
-          <!-- Total Hours Decimal & Started At Info -->
-          <div class="mt-3 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs text-slate-400">
-            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800">
-              <span class="text-slate-500">Duration:</span>
-              <span id="currentLapTotalHours" class="font-mono font-semibold text-emerald-400">0.00 hrs</span>
-            </div>
-            <div id="lapStartedAtBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800 text-slate-400">
-              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-              <span>Started: Just now</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Personal Best Comparison Bar -->
-        <div class="mt-2 max-w-xl mx-auto">
-          <div class="flex items-center justify-between text-[11px] sm:text-xs text-slate-400 mb-1.5">
-            <span>Lap vs Personal Best</span>
-            <span id="pbProgressLabel" class="font-mono text-emerald-400 font-semibold">0% of Personal Best</span>
-          </div>
-          <div class="w-full h-1.5 sm:h-2 rounded-full bg-slate-950/90 overflow-hidden border border-slate-800/80">
-            <div id="pbProgressBar" class="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400 rounded-full transition-all duration-500" style="width: 0%"></div>
-          </div>
-        </div>
-
-        <!-- Primary Action Controls (Thumb Zone Optimized) -->
-        <div class="mt-6 flex flex-col gap-2.5 max-w-xl mx-auto">
-          <!-- Urge Surfer 90s Lifeline (First Line of Defense) -->
-          <button id="openUrgeSurferBtn" class="w-full min-h-[46px] py-2.5 px-4 rounded-2xl font-medium text-xs sm:text-sm flex items-center justify-between bg-amber-500/10 hover:bg-amber-500/15 text-amber-200 border border-amber-500/30 shadow-sm transition active:scale-[0.98] cursor-pointer group">
-            <div class="flex items-center gap-2.5">
-              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-              <span>Craving to scroll? <strong>Ride the 90-second Wave</strong></span>
-            </div>
-            <span class="text-amber-400 font-mono text-xs opacity-75 group-hover:translate-x-1 transition-transform">→</span>
-          </button>
-
-          <!-- Primary Lap Action Slot -->
-          <div class="w-full">
-            <!-- Start button (shown only when no lap is running) -->
-            <button id="toggleTimerBtn" class="w-full min-h-[50px] py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-950/40 transition active:scale-[0.98] cursor-pointer">
-              <svg id="toggleTimerIcon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
-              </svg>
-              <span id="toggleTimerText">Start Detox Lap</span>
+          <div class="mt-7 flex flex-col gap-3">
+            <button id="openUrgeSurferBtn" type="button" class="btn btn-tide w-full justify-between text-left !px-5">
+              <span class="flex flex-col leading-tight">
+                <span>Urge to scroll?</span>
+                <span class="text-[0.82rem] font-medium opacity-85">Ride the 90-second wave</span>
+              </span>
+              <svg class="w-6 h-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 12c2.5-4 5-4 7.5 0s5 4 7.5 0 3-3 5-2"/><path d="M2 18c2.5-4 5-4 7.5 0s5 4 7.5 0 3-3 5-2" opacity=".5"/></svg>
             </button>
 
-            <!-- Relapse & Reflect Button (Primary action when running, replacing the reset button) -->
-            <button id="relapseBtn" class="hidden w-full min-h-[50px] py-3.5 px-6 rounded-2xl font-semibold text-sm sm:text-base items-center justify-center gap-2.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-200 border border-rose-500/35 transition active:scale-[0.98] cursor-pointer shadow-md shadow-rose-950/20">
-              <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <span>I Slipped — Bank Lap & Reflect</span>
+            <div>
+              <button id="toggleTimerBtn" type="button" class="btn btn-lamp w-full">
+                <svg id="toggleTimerIcon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.3 4.4a1 1 0 011.5-.86l8 5.6a1 1 0 010 1.72l-8 5.6a1 1 0 01-1.5-.86V4.4z"/></svg>
+                <span id="toggleTimerText">Start detox lap</span>
+              </button>
+              <button id="relapseBtn" type="button" class="btn btn-slip w-full hidden">
+                <span>I slipped. Save this lap and reflect</span>
+              </button>
+            </div>
+
+            <button id="openBackdateBtn" type="button" class="link-btn self-start" title="Change when this lap started">
+              Change start time
             </button>
           </div>
-        </div>
 
-        <!-- Backdate Start Time Drawer (Hidden by Default) -->
-        <div id="backdateDrawer" class="hidden max-w-xl mx-auto mt-5 pt-4 border-t border-slate-800/80">
-          <div class="bg-slate-950/80 rounded-2xl p-4 border border-slate-800">
-            <div class="flex items-center justify-between mb-2">
-              <label class="text-xs font-semibold text-slate-300">Adjust Current Lap Start Time</label>
-              <button id="closeBackdateBtn" class="text-xs text-slate-400 hover:text-white cursor-pointer">Cancel</button>
+          <!-- Backdate drawer -->
+          <div id="backdateDrawer" class="hidden mt-4 rule-top pt-5">
+            <div class="flex items-center justify-between mb-1">
+              <label for="customStartTimeInput" class="field-label">Start time for this lap</label>
+              <button id="closeBackdateBtn" type="button" class="link-btn">Close</button>
             </div>
-            <p class="text-[11px] text-slate-400 mb-3">If you stopped doomscrolling earlier today or yesterday, set your actual quit time here.</p>
+            <p class="field-hint mb-3">Stopped scrolling earlier today or yesterday? Set the time you actually quit.</p>
             <div class="flex gap-2">
-              <input type="datetime-local" id="customStartTimeInput" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-emerald-500" />
-              <button id="applyBackdateBtn" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs sm:text-sm transition cursor-pointer">
-                Apply Time
-              </button>
+              <input type="datetime-local" id="customStartTimeInput" class="field flex-1 min-w-0" />
+              <button id="applyBackdateBtn" type="button" class="btn btn-lamp !px-5">Apply</button>
             </div>
-            <div class="mt-3 pt-3 border-t border-slate-900 flex justify-end">
-              <button id="resetTimerBtn" type="button" class="text-xs text-slate-500 hover:text-rose-400 transition cursor-pointer flex items-center gap-1.5" title="Discard current streak without reflection">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                <span id="resetTimerText">Discard lap & reset to 00:00</span>
+            <div class="mt-4 flex justify-end">
+              <button id="resetTimerBtn" type="button" class="link-btn" title="Discard the current lap without a reflection">
+                <span id="resetTimerText">Discard lap and reset to zero</span>
               </button>
             </div>
           </div>
         </div>
       </section>
-
     </div>
 
     <!-- =================================================================== -->
-    <!-- TAB VIEW 2: PATTERNS & HEATMAP (Behavioral Analytics)              -->
+    <!-- VIEW 2: PATTERNS                                                    -->
     <!-- =================================================================== -->
-    <div id="view-analytics" class="hidden space-y-8">
+    <div id="view-analytics" class="hidden space-y-14">
 
-      <!-- SUMMARY KPI CARDS (Moved from Focus tab for clean focus) -->
-      <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <!-- KPI 1: Total Clean Time -->
-        <div class="glass-card rounded-2xl p-4 sm:p-5">
-          <div class="text-slate-400 text-[11px] font-semibold tracking-wider uppercase mb-1">Total Clean Time</div>
-          <div id="kpiTotalCleanTime" class="font-mono text-xl sm:text-2xl font-bold text-white tabular-nums">0.0 hrs</div>
-          <p id="kpiTotalCleanSub" class="text-[11px] text-slate-500 mt-1">Across all laps + active streak</p>
+      <h2 class="title">Your numbers</h2>
+
+      <!-- Ledger: four totals in one open row -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6 -mt-6">
+        <div>
+          <div id="kpiTotalCleanTime" class="stat-num">0.0 hrs</div>
+          <div class="text-ink font-semibold mt-2">Total clean time</div>
+          <p id="kpiTotalCleanSub" class="text-mute text-sm">Across all laps and the active streak</p>
         </div>
-
-        <!-- KPI 2: Longest Lap (PB) -->
-        <div class="glass-card rounded-2xl p-4 sm:p-5">
-          <div class="text-slate-400 text-[11px] font-semibold tracking-wider uppercase mb-1">Personal Best</div>
-          <div id="kpiLongestLap" class="font-mono text-xl sm:text-2xl font-bold text-amber-300 tabular-nums">0.0 hrs</div>
-          <p id="kpiLongestLapSub" class="text-[11px] text-slate-500 mt-1">Best single social-free lap</p>
+        <div>
+          <div id="kpiLongestLap" class="stat-num !text-lamp-text">0.0 hrs</div>
+          <div class="text-ink font-semibold mt-2">Personal best</div>
+          <p id="kpiLongestLapSub" class="text-mute text-sm">Longest single lap</p>
         </div>
-
-        <!-- KPI 3: Average Lap Duration -->
-        <div class="glass-card rounded-2xl p-4 sm:p-5">
-          <div class="text-slate-400 text-[11px] font-semibold tracking-wider uppercase mb-1">Average Lap</div>
-          <div id="kpiAverageLap" class="font-mono text-xl sm:text-2xl font-bold text-sky-300 tabular-nums">0.0 hrs</div>
-          <p id="kpiAverageLapSub" class="text-[11px] text-slate-500 mt-1">Mean duration between relapses</p>
+        <div>
+          <div id="kpiAverageLap" class="stat-num">0.0 hrs</div>
+          <div class="text-ink font-semibold mt-2">Average lap</div>
+          <p id="kpiAverageLapSub" class="text-mute text-sm">Typical time between slips</p>
         </div>
-
-        <!-- KPI 4: Total Relapses Logged -->
-        <div class="glass-card rounded-2xl p-4 sm:p-5">
-          <div class="text-slate-400 text-[11px] font-semibold tracking-wider uppercase mb-1">Relapses Logged</div>
-          <div id="kpiTotalRelapses" class="font-mono text-xl sm:text-2xl font-bold text-rose-300 tabular-nums">0</div>
-          <p id="kpiTotalRelapsesSub" class="text-[11px] text-slate-500 mt-1">Each log reveals your patterns</p>
+        <div>
+          <div id="kpiTotalRelapses" class="stat-num !text-ember-text">0</div>
+          <div class="text-ink font-semibold mt-2">Slips logged</div>
+          <p id="kpiTotalRelapsesSub" class="text-mute text-sm">Each one shows a pattern</p>
         </div>
       </section>
 
-      <!-- TIME RECLAIMED: REAL-WORLD IMPACT -->
-      <section class="glass-card rounded-3xl p-5 sm:p-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+      <!-- Time reclaimed -->
+      <section class="rule-top pt-8">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <div class="text-xs font-semibold uppercase tracking-wider text-emerald-400">
-              Time Reclaimed
-            </div>
-            <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">
-              Real-World Impact
-            </h2>
-            <p class="text-xs text-slate-400">Time saved from algorithmic feeds converted to real-world hours.</p>
+            <h2 class="title !text-[1.8rem]">Time reclaimed</h2>
+            <p class="lede mt-2">Hours you did not spend in feeds, in terms of what else they could hold.</p>
           </div>
-          <div class="px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-emerald-400 text-xs font-mono font-medium self-start sm:self-auto">
-            <span id="reclaimedTotalHoursText">0.0</span> hrs saved
-          </div>
+          <p class="text-ink font-semibold"><span id="reclaimedTotalHoursText" class="tabular-nums">0.0</span> hrs in total</p>
         </div>
 
-        <!-- 4 Impact Conversion Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-          <!-- Metric 1: Books Read -->
-          <div class="bg-slate-900/60 rounded-2xl p-4 border border-slate-800/80 flex flex-col items-center text-center">
-            <div id="statBooksEquivalent" class="font-mono text-xl sm:text-2xl font-bold text-white tabular-nums">0.0</div>
-            <div class="text-xs font-medium text-slate-300 mt-1">Books Read</div>
-            <p class="text-[10px] text-slate-500 mt-0.5">@ 5 hrs / ~300 pages</p>
-          </div>
-
-          <!-- Metric 2: Gym Sessions -->
-          <div class="bg-slate-900/60 rounded-2xl p-4 border border-slate-800/80 flex flex-col items-center text-center">
-            <div id="statWorkoutsEquivalent" class="font-mono text-xl sm:text-2xl font-bold text-emerald-400 tabular-nums">0</div>
-            <div class="text-xs font-medium text-slate-300 mt-1">Workouts</div>
-            <p class="text-[10px] text-slate-500 mt-0.5">@ 1 hr session</p>
-          </div>
-
-          <!-- Metric 3: Deep Focus Blocks -->
-          <div class="bg-slate-900/60 rounded-2xl p-4 border border-slate-800/80 flex flex-col items-center text-center">
-            <div id="statDeepFocusCycles" class="font-mono text-xl sm:text-2xl font-bold text-sky-400 tabular-nums">0</div>
-            <div class="text-xs font-medium text-slate-300 mt-1">Focus Blocks</div>
-            <p class="text-[10px] text-slate-500 mt-0.5">@ 90 min deep work</p>
-          </div>
-
-          <!-- Metric 4: Urges Surfed -->
-          <div class="bg-slate-900/60 rounded-2xl p-4 border border-slate-800/80 flex flex-col items-center text-center">
-            <div id="statUrgesDefeatedCount" class="font-mono text-xl sm:text-2xl font-bold text-amber-300 tabular-nums">0</div>
-            <div class="text-xs font-medium text-slate-300 mt-1">Urges Surfed</div>
-            <p class="text-[10px] text-slate-500 mt-0.5">Craving spikes defeated</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- PATTERN RECOGNITION & BEHAVIORAL ANALYTICS SECTION -->
-      <section class="space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-y-8 gap-x-6 mt-8">
           <div>
-            <div class="text-xs font-semibold uppercase tracking-wider text-rose-400">
-              Insights
-            </div>
-            <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">
-              Relapse Pattern Analysis
-            </h2>
-            <p class="text-xs text-slate-400">Understand your vulnerability windows and emotional triggers to break the habit loop.</p>
+            <div id="statBooksEquivalent" class="stat-num">0.0</div>
+            <div class="text-ink font-semibold mt-2">Books read</div>
+            <p class="text-mute text-sm">At 5 hours per ~300 pages</p>
           </div>
-
-          <!-- Demo Data Pre-fill Helper (For testing insights with sample laps) -->
-          <div class="flex items-center gap-2">
-            <button id="loadDemoDataBtn" class="text-xs px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 transition cursor-pointer">
-              Fill Sample Behavioral Data
-            </button>
-          </div>
-        </div>
-
-        <!-- 3-Column Behavioral Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Column 1: Vulnerability Clock -->
-          <div class="glass-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">
-                  Vulnerability Window
-                </span>
-                <span class="text-[11px] text-slate-500 font-mono">By Time of Day</span>
-              </div>
-              <p id="vulnerabilitySummaryText" class="text-xs text-slate-400 mb-4">
-                Log at least one relapse to see which time of day you are most vulnerable.
-              </p>
-
-              <!-- Bucket breakdown bars -->
-              <div id="timeOfDayBucketsContainer" class="space-y-3">
-                <!-- Rendered dynamically via JS -->
-              </div>
-            </div>
-
-            <!-- Tailored Advice Box based on peak danger time -->
-            <div id="vulnerabilityAdviceBox" class="mt-5 p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300">
-              <span class="font-semibold text-emerald-400">Strategy:</span>
-              <span class="text-slate-400 ml-1">Awareness is 80% of overcoming the habit loop. Keep logging honest reflections.</span>
-            </div>
-          </div>
-
-          <!-- Column 2: Top Triggers & Relapse Apps -->
-          <div class="glass-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">
-                  Pre-Relapse Triggers
-                </span>
-                <span class="text-[11px] text-slate-500 font-mono">Top Culprits</span>
-              </div>
-
-              <!-- Top Triggers list -->
-              <div id="topTriggersContainer" class="space-y-3">
-                <p class="text-xs text-slate-500 py-4 text-center">No relapse trigger data yet.</p>
-              </div>
-
-              <!-- Platform Breakdown Pills -->
-              <div class="mt-5 pt-4 border-t border-slate-800">
-                <span class="text-xs font-semibold text-slate-300 block mb-2">Relapse Platforms / Sites:</span>
-                <div id="topPlatformsContainer" class="flex flex-wrap gap-1.5">
-                  <span class="text-xs text-slate-500">None logged yet</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-4 p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-400">
-              <span class="text-rose-400 font-medium">Tip:</span> pick your top trigger above and plan one physical-friction fix for it, such as the phone in another room, an app blocker, or a replacement action.
-            </div>
-          </div>
-
-          <!-- Column 3: The Emotional Shift (Before vs After) -->
-          <div class="glass-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">
-                  Emotional Shift
-                </span>
-                <span class="text-[11px] text-slate-500 font-mono">Before vs After</span>
-              </div>
-              <p class="text-xs text-slate-400 mb-3">
-                How you felt right before relapsing vs. how you felt immediately after.
-              </p>
-
-              <!-- Emotional transition cards -->
-              <div id="emotionalPairsContainer" class="space-y-2.5">
-                <p class="text-xs text-slate-500 py-4 text-center">No emotional pairs logged yet.</p>
-              </div>
-            </div>
-
-            <!-- Insight quote -->
-            <div class="mt-4 p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300">
-              <div id="emotionInsightText">
-                <span class="text-amber-300 font-semibold">Reminder:</span> Social scrolling promises relief from stress or boredom, but almost invariably delivers guilt, numbness, or fatigue.
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 30-DAY DETOX CONSISTENCY HEATMAP -->
-      <section class="glass-card rounded-3xl p-5 sm:p-7 space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div class="text-xs font-semibold uppercase tracking-wider text-emerald-400">
-              Momentum
-            </div>
-            <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">
-              30-Day Activity Heatmap
-            </h2>
-            <p class="text-xs text-slate-400">Visual proof of your daily momentum. Every hour avoided turns into visual clean streak power.</p>
+            <div id="statWorkoutsEquivalent" class="stat-num">0</div>
+            <div class="text-ink font-semibold mt-2">Workouts</div>
+            <p class="text-mute text-sm">At one hour each</p>
           </div>
-          <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
-            <span class="inline-block w-3 h-3 rounded-sm bg-slate-900 border border-slate-800"></span> 0h
-            <span class="inline-block w-3 h-3 rounded-sm bg-emerald-950 border border-emerald-800/40 ml-1"></span> &lt;8h
-            <span class="inline-block w-3 h-3 rounded-sm bg-emerald-800 border border-emerald-600/50 ml-1"></span> &lt;16h
-            <span class="inline-block w-3 h-3 rounded-sm bg-emerald-500 border border-emerald-400 ml-1"></span> 16-24h
+          <div>
+            <div id="statDeepFocusCycles" class="stat-num">0</div>
+            <div class="text-ink font-semibold mt-2">Focus blocks</div>
+            <p class="text-mute text-sm">At 90 minutes of deep work</p>
           </div>
-        </div>
-
-        <!-- 30-Day Squares Grid -->
-        <div class="overflow-x-auto pb-1">
-          <div id="consistencyHeatmapGrid" class="grid grid-cols-5 sm:grid-cols-10 md:grid-cols-[repeat(15,minmax(0,1fr))] gap-2 min-w-[320px]">
-            <!-- Populated dynamically via JS -->
+          <div>
+            <div id="statUrgesDefeatedCount" class="stat-num !text-tide-text">0</div>
+            <div class="text-ink font-semibold mt-2">Urges surfed</div>
+            <p class="text-mute text-sm">Cravings you rode out</p>
           </div>
         </div>
       </section>
 
+      <!-- Relapse patterns -->
+      <section class="rule-top pt-8">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+          <div>
+            <h2 class="title !text-[1.8rem]">When and why you slip</h2>
+            <p class="lede mt-2">Your risky hours and triggers, so you can plan for them.</p>
+          </div>
+          <button id="loadDemoDataBtn" type="button" class="btn btn-quiet btn-sm self-start sm:self-auto">Fill sample data</button>
+        </div>
+
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 md:divide-x md:divide-line gap-10 md:gap-0">
+          <!-- Risky hours -->
+          <div class="md:pr-8 flex flex-col">
+            <h3 class="font-semibold text-ink text-lg">Risky hours</h3>
+            <p id="vulnerabilitySummaryText" class="text-mute text-sm mt-1 mb-5">
+              Log a slip to see which time of day is hardest for you.
+            </p>
+            <div id="timeOfDayBucketsContainer" class="space-y-4"></div>
+            <div id="vulnerabilityAdviceBox" class="mt-6 border-l-4 border-lamp pl-4 text-sm">
+              <span class="font-semibold text-ink">Plan:</span>
+              <span class="text-mute">Awareness is most of the work. Keep logging honest reflections.</span>
+            </div>
+          </div>
+
+          <!-- Triggers -->
+          <div class="md:px-8 flex flex-col">
+            <h3 class="font-semibold text-ink text-lg">Triggers</h3>
+            <p class="text-mute text-sm mt-1 mb-5">What was going on right before you slipped.</p>
+            <div id="topTriggersContainer" class="space-y-4">
+              <p class="text-mute text-sm">No trigger data yet.</p>
+            </div>
+            <div class="mt-6 pt-5 rule-top">
+              <span class="field-label !text-sm mb-2">Where you slipped</span>
+              <div id="topPlatformsContainer" class="flex flex-wrap gap-2">
+                <span class="text-mute text-sm">None logged yet</span>
+              </div>
+            </div>
+            <div class="mt-6 border-l-4 border-ember pl-4 text-sm">
+              <span class="font-semibold text-ink">Try:</span>
+              <span class="text-mute">add friction to your top trigger: phone in another room, an app blocker, or a replacement action.</span>
+            </div>
+          </div>
+
+          <!-- Feelings -->
+          <div class="md:pl-8 flex flex-col">
+            <h3 class="font-semibold text-ink text-lg">Before and after</h3>
+            <p class="text-mute text-sm mt-1 mb-5">How you felt just before a slip, and right after.</p>
+            <div id="emotionalPairsContainer" class="space-y-3">
+              <p class="text-mute text-sm">No feelings logged yet.</p>
+            </div>
+            <div class="mt-6 border-l-4 border-tide pl-4 text-sm">
+              <div id="emotionInsightText" class="text-mute">
+                <span class="font-semibold text-ink">Remember:</span> scrolling promises relief from stress or boredom, and mostly delivers guilt, numbness or fatigue.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Heatmap -->
+      <section class="rule-top pt-8">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+          <div>
+            <h2 class="title !text-[1.8rem]">Last 30 days</h2>
+            <p class="lede mt-2">Each square is a day. Brighter means more hours free of social media.</p>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-mute">
+            <span class="inline-block w-4 h-4 rounded bg-line"></span> 0h
+            <span class="inline-block w-4 h-4 rounded bg-lamp/30 ml-1"></span> under 8h
+            <span class="inline-block w-4 h-4 rounded bg-lamp/65 ml-1"></span> under 16h
+            <span class="inline-block w-4 h-4 rounded bg-lamp ml-1"></span> 16h or more
+          </div>
+        </div>
+        <div class="mt-6 overflow-x-auto pb-1">
+          <div id="consistencyHeatmapGrid" class="grid grid-cols-5 sm:grid-cols-10 md:grid-cols-[repeat(15,minmax(0,1fr))] gap-2 min-w-[300px]"></div>
+        </div>
+      </section>
     </div>
 
     <!-- =================================================================== -->
-    <!-- TAB VIEW 3: JOURNAL & MILESTONES (History & Milestones)             -->
+    <!-- VIEW 3: JOURNAL                                                     -->
     <!-- =================================================================== -->
-    <div id="view-journal" class="hidden space-y-8">
+    <div id="view-journal" class="hidden space-y-14">
 
-      <!-- MILESTONE UNLOCKS SECTION -->
-      <section class="glass-card rounded-3xl p-5 sm:p-7 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div class="text-xs font-semibold uppercase tracking-wider text-amber-400">
-              Milestones
-            </div>
-            <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">
-              Streak Achievements
-            </h2>
-            <p class="text-xs text-slate-400">Milestones unlocked by your longest single clean streak.</p>
-          </div>
-        </div>
-
-        <!-- Milestone Badges Grid -->
-        <div id="milestonesContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          <!-- Populated dynamically via JS -->
-        </div>
+      <section>
+        <h2 class="title">Milestones</h2>
+        <p class="lede mt-2">Unlocked by your longest single lap.</p>
+        <div id="milestonesContainer" class="mt-7 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-8"></div>
       </section>
 
-      <!-- CHRONOLOGICAL LAP HISTORY & RELAPSE JOURNAL -->
-      <section class="glass-card rounded-3xl p-5 sm:p-7 space-y-5">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <section class="rule-top pt-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-5">
           <div>
-            <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-              <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Detox Lap History & Relapse Reflections
-            </h2>
-            <p class="text-xs sm:text-sm text-slate-400">Every completed detox lap, how many hours you avoided social media, and your reflection log.</p>
+            <h2 class="title !text-[1.8rem]">Lap history</h2>
+            <p class="lede mt-2">Every finished lap, with the reflection you wrote after it.</p>
           </div>
-
-          <!-- Search & Filter Controls -->
-          <div class="flex flex-wrap items-center gap-2.5">
-            <!-- Search Input -->
-            <div class="relative flex-1 sm:flex-initial">
-              <input
-                type="text"
-                id="searchLapsInput"
-                placeholder="Search triggers, emotions, notes..."
-                class="w-full sm:w-60 bg-slate-900/90 border border-slate-700/80 rounded-xl pl-8 pr-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-              />
-              <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-
-            <!-- Time of Day Filter -->
-            <select id="filterTimeBucketSelect" class="bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
-              <option value="ALL">All Times of Day</option>
-              <option value="Morning">Morning (6am–12pm)</option>
-              <option value="Afternoon">Afternoon (12pm–5pm)</option>
-              <option value="Evening">Evening (5pm–10pm)</option>
-              <option value="Late Night">Late Night (10pm–6am)</option>
+          <div class="flex flex-wrap items-center gap-3">
+            <label class="sr-only" for="searchLapsInput">Search laps</label>
+            <input type="text" id="searchLapsInput" placeholder="Search triggers, feelings, notes" class="field w-full sm:w-64" />
+            <label class="sr-only" for="filterTimeBucketSelect">Filter by time of day</label>
+            <select id="filterTimeBucketSelect" class="field w-full sm:w-auto">
+              <option value="ALL">Any time of day</option>
+              <option value="Morning">Morning (6am to 12pm)</option>
+              <option value="Afternoon">Afternoon (12pm to 5pm)</option>
+              <option value="Evening">Evening (5pm to 10pm)</option>
+              <option value="Late Night">Late night (10pm to 6am)</option>
             </select>
           </div>
         </div>
-
-        <!-- Lap Timeline List -->
-        <div id="lapHistoryList" class="space-y-3">
-          <!-- Populated dynamically via JS -->
-        </div>
+        <div id="lapHistoryList" class="mt-8 rail space-y-9"></div>
       </section>
-
     </div>
-
   </main>
 
-  <!-- Footer (Desktop only, minimal) -->
-  <footer class="hidden sm:block relative z-10 border-t border-slate-900/80 py-6 mt-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 text-xs text-slate-500">
-      <div><span class="text-slate-400 font-medium">Gaining Our Life Back</span> — Mindful Screen Recovery</div>
-      <div class="flex items-center gap-2">
-        <span class="text-slate-600">ID:</span>
-        <span id="footerUserId" class="text-slate-500 font-mono text-[11px] select-all">Initializing...</span>
-      </div>
+  <!-- Footer -->
+  <footer class="hidden sm:block border-t border-line py-6">
+    <div class="max-w-6xl mx-auto px-6 flex items-center justify-between gap-3 text-sm text-faint">
+      <div><span class="text-mute font-medium">Gaining Our Life Back</span>, screen recovery one lap at a time</div>
+      <div>Sync <span id="footerUserId" class="select-all tabular-nums">Initializing</span></div>
     </div>
   </footer>
 
   <!-- ===================================================================== -->
-  <!-- MODAL 1: RELAPSE LOGGING & HONEST REFLECTION FORM                    -->
+  <!-- SHEET 1: LOG A SLIP                                                   -->
   <!-- ===================================================================== -->
-  <div id="relapseModal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-5 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
-    <div class="relative w-full max-w-2xl bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh]">
-      <!-- Mobile Pull Indicator Bar -->
-      <div class="w-10 h-1 bg-slate-700/80 rounded-full mx-auto my-2.5 sm:hidden"></div>
-      <!-- Header -->
-      <div class="px-5 sm:px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-          </div>
-          <div>
-            <h3 class="text-base sm:text-lg font-bold text-white">Log Relapse Reflection</h3>
-            <p class="text-xs text-slate-400">No shame. Every relapse documented weakens the habit loop for next time.</p>
-          </div>
+  <div id="relapseModal" class="scrim hidden" role="dialog" aria-modal="true" aria-labelledby="relapseTitle">
+    <div class="sheet max-w-2xl">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head">
+        <div>
+          <h3 id="relapseTitle" class="title !text-[1.7rem]">Log a slip</h3>
+          <p class="text-mute text-sm mt-1.5">No shame. Writing it down is how the pattern loses its grip.</p>
         </div>
-        <button id="closeRelapseModalBtn" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        <button id="closeRelapseModalBtn" type="button" class="icon-btn shrink-0" aria-label="Close">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
-      <!-- Scrollable Form Body -->
-      <form id="relapseForm" class="p-5 sm:px-6 overflow-y-auto space-y-6 flex-1">
-        <!-- Captured Lap Stats Summary -->
-        <div class="grid grid-cols-2 gap-3 p-4 rounded-2xl bg-slate-950/70 border border-slate-800">
+      <form id="relapseForm" class="space-y-7">
+        <!-- What this lap banked -->
+        <div class="grid grid-cols-2 gap-5 pb-6 border-b border-line">
           <div>
-            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Lap Clean Duration</span>
-            <div class="flex items-baseline gap-2 mt-0.5">
-              <span id="modalCapturedDurationText" class="font-mono text-2xl font-bold text-emerald-400">0h 00m</span>
-              <span id="modalCapturedHoursDecimal" class="font-mono text-xs text-slate-400">(0.00 hrs)</span>
+            <span class="field-hint block">This lap lasted</span>
+            <div class="flex items-baseline gap-2 mt-1 flex-wrap">
+              <span id="modalCapturedDurationText" class="numeral text-lamp-text text-[2.4rem]">0h 00m</span>
+              <span id="modalCapturedHoursDecimal" class="field-hint">(0.00 hrs)</span>
             </div>
-            <div class="mt-1 flex items-center gap-1.5 text-[11px] text-slate-400">
-              <span>Adjust hours:</span>
-              <input type="number" id="manualHoursOverride" step="0.1" min="0" class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-white focus:outline-none focus:border-emerald-500" />
-            </div>
+            <label class="field-hint mt-2 flex items-center gap-2">
+              Adjust hours
+              <input type="number" id="manualHoursOverride" step="0.1" min="0" class="field !w-24 !py-1.5 !px-2.5 !text-sm" />
+            </label>
           </div>
-
           <div>
-            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Relapse Time & Window</span>
-            <div id="modalCapturedTimestampText" class="text-sm font-semibold text-white mt-1">Today, 3:45 PM</div>
-            <div class="mt-1">
-              <span id="modalCapturedBucketBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                Afternoon
-              </span>
+            <span class="field-hint block">When you slipped</span>
+            <div id="modalCapturedTimestampText" class="font-semibold text-ink mt-1.5">Today, 3:45 PM</div>
+            <div class="mt-2">
+              <span id="modalCapturedBucketBadge" class="tag tag-ember">Afternoon</span>
             </div>
           </div>
         </div>
 
-        <!-- Relapse App / Platform Selector -->
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
-            Which app or site triggered the relapse? <span class="text-rose-400">*</span>
-          </label>
-          <div id="platformPillsContainer" class="flex flex-wrap gap-2">
-            <!-- Platform chips rendered via JS -->
-          </div>
-          <div id="customPlatformContainer" class="mt-2.5 hidden">
-            <input
-              type="text"
-              id="customPlatformInput" maxlength="60"
-              placeholder="Enter custom platform or website name..."
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-            />
+          <span class="field-label mb-3">Which app or site pulled you in? <span class="text-ember-text" aria-hidden="true">*</span></span>
+          <div id="platformPillsContainer" class="flex flex-wrap gap-2"></div>
+          <div id="customPlatformContainer" class="mt-3 hidden">
+            <input type="text" id="customPlatformInput" maxlength="60" placeholder="App or website name" aria-label="Custom app or site name" class="field" />
           </div>
         </div>
 
-        <!-- Primary Triggers (Multi-Select Chips) -->
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
-            What was the root trigger? (Select all that apply)
-          </label>
-          <div id="triggerPillsContainer" class="flex flex-wrap gap-2 mb-3">
-            <!-- Trigger chips rendered via JS -->
-          </div>
-          <input
-            type="text"
-            id="whatHappenedBeforeInput" maxlength="300"
-            placeholder="Context: Where were you? (e.g. In bed before sleep, stuck on hard coding bug, waiting for Uber)..."
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-          />
+          <span class="field-label mb-3">What set it off? <span class="field-hint font-normal">Choose all that apply</span></span>
+          <div id="triggerPillsContainer" class="flex flex-wrap gap-2 mb-3"></div>
+          <input type="text" id="whatHappenedBeforeInput" maxlength="300" placeholder="Where were you? What was going on?" aria-label="What happened before" class="field" />
         </div>
 
-        <!-- Emotional Shift (Before vs After) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Feeling Right Before -->
-          <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800">
-            <label class="block text-xs font-bold text-slate-200 mb-1.5 flex items-center gap-1.5">
-              <span>⚡</span> How did you feel RIGHT BEFORE?
-            </label>
-            <div id="feelingBeforePillsContainer" class="flex flex-wrap gap-1.5 mb-3">
-              <!-- Rendered via JS -->
-            </div>
-            <input
-              type="text"
-              id="feelingBeforeNoteInput" maxlength="300"
-              placeholder="Optional notes on before mindset..."
-              class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-            />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-7">
+          <div>
+            <span class="field-label mb-3">How did you feel right before?</span>
+            <div id="feelingBeforePillsContainer" class="flex flex-wrap gap-2 mb-3"></div>
+            <input type="text" id="feelingBeforeNoteInput" maxlength="300" placeholder="Anything to add (optional)" aria-label="Notes on how you felt before" class="field" />
           </div>
-
-          <!-- Feeling Immediately After -->
-          <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800">
-            <label class="block text-xs font-bold text-slate-200 mb-1.5 flex items-center gap-1.5">
-              <span>🛑</span> How do you feel NOW (AFTER)?
-            </label>
-            <div id="feelingAfterPillsContainer" class="flex flex-wrap gap-1.5 mb-3">
-              <!-- Rendered via JS -->
-            </div>
-            <input
-              type="text"
-              id="feelingAfterNoteInput" maxlength="300"
-              placeholder="Optional notes on after feeling..."
-              class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-            />
+          <div>
+            <span class="field-label mb-3">How do you feel now?</span>
+            <div id="feelingAfterPillsContainer" class="flex flex-wrap gap-2 mb-3"></div>
+            <input type="text" id="feelingAfterNoteInput" maxlength="300" placeholder="Anything to add (optional)" aria-label="Notes on how you feel now" class="field" />
           </div>
         </div>
 
-        <!-- Relapse Duration Estimate -->
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
-            Approximate time spent scrolling this relapse:
-          </label>
-          <div id="relapseDurationPillsContainer" class="flex flex-wrap gap-1.5">
-            <!-- Duration chips rendered via JS -->
-          </div>
+          <span class="field-label mb-3">About how long did you scroll?</span>
+          <div id="relapseDurationPillsContainer" class="flex flex-wrap gap-2"></div>
         </div>
 
-        <!-- Plan for Next Time -->
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
-            What will you do differently next time this trigger strikes?
-          </label>
-          <textarea
-            id="nextTimePlanInput" maxlength="300"
-            rows="2"
-            placeholder="e.g. Put phone in drawer, open Urge Surfer 90s, do 20 pushups, drink a tall glass of cold water..."
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-          ></textarea>
+          <label for="nextTimePlanInput" class="field-label mb-2">What will you do differently next time?</label>
+          <textarea id="nextTimePlanInput" maxlength="300" rows="2" placeholder="Phone in the drawer, open the 90-second wave, twenty push-ups, a tall glass of cold water" class="field"></textarea>
         </div>
 
-        <!-- Auto restart checkbox -->
-        <div class="flex items-center gap-2.5 pt-2">
-          <input type="checkbox" id="autoRestartNextLapCheckbox" checked class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-emerald-500" />
-          <label for="autoRestartNextLapCheckbox" class="text-xs text-slate-300">
-            Automatically start Lap #<span id="nextLapNumberText">2</span> immediately upon saving
-          </label>
-        </div>
+        <label for="autoRestartNextLapCheckbox" class="flex items-start gap-3 text-ink cursor-pointer">
+          <input type="checkbox" id="autoRestartNextLapCheckbox" checked class="mt-1 w-5 h-5 accent-[rgb(var(--c-lamp))] shrink-0" />
+          <span>Start lap <span id="nextLapNumberText">2</span> as soon as I save</span>
+        </label>
 
-        <!-- Action Buttons -->
-        <div class="pt-3 border-t border-slate-800 flex items-center justify-end gap-3">
-          <button type="button" id="cancelRelapseModalBtn" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-medium transition cursor-pointer">
-            Cancel
-          </button>
-          <button type="submit" id="saveRelapseSubmitBtn" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs sm:text-sm shadow-lg shadow-emerald-950/50 transition cursor-pointer">
-            Save Reflection & Reset Lap
-          </button>
+        <div class="pt-5 border-t border-line flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+          <button type="button" id="cancelRelapseModalBtn" class="btn btn-quiet">Cancel</button>
+          <button type="submit" id="saveRelapseSubmitBtn" class="btn btn-lamp">Save reflection and reset lap</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODAL 2: BACKUP, EXPORT & RESTORE DATA MODAL                         -->
+  <!-- SHEET 2: BACKUP AND EXPORT                                            -->
   <!-- ===================================================================== -->
-  <div id="backupModal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-md">
-    <div class="w-full max-w-lg bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-      <!-- Mobile Pull Indicator Bar -->
-      <div class="w-10 h-1 bg-slate-700/80 rounded-full mx-auto mb-3 sm:hidden"></div>
-      <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-5">
-        <div class="flex items-center gap-2.5">
-          <span class="text-xl">💾</span>
-          <div>
-            <h3 class="text-base font-bold text-white">Backup, Export & Restore</h3>
-            <p class="text-xs text-slate-400">Your data belongs to you. Zero vendor lock-in.</p>
-          </div>
+  <div id="backupModal" class="scrim hidden" role="dialog" aria-modal="true" aria-labelledby="backupTitle">
+    <div class="sheet max-w-lg">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head">
+        <div>
+          <h3 id="backupTitle" class="title !text-[1.7rem]">Backup and export</h3>
+          <p class="text-mute text-sm mt-1.5">Your data belongs to you.</p>
         </div>
-        <button id="closeBackupModalBtn" class="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white cursor-pointer">✕</button>
+        <button id="closeBackupModalBtn" type="button" class="icon-btn shrink-0" aria-label="Close">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
       </div>
 
-      <div class="space-y-4 text-xs text-slate-300">
-        <!-- Cloud Sync State Summary -->
-        <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
-          <span>Cloud Sync Status:</span>
-          <span id="backupModalCloudState" class="font-semibold text-emerald-400">Connected & Synced</span>
-        </div>
-        <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
-          <span>Total Recorded Laps:</span>
-          <span id="backupModalLapCount" class="font-mono font-semibold text-white">0</span>
-        </div>
+      <div class="space-y-6">
+        <dl class="divide-y divide-line border-y border-line text-[0.95rem]">
+          <div class="flex items-center justify-between py-3">
+            <dt class="text-mute">Cloud sync</dt>
+            <dd id="backupModalCloudState" class="font-semibold text-ink">Connected and synced</dd>
+          </div>
+          <div class="flex items-center justify-between py-3">
+            <dt class="text-mute">Laps recorded</dt>
+            <dd id="backupModalLapCount" class="font-semibold text-ink tabular-nums">0</dd>
+          </div>
+        </dl>
 
-        <!-- Export Buttons -->
-        <div class="grid grid-cols-2 gap-3 pt-2">
-          <button id="exportCsvBtn" class="p-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-left transition cursor-pointer group">
-            <div class="font-bold text-white group-hover:text-emerald-400 transition flex items-center gap-1.5">📊 Export CSV</div>
-            <p class="text-[11px] text-slate-400 mt-1">Open in Excel, Google Sheets, or Notion</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button id="exportCsvBtn" type="button" class="btn btn-quiet !justify-start !items-start flex-col !gap-1 !py-3.5 text-left">
+            <span class="font-semibold">Export CSV</span>
+            <span class="text-mute text-[0.82rem] font-normal">For Excel, Sheets or Notion</span>
           </button>
-
-          <button id="exportJsonBtn" class="p-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-left transition cursor-pointer group">
-            <div class="font-bold text-white group-hover:text-emerald-400 transition flex items-center gap-1.5">📦 Export JSON Backup</div>
-            <p class="text-[11px] text-slate-400 mt-1">Full state backup for restoring anytime</p>
+          <button id="exportJsonBtn" type="button" class="btn btn-quiet !justify-start !items-start flex-col !gap-1 !py-3.5 text-left">
+            <span class="font-semibold">Export JSON backup</span>
+            <span class="text-mute text-[0.82rem] font-normal">Everything, restorable any time</span>
           </button>
         </div>
 
-        <!-- Copy Summary Report -->
-        <button id="copyMarkdownReportBtn" class="w-full py-3 px-4 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
-          <span>Copy Formatted Markdown Progress Report</span>
-        </button>
+        <button id="copyMarkdownReportBtn" type="button" class="btn btn-lamp w-full">Copy progress report</button>
 
-        <!-- Restore JSON Backup -->
-        <div class="pt-4 border-t border-slate-800">
-          <label class="block text-xs font-semibold text-slate-300 mb-2">Restore from JSON File</label>
+        <div class="pt-5 border-t border-line">
+          <span class="field-label mb-2">Restore from a backup</span>
           <input type="file" id="importJsonFileInput" accept=".json,application/json" class="hidden" />
-          <button type="button" id="triggerImportJsonBtn" class="w-full py-3 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-medium transition cursor-pointer flex items-center justify-center gap-2">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-            <span>Upload & Restore JSON Backup File</span>
-          </button>
+          <button type="button" id="triggerImportJsonBtn" class="btn btn-quiet w-full">Choose a JSON backup file</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODAL 3: FIREBASE CONSOLE RULES SETUP HELPER                         -->
+  <!-- SHEET 3: CLOUD SETUP AND SECURITY RULES                               -->
   <!-- ===================================================================== -->
-  <div id="rulesHelperModal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
-    <div class="w-full max-w-xl bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-      <!-- Mobile Pull Indicator Bar -->
-      <div class="w-10 h-1 bg-slate-700/80 rounded-full mx-auto mb-3 sm:hidden"></div>
-      <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
-        <div class="flex items-center gap-2.5">
-          <span class="text-xl">🔒</span>
-          <div>
-            <h3 class="text-base font-bold text-white">Firebase Security Rules & Cloud Setup</h3>
-            <p class="text-xs text-slate-400">Step-by-step instructions to allow cloud syncing across devices.</p>
-          </div>
+  <div id="rulesHelperModal" class="scrim hidden" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+    <div class="sheet max-w-xl">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head">
+        <div>
+          <h3 id="rulesTitle" class="title !text-[1.7rem]">Cloud setup</h3>
+          <p class="text-mute text-sm mt-1.5">Three steps to sync across your devices.</p>
         </div>
-        <button id="closeRulesHelperModalBtn" class="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white cursor-pointer">✕</button>
+        <button id="closeRulesHelperModalBtn" type="button" class="icon-btn shrink-0" aria-label="Close">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
       </div>
 
-      <div class="space-y-4 text-xs text-slate-300 max-h-[75vh] overflow-y-auto pr-1">
-        <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
-          <h4 class="font-bold text-slate-200 mb-1">Step 1: Enable Anonymous & Google Auth</h4>
-          <p class="text-slate-400">Go to Firebase Console &gt; Build &gt; Authentication &gt; Sign-in method &gt; Enable Anonymous and Google.</p>
-        </div>
+      <ol class="space-y-8 text-[0.95rem]">
+        <li>
+          <h4 class="font-semibold text-ink">1. Turn on Google sign-in</h4>
+          <p class="text-mute mt-1">Firebase Console &gt; Build &gt; Authentication &gt; Sign-in method &gt; enable Google.</p>
+        </li>
 
-        <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
-          <div class="flex items-center justify-between mb-2">
-            <h4 class="font-bold text-slate-200">Step 2: Publish Firestore Rules</h4>
-            <button id="copyFirestoreRulesBtn" type="button" class="px-3 py-1 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs transition cursor-pointer">
-              Copy Rules
-            </button>
+        <li>
+          <div class="flex items-center justify-between gap-3 mb-2">
+            <h4 class="font-semibold text-ink">2. Publish the Firestore rules</h4>
+            <button id="copyFirestoreRulesBtn" type="button" class="btn btn-lamp btn-sm">Copy rules</button>
           </div>
-          <p class="text-slate-400 mb-2">In Firebase Console &gt; Build &gt; Firestore Database &gt; Rules, paste these exact rules:</p>
-          <pre id="firestoreRulesCode" class="bg-slate-900 p-3.5 rounded-xl border border-slate-700 font-mono text-[11px] text-emerald-300 overflow-x-auto select-all">rules_version = '2';
+          <p class="text-mute mb-3">In Firebase Console &gt; Build &gt; Firestore Database &gt; Rules, paste these exact rules.</p>
+          <pre id="firestoreRulesCode" class="bg-surface border border-line rounded-2xl p-4 text-[0.75rem] leading-relaxed text-ink overflow-x-auto select-all scroll-quiet" style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;">rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /artifacts/{appId}/users/{userId} {
@@ -969,124 +651,97 @@ service cloud.firestore {
     }
   }
 }</pre>
-        </div>
+        </li>
 
-        <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
-          <div class="flex items-center justify-between mb-2">
-            <h4 class="font-bold text-slate-200">Step 3: Add Authorized Domain in Firebase</h4>
-            <button id="copyDomainBtn" type="button" onclick="navigator.clipboard.writeText('meeransahib.github.io'); this.textContent='Copied!';" class="px-3 py-1 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs transition cursor-pointer">
-              Copy Domain
-            </button>
+        <li>
+          <div class="flex items-center justify-between gap-3 mb-2">
+            <h4 class="font-semibold text-ink">3. Authorize your domain</h4>
+            <button id="copyDomainBtn" type="button" onclick="navigator.clipboard.writeText('meeransahib.github.io'); this.textContent='Copied';" class="btn btn-lamp btn-sm">Copy domain</button>
           </div>
-          <p class="text-slate-400 mb-2">Go to Firebase Console &gt; Build &gt; Authentication &gt; <strong>Settings</strong> tab &gt; <strong>Authorized domains</strong> &gt; Click <strong>Add domain</strong> and enter:</p>
-          <pre class="bg-slate-900 p-2.5 rounded-xl border border-slate-700 font-mono text-xs text-emerald-300 select-all">meeransahib.github.io</pre>
-          <p class="text-[11px] text-amber-300 mt-2">💡 In Brave browser, click the lock/shield icon in the address bar to allow pop-ups for this site, or allow automatic redirect sign-in.</p>
-        </div>
-      </div>
+          <p class="text-mute mb-3">Authentication &gt; <strong class="text-ink">Settings</strong> &gt; <strong class="text-ink">Authorized domains</strong> &gt; <strong class="text-ink">Add domain</strong>, then enter:</p>
+          <pre class="bg-surface border border-line rounded-2xl px-4 py-3 text-sm text-ink select-all" style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;">meeransahib.github.io</pre>
+          <p class="text-mute text-sm mt-3">In Brave, tap the shield icon in the address bar and allow pop-ups for this site, or let sign-in redirect.</p>
+        </li>
+      </ol>
     </div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODAL 4: URGE SURFER 90-SECOND CRAVING LIFESAVER                     -->
+  <!-- SHEET 4: THE 90-SECOND WAVE                                           -->
   <!-- ===================================================================== -->
-  <div id="urgeSurferModal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-5 bg-slate-950/85 backdrop-blur-md overflow-y-auto">
-    <div class="relative w-full max-w-lg bg-slate-900 border-t sm:border border-amber-500/30 rounded-t-3xl sm:rounded-3xl shadow-2xl p-5 sm:p-8 text-center max-h-[92vh] overflow-y-auto">
-      <!-- Mobile Pull Indicator Bar -->
-      <div class="w-10 h-1 bg-slate-700/80 rounded-full mx-auto mb-3 sm:hidden"></div>
-      <!-- Close Button -->
-      <div class="flex justify-between items-center mb-4">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-          <span>🌊 Urge Surfing Technique</span>
-        </div>
-        <button id="closeUrgeSurferBtn" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer">✕</button>
+  <div id="urgeSurferModal" class="scrim hidden" role="dialog" aria-modal="true" aria-labelledby="urgeTitle">
+    <div class="sheet max-w-lg !pt-0 overflow-x-hidden">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head">
+        <h3 id="urgeTitle" class="title !text-[1.7rem]">Ride the wave</h3>
+        <button id="closeUrgeSurferBtn" type="button" class="icon-btn shrink-0" aria-label="Close">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
       </div>
 
-      <!-- Breathing Ring & Countdown Display -->
-      <div class="py-3 sm:py-4 flex flex-col items-center justify-center">
-        <div class="relative w-36 h-36 sm:w-44 sm:h-44 rounded-full flex items-center justify-center border-4 border-emerald-500/40 bg-slate-950/80 shadow-2xl animate-breathe">
-          <div class="flex flex-col items-center justify-center">
-            <span id="urgeTimerDisplay" class="font-mono text-3xl sm:text-4xl font-extrabold text-white tracking-tight">01:30</span>
-            <span id="urgeBreathingCue" class="text-xs uppercase tracking-wider text-emerald-300 font-semibold mt-1 transition-all duration-500">Inhale Slowly...</span>
+      <div class="flex flex-col items-center py-3">
+        <div class="breath">
+          <div class="breath-core">
+            <span id="urgeTimerDisplay" class="numeral text-ink text-[3.4rem]">01:30</span>
+            <span id="urgeBreathingCue" class="cue mt-2">Breathe in slowly</span>
           </div>
         </div>
       </div>
 
-      <!-- Neurochemistry Science Explanation -->
-      <p class="text-xs text-slate-400 mt-3 sm:mt-4 leading-relaxed max-w-sm mx-auto">
-        Urges tend to rise, peak, and fade when you ride them out instead of acting on them. Breathe gently in and out with the pulsing ring for the next <strong>90 seconds</strong>.
+      <div class="wave" aria-hidden="true"></div>
+      <div class="wave wave-b" aria-hidden="true"></div>
+
+      <p class="text-mute text-[0.95rem] mt-5">
+        An urge rises, peaks and fades if you ride it out instead of acting on it. Breathe with the circle for the next <strong class="text-ink">90 seconds</strong>.
       </p>
 
-      <!-- Personalized Reality Check Reminder -->
-      <div class="mt-4 p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 text-left">
-        <div class="text-[11px] font-semibold text-amber-400 uppercase tracking-wider mb-1">Your Honest Reality Check:</div>
-        <p id="urgeRealityCheckText" class="text-xs text-slate-200 leading-relaxed">
-          Remember how you feel every time you scroll: guilty, drained, and distracted. Your real life is waiting on the other side of this 90-second wave.
+      <div class="mt-6 border-l-4 border-tide pl-4">
+        <div class="font-semibold text-ink text-sm">Your honest reality check</div>
+        <p id="urgeRealityCheckText" class="text-mute text-[0.95rem] mt-1">
+          Remember how you feel every time you scroll: guilty, drained and distracted. Your real life is waiting on the other side of this wave.
         </p>
       </div>
 
-      <!-- Replacement micro-habits -->
-      <div class="mt-4 text-left">
-        <div class="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-2">Do one of these while the wave passes:</div>
-        <ul class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-300">
-          <li class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">💧 Drink a glass of cold water</li>
-          <li class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">🙆 Stand up and stretch</li>
-          <li class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">🪟 Look out a window for 30 seconds</li>
+      <div class="mt-6">
+        <div class="font-semibold text-ink text-sm mb-2">While the wave passes, do one of these</div>
+        <ul class="divide-y divide-line border-y border-line text-[0.95rem] text-ink">
+          <li class="py-2.5">Drink a glass of cold water</li>
+          <li class="py-2.5">Stand up and stretch</li>
+          <li class="py-2.5">Look out of a window for 30 seconds</li>
         </ul>
       </div>
 
-      <!-- Urge Surfer Decision Buttons -->
-      <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 pb-safe">
-        <button type="button" id="urgeRelapsedBtn" class="w-full sm:w-auto px-4 py-3 rounded-xl bg-slate-900 hover:bg-rose-950/30 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-500/30 text-xs font-medium transition cursor-pointer">
-          I Couldn't Resist (Log Reflection)
-        </button>
-        <button type="button" id="urgeDefeatedBtn" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-950/50 transition cursor-pointer flex items-center justify-center gap-2">
-          <span>🎉</span>
-          <span>Wave Surfed! I Beat the Craving</span>
-        </button>
+      <div class="mt-7 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+        <button type="button" id="urgeRelapsedBtn" class="btn btn-quiet">I couldn't resist. Log it</button>
+        <button type="button" id="urgeDefeatedBtn" class="btn btn-tide">I surfed it</button>
       </div>
     </div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- FIXED BOTTOM NAVIGATION BAR (Mobile Thumb Zone Only)                 -->
+  <!-- BOTTOM NAV (mobile)                                                   -->
   <!-- ===================================================================== -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-lg border-t border-slate-800/90 pb-safe shadow-2xl">
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-ground/95 backdrop-blur-lg border-t border-line pb-safe" aria-label="Sections">
     <div class="grid grid-cols-3 h-16 max-w-lg mx-auto px-2">
-      <!-- Tab 1: Focus -->
-      <button data-tab-target="stopwatch" class="mobile-tab-btn flex flex-col items-center justify-center gap-1 text-emerald-400 font-semibold cursor-pointer py-1 transition">
-        <svg class="tab-icon w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="9" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3" />
-        </svg>
-        <span class="text-[11px] tracking-tight">Focus</span>
+      <button data-tab-target="stopwatch" aria-selected="true" class="mobile-tab-btn navbtn is-active">
+        <svg class="tab-icon w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3"/></svg>
+        <span>Today</span>
       </button>
-
-      <!-- Tab 2: Patterns -->
-      <button data-tab-target="analytics" class="mobile-tab-btn flex flex-col items-center justify-center gap-1 text-slate-400 font-medium cursor-pointer py-1 transition">
-        <svg class="tab-icon w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-        <span class="text-[11px] tracking-tight">Patterns</span>
+      <button data-tab-target="analytics" aria-selected="false" class="mobile-tab-btn navbtn">
+        <svg class="tab-icon w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 20V11M12 20V4M19 20v-6"/></svg>
+        <span>Patterns</span>
       </button>
-
-      <!-- Tab 3: Journal -->
-      <button data-tab-target="journal" class="mobile-tab-btn flex flex-col items-center justify-center gap-1 text-slate-400 font-medium cursor-pointer py-1 transition">
-        <svg class="tab-icon w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-        </svg>
-        <span class="text-[11px] tracking-tight">Journal</span>
+      <button data-tab-target="journal" aria-selected="false" class="mobile-tab-btn navbtn">
+        <svg class="tab-icon w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.25v13m0-13C10.8 5.5 9.2 5 7.5 5S4.2 5.5 3 6.25v13C4.2 18.5 5.8 18 7.5 18s3.3.5 4.5 1.25m0-13C13.2 5.5 14.8 5 16.5 5s3.3.5 4.5 1.25v13C19.8 18.5 18.2 18 16.5 18s-3.3.5-4.5 1.25"/></svg>
+        <span>Journal</span>
       </button>
     </div>
   </nav>
 
-  <!-- ===================================================================== -->
-  <!-- MODULAR JAVASCRIPT ARCHITECTURE                                      -->
-  <!-- ===================================================================== -->
   <script src="js/constants.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/analytics.js"></script>
   <script src="js/urgeSurfer.js"></script>
   <script src="js/app.js"></script>
-
 </body>
 </html>

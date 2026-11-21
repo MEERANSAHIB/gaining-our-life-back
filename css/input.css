@@ -1,0 +1,568 @@
+/* =========================================================================
+   Gaining Our Life Back: design system
+   Source file. Build with `npm run build:css` (writes css/app.css).
+
+   One idea: the app looks like the hour it's in. js/theme.js sets
+   <html data-daypart="morning|afternoon|evening|night"> and every colour
+   below follows. Colour means something and is never decoration:
+     lamp  = banked time and the main action
+     tide  = urges and the 90-second wave
+     ember = slips, and nothing else
+   ========================================================================= */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Self-hosted so the app never waits on, or breaks without, a font CDN. */
+@font-face {
+  font-family: 'Archivo';
+  src: url('../fonts/archivo-latin-wdth.woff2') format('woff2');
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Instrument Sans';
+  src: url('../fonts/instrument-sans-latin-wght.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@layer base {
+  /* Values are space-separated RGB so Tailwind can apply opacity (bg-lamp/20). */
+
+  /* Morning, 6am to noon: pale mist, harbor ink */
+  :root,
+  [data-daypart='morning'] {
+    color-scheme: light;
+    --c-ground: 237 242 242;
+    --c-surface: 247 250 250;
+    --c-raised: 255 255 255;
+    --c-line: 203 215 226;
+    --c-ink: 18 40 63;
+    --c-mute: 62 82 105;
+    --c-faint: 90 110 133;
+    --c-lamp: 242 183 5;
+    --c-lamp-ink: 35 24 0;
+    --c-lamp-text: 138 90 0;
+    --c-tide: 47 127 193;
+    --c-tide-ink: 255 255 255;
+    --c-tide-text: 31 95 153;
+    --c-ember: 200 52 75;
+    --c-ember-ink: 255 255 255;
+    --c-ember-text: 176 42 65;
+    --disc: var(--c-lamp);
+    --disc-alpha: 0.24;
+    --disc-x: 88%;
+    --disc-y: 30%;
+  }
+
+  /* Afternoon, noon to 5pm: sky mist */
+  [data-daypart='afternoon'] {
+    --c-ground: 227 238 247;
+    --c-surface: 241 247 252;
+    --c-line: 190 208 226;
+    --disc-x: 82%;
+    --disc-y: 8%;
+  }
+
+  /* Evening, 5pm to 10pm: dusk indigo */
+  [data-daypart='evening'] {
+    color-scheme: dark;
+    --c-ground: 26 27 56;
+    --c-surface: 35 37 71;
+    --c-raised: 45 48 89;
+    --c-line: 58 61 107;
+    --c-ink: 236 235 245;
+    --c-mute: 179 181 214;
+    --c-faint: 141 144 188;
+    --c-lamp: 245 196 81;
+    --c-lamp-ink: 35 24 0;
+    --c-lamp-text: 245 196 81;
+    --c-tide: 90 169 230;
+    --c-tide-ink: 6 25 43;
+    --c-tide-text: 125 189 240;
+    --c-ember: 232 93 117;
+    --c-ember-ink: 42 6 16;
+    --c-ember-text: 255 143 161;
+    --disc: var(--c-lamp);
+    --disc-alpha: 0.24;
+    --disc-x: 90%;
+    --disc-y: 26%;
+  }
+
+  /* Late night, 10pm to 6am: deepest and lowest glare, because that is when
+     slips cluster. */
+  [data-daypart='night'] {
+    color-scheme: dark;
+    --c-ground: 11 15 32;
+    --c-surface: 18 24 48;
+    --c-raised: 26 33 64;
+    --c-line: 40 48 79;
+    --c-ink: 230 233 244;
+    --c-mute: 169 176 207;
+    --c-faint: 127 136 173;
+    --c-lamp: 242 190 74;
+    --c-lamp-ink: 35 24 0;
+    --c-lamp-text: 242 190 74;
+    --c-tide: 90 169 230;
+    --c-tide-ink: 6 25 43;
+    --c-tide-text: 125 189 240;
+    --c-ember: 232 93 117;
+    --c-ember-ink: 42 6 16;
+    --c-ember-text: 255 143 161;
+    --disc: var(--c-ink);
+    --disc-alpha: 0.07;
+    --disc-x: 84%;
+    --disc-y: 10%;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ground text-ink font-sans antialiased;
+    font-size: 16px;
+    line-height: 1.5;
+    overflow-x: hidden;
+    transition: background-color 0.6s ease, color 0.6s ease;
+  }
+
+  ::selection {
+    background: rgb(var(--c-lamp));
+    color: rgb(var(--c-lamp-ink));
+  }
+
+  button,
+  a,
+  summary {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-tide-text));
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  input[type='datetime-local'],
+  input[type='number'],
+  select {
+    color-scheme: inherit;
+  }
+}
+
+@layer components {
+  /* ---- Type ------------------------------------------------------------ */
+  .numeral {
+    font-family: 'Archivo', 'Arial Narrow', Impact, sans-serif;
+    font-stretch: 62%;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 0.88;
+    letter-spacing: -0.005em;
+  }
+
+  .title {
+    font-family: 'Archivo', 'Arial Narrow', Impact, sans-serif;
+    font-stretch: 62%;
+    font-weight: 800;
+    font-size: clamp(2rem, 8vw, 2.9rem);
+    line-height: 0.95;
+    letter-spacing: 0;
+  }
+
+  .lede {
+    @apply text-mute;
+    max-width: 52ch;
+    font-size: 0.97rem;
+  }
+
+  /* ---- Buttons ----------------------------------------------------------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-control font-semibold transition;
+    min-height: 52px;
+    padding: 0 1.4rem;
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn-lamp {
+    @apply bg-lamp text-lamp-ink;
+  }
+  .btn-lamp:hover {
+    filter: brightness(1.06);
+  }
+  .btn-tide {
+    @apply bg-tide text-tide-ink;
+  }
+  .btn-tide:hover {
+    filter: brightness(1.06);
+  }
+  .btn-slip {
+    @apply text-ember-text border border-ember/50;
+  }
+  .btn-slip:hover {
+    @apply bg-ember/10;
+  }
+  .btn-quiet {
+    @apply text-ink border border-line;
+  }
+  .btn-quiet:hover {
+    @apply bg-surface;
+  }
+  .btn-sm {
+    min-height: 40px;
+    padding: 0 0.95rem;
+    font-size: 0.875rem;
+    border-radius: 12px;
+  }
+  .link-btn {
+    @apply text-mute text-sm transition;
+    text-underline-offset: 4px;
+  }
+  .link-btn:hover {
+    @apply text-ink underline;
+  }
+  .icon-btn {
+    @apply inline-flex items-center justify-center rounded-full text-mute border border-line transition;
+    width: 40px;
+    height: 40px;
+  }
+  .icon-btn:hover {
+    @apply text-ink bg-surface;
+  }
+
+  /* ---- Form controls ----------------------------------------------------- */
+  .field {
+    @apply w-full bg-surface text-ink border border-line rounded-control;
+    padding: 0.7rem 0.95rem;
+    font-size: 1rem; /* 16px stops iOS zooming on focus */
+    line-height: 1.35;
+  }
+  .field::placeholder {
+    @apply text-faint;
+  }
+  .field:focus {
+    @apply border-tide-text outline-none;
+  }
+  .field-label {
+    @apply block text-ink font-semibold;
+    font-size: 0.98rem;
+  }
+  .field-hint {
+    @apply text-mute;
+    font-size: 0.875rem;
+  }
+
+  /* Choice chips (relapse form). JS adds chip-on / chip-on-ember. */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line text-mute bg-transparent transition;
+    min-height: 44px;
+    padding: 0 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  .chip:hover {
+    @apply text-ink border-faint;
+  }
+  .chip-on {
+    @apply bg-ink text-ground border-ink;
+  }
+  .chip-on:hover {
+    @apply text-ground border-ink;
+  }
+  .chip-on-ember {
+    @apply bg-ember text-ember-ink border-ember;
+  }
+  .chip-on-ember:hover {
+    @apply text-ember-ink border-ember;
+  }
+
+  /* Small read-only tags (history, insights) */
+  .tag {
+    @apply inline-flex items-center rounded-full border border-line text-mute;
+    padding: 0.1rem 0.65rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  .tag-ember {
+    @apply border-ember/40 text-ember-text;
+  }
+  .tag-lamp {
+    @apply border-lamp/60 text-lamp-text;
+  }
+  .tag-tide {
+    @apply border-tide/50 text-tide-text;
+  }
+
+  /* ---- Status pill (live / idle) ------------------------------------------ */
+  .status {
+    @apply inline-flex items-center gap-2 text-sm font-semibold;
+  }
+  .status-live {
+    @apply text-lamp-text;
+  }
+  .status-idle {
+    @apply text-mute;
+  }
+  .dot {
+    @apply inline-block rounded-full;
+    width: 8px;
+    height: 8px;
+    background: currentColor;
+  }
+  .dot-live {
+    animation: live-pulse 2.4s ease-in-out infinite;
+  }
+
+  /* ---- Navigation ------------------------------------------------------------ */
+  .tab {
+    @apply text-mute font-semibold transition border-b-[3px] border-transparent;
+    padding: 0.5rem 0;
+    font-size: 1rem;
+  }
+  .tab:hover {
+    @apply text-ink;
+  }
+  .tab.is-active {
+    @apply text-ink border-lamp;
+  }
+
+  .navbtn {
+    @apply relative flex flex-col items-center justify-center gap-1 text-mute transition;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .navbtn.is-active {
+    @apply text-ink;
+  }
+  .navbtn.is-active::before {
+    content: '';
+    @apply absolute bg-lamp rounded-full;
+    top: 0;
+    width: 28px;
+    height: 4px;
+  }
+
+  /* ---- Hero ----------------------------------------------------------------- */
+  .hero {
+    @apply relative overflow-hidden;
+    isolation: isolate;
+  }
+  /* The hour, drawn as a disc: sun by day, moon at night. */
+  .hero-disc {
+    @apply absolute rounded-full pointer-events-none;
+    z-index: -1;
+    width: clamp(170px, 46vw, 340px);
+    aspect-ratio: 1;
+    left: var(--disc-x);
+    top: var(--disc-y);
+    transform: translate(-50%, -50%);
+    background: rgb(var(--disc) / var(--disc-alpha));
+    transition: left 1.2s ease, top 1.2s ease, background-color 0.8s ease;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-disc {
+      width: 300px;
+      top: 0;
+      transform: translate(-50%, -38%);
+    }
+  }
+
+  .hero-days {
+    font-size: clamp(4.5rem, 23vw, 8.75rem);
+  }
+  .hero-clock {
+    font-size: clamp(2.5rem, 12vw, 4.5rem);
+  }
+  .unit {
+    @apply text-mute font-sans;
+    font-stretch: 100%;
+    font-weight: 600;
+    font-size: 0.26em;
+    letter-spacing: 0;
+    margin: 0 0.35em 0 0.08em;
+  }
+
+  .meter {
+    @apply bg-line rounded-full overflow-hidden;
+    height: 6px;
+  }
+  .meter > div {
+    @apply bg-lamp h-full rounded-full transition-all duration-500;
+  }
+
+  /* ---- Layout helpers ----------------------------------------------------------- */
+  .stat-num {
+    @apply numeral text-ink;
+    font-size: clamp(2.1rem, 7.6vw, 3.2rem);
+  }
+  .rule-top {
+    @apply border-t border-line;
+  }
+  .well {
+    @apply bg-surface rounded-[18px] border border-line;
+  }
+
+  /* ---- Sheets (modals) ----------------------------------------------------------- */
+  .scrim {
+    @apply fixed inset-0 z-50 flex items-end sm:items-center justify-center overflow-y-auto sm:p-6;
+    background: rgb(8 11 24 / 0.62);
+    backdrop-filter: blur(6px);
+  }
+  .sheet {
+    @apply relative w-full bg-ground text-ink border border-line rounded-t-sheet sm:rounded-sheet;
+    max-height: 94vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.4rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom));
+  }
+  @media (min-width: 640px) {
+    .sheet {
+      max-height: 88vh;
+      padding: 1.5rem 1.75rem 1.75rem;
+    }
+  }
+  .scrim:not(.hidden) .sheet {
+    animation: sheet-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .sheet-grab {
+    @apply bg-line rounded-full mx-auto sm:hidden;
+    width: 40px;
+    height: 4px;
+    margin-top: 0.4rem;
+    margin-bottom: 0.6rem;
+  }
+  .sheet-head {
+    @apply sticky top-0 z-10 flex items-start justify-between gap-4 bg-ground;
+    padding: 0.5rem 0 0.9rem;
+  }
+
+  /* ---- Toast ------------------------------------------------------------------------ */
+  #toastBanner:not(.hidden) > div {
+    animation: toast-in 0.22s ease-out;
+  }
+
+  /* ---- Urge surfer ---------------------------------------------------------------- */
+  .breath {
+    @apply rounded-full bg-tide/15 border-2 border-tide/60 flex items-center justify-center;
+    width: min(62vw, 15rem);
+    aspect-ratio: 1;
+    animation: breathe 8s ease-in-out infinite;
+  }
+  /* The countdown sits in a calm, non-scaling layer so text never swells. */
+  .breath-core {
+    @apply flex flex-col items-center justify-center text-center;
+    animation: breathe-counter 8s ease-in-out infinite;
+  }
+  @keyframes breathe-counter {
+    0% { transform: scale(1.28); }
+    37.5% { transform: scale(0.943); }
+    62.5% { transform: scale(0.943); }
+    100% { transform: scale(1.28); }
+  }
+  .cue {
+    @apply text-tide-text font-semibold;
+    font-size: 1rem;
+    min-height: 1.5em;
+  }
+  .cue-done {
+    @apply text-lamp-text;
+  }
+
+  /* Drifting wave line behind the surfer heading. */
+  .wave {
+    height: 36px;
+    background-color: rgb(var(--c-tide) / 0.28);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='36' viewBox='0 0 240 36'%3E%3Cpath d='M0 18 C 30 2, 60 2, 90 18 S 150 34, 180 18 S 225 2, 240 18 V36 H0Z' fill='black'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='36' viewBox='0 0 240 36'%3E%3Cpath d='M0 18 C 30 2, 60 2, 90 18 S 150 34, 180 18 S 225 2, 240 18 V36 H0Z' fill='black'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: repeat-x;
+    mask-repeat: repeat-x;
+    -webkit-mask-size: 240px 36px;
+    mask-size: 240px 36px;
+    animation: wave-drift 9s linear infinite;
+  }
+  .wave-b {
+    background-color: rgb(var(--c-tide) / 0.16);
+    animation-duration: 14s;
+    animation-direction: reverse;
+    margin-top: -22px;
+  }
+  @keyframes wave-drift {
+    from { -webkit-mask-position-x: 0; mask-position-x: 0; }
+    to { -webkit-mask-position-x: -240px; mask-position-x: -240px; }
+  }
+
+  /* ---- Timeline rail (journal) ----------------------------------------------------- */
+  .rail {
+    @apply relative;
+    padding-left: 1.5rem;
+  }
+  .rail::before {
+    content: '';
+    @apply absolute bg-line;
+    left: 5px;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 2px;
+  }
+  .rail-item {
+    @apply relative;
+  }
+  .rail-item::before {
+    content: '';
+    @apply absolute bg-lamp rounded-full border-2 border-ground;
+    left: -1.5rem;
+    top: 0.55rem;
+    width: 12px;
+    height: 12px;
+    box-sizing: border-box;
+  }
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .scroll-quiet {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--c-line)) transparent;
+  }
+}
+
+/* Quiet scrollbars where they exist */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--c-line));
+  border-radius: 9999px;
+}
+
+/* Respect people who ask for less motion: keep state changes, drop the loops. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .breath,
+  .breath-core {
+    animation: none !important;
+  }
+}

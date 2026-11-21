@@ -1,10 +1,13 @@
-const CACHE_NAME = 'lifeback-detox-cache-v12';
+const CACHE_NAME = 'lifeback-detox-cache-v13';
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon.svg',
-  './css/styles.css',
+  './css/app.css',
+  './fonts/archivo-latin-wdth.woff2',
+  './fonts/instrument-sans-latin-wght.woff2',
+  './js/theme.js',
   './js/constants.js',
   './js/storage.js',
   './js/analytics.js',
@@ -36,7 +39,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch: Stale-while-revalidate for local assets, network-first for external CDNs, bypass Firebase
+// Fetch: Stale-while-revalidate for local assets, bypass Firebase
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
@@ -47,25 +50,6 @@ self.addEventListener('fetch', (event) => {
     url.hostname.includes('gstatic.com') ||
     url.hostname.includes('google.com')
   ) {
-    return;
-  }
-
-  // Tailwind Play CDN: stale-while-revalidate, caching opaque cross-origin
-  // responses too, so the UI stays styled when offline.
-  if (url.hostname === 'cdn.tailwindcss.com') {
-    event.respondWith(
-      caches.open(CACHE_NAME).then((cache) =>
-        cache.match(event.request).then((cached) => {
-          const network = fetch(event.request).then((res) => {
-            if (res && (res.ok || res.type === 'opaque')) {
-              cache.put(event.request, res.clone());
-            }
-            return res;
-          }).catch(() => cached);
-          return cached || network;
-        })
-      )
-    );
     return;
   }
 

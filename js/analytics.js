@@ -1,5 +1,5 @@
 // =========================================================================
-// Gaining Our Life Back — Behavioral Analytics & Visual Heatmap
+// Gaining Our Life Back: behavioral Analytics & Visual Heatmap
 // =========================================================================
 
 window.DetoxAnalytics = {
@@ -7,10 +7,10 @@ window.DetoxAnalytics = {
     if (!containerEl) return;
 
     const buckets = [
-      { key: "Morning", label: "Morning (6am–12pm)", count: 0 },
-      { key: "Afternoon", label: "Afternoon (12pm–5pm)", count: 0 },
-      { key: "Evening", label: "Evening (5pm–10pm)", count: 0 },
-      { key: "Late Night", label: "Late Night (10pm–6am)", count: 0 }
+      { key: "Morning", label: "Morning (6am to 12pm)", count: 0 },
+      { key: "Afternoon", label: "Afternoon (12pm to 5pm)", count: 0 },
+      { key: "Evening", label: "Evening (5pm to 10pm)", count: 0 },
+      { key: "Late Night", label: "Late night (10pm to 6am)", count: 0 }
     ];
 
     laps.forEach(l => {
@@ -25,15 +25,15 @@ window.DetoxAnalytics = {
     });
 
     if (laps.length === 0) {
-      if (summaryEl) summaryEl.textContent = "Your clean streak is running. When you complete a lap, your peak danger window will appear here.";
-      if (adviceEl) adviceEl.innerHTML = `<span class="font-semibold text-emerald-400">Momentum:</span> You haven't relapsed yet — that's real progress. Keep the streak alive!`;
+      if (summaryEl) summaryEl.textContent = "Your streak is running. When you finish a lap, your riskiest time of day shows up here.";
+      if (adviceEl) adviceEl.innerHTML = `<span class="font-semibold text-ink">Momentum:</span> <span class="text-mute">You haven't slipped yet. Keep it going.</span>`;
     } else {
       const peakPct = Math.round((peakBucket.count / laps.length) * 100);
       if (summaryEl) {
-        summaryEl.innerHTML = `<span class="text-amber-300 font-semibold">${peakPct}% of your relapses</span> happen during the <span class="text-white font-semibold">${peakBucket.key}</span> window.`;
+        summaryEl.innerHTML = `<span class="text-ink font-semibold">${peakPct}% of your slips</span> happen in the <span class="text-ink font-semibold">${peakBucket.label.toLowerCase()}</span>.`;
       }
       if (adviceEl) {
-        adviceEl.innerHTML = `<span class="font-semibold text-amber-300">Actionable Fix:</span> Your highest danger zone is <span class="text-white font-semibold">${peakBucket.label}</span>. Put your phone in another room or enable strict app blockers during this window.`;
+        adviceEl.innerHTML = `<span class="font-semibold text-ink">Plan:</span> <span class="text-mute">your riskiest window is ${peakBucket.label.toLowerCase()}. Put your phone in another room or turn on a strict app blocker then.</span>`;
       }
     }
 
@@ -42,13 +42,11 @@ window.DetoxAnalytics = {
       const isPeak = laps.length > 0 && b.key === peakBucket.key && b.count > 0;
       return `
         <div>
-          <div class="flex items-center justify-between text-xs mb-1">
-            <span class="${isPeak ? 'text-amber-300 font-semibold' : 'text-slate-300'}">${b.label}</span>
-            <span class="font-mono text-slate-400">${b.count} (${pct}%)</span>
+          <div class="flex items-baseline justify-between text-sm mb-1.5">
+            <span class="${isPeak ? 'text-ink font-semibold' : 'text-mute'}">${b.label}</span>
+            <span class="tabular-nums ${isPeak ? 'text-ember-text font-semibold' : 'text-mute'}">${b.count} (${pct}%)</span>
           </div>
-          <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-            <div class="h-full rounded-full transition-all duration-500 ${isPeak ? 'bg-amber-400' : 'bg-slate-600'}" style="width: ${pct}%"></div>
-          </div>
+          <div class="meter"><div class="${isPeak ? '!bg-ember' : '!bg-faint/60'}" style="width: ${pct}%"></div></div>
         </div>
       `;
     }).join('');
@@ -58,13 +56,8 @@ window.DetoxAnalytics = {
     if (!triggersEl) return;
 
     if (laps.length === 0) {
-      triggersEl.innerHTML = `
-        <div class="text-xs text-slate-400 py-6 px-3 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-950/40">
-          <p class="font-semibold text-slate-300">Clean streak running</p>
-          <p class="text-slate-500 mt-1">If you slip up, honest logging reveals your top habit triggers.</p>
-        </div>
-      `;
-      if (platformsEl) platformsEl.innerHTML = `<span class="text-xs text-slate-500">None logged yet</span>`;
+      triggersEl.innerHTML = `<p class="text-mute text-sm">No slips yet. If one happens, honest logging shows what sets it off.</p>`;
+      if (platformsEl) platformsEl.innerHTML = `<span class="text-mute text-sm">None logged yet</span>`;
       return;
     }
 
@@ -88,13 +81,11 @@ window.DetoxAnalytics = {
       const pct = Math.round((count / laps.length) * 100);
       return `
         <div>
-          <div class="flex items-center justify-between text-xs mb-1">
-            <span class="${idx === 0 ? 'text-rose-300 font-semibold' : 'text-slate-300'}">${idx + 1}. ${window.DetoxConstants.escapeHtml(trig)}</span>
-            <span class="font-mono text-slate-400">${count}x (${pct}%)</span>
+          <div class="flex items-baseline justify-between gap-3 text-sm mb-1.5">
+            <span class="${idx === 0 ? 'text-ink font-semibold' : 'text-mute'}">${window.DetoxConstants.escapeHtml(trig)}</span>
+            <span class="tabular-nums shrink-0 ${idx === 0 ? 'text-ember-text font-semibold' : 'text-mute'}">${count}x (${pct}%)</span>
           </div>
-          <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-            <div class="h-full rounded-full ${idx === 0 ? 'bg-rose-500' : 'bg-rose-500/50'}" style="width: ${pct}%"></div>
-          </div>
+          <div class="meter"><div class="${idx === 0 ? '!bg-ember' : '!bg-faint/60'}" style="width: ${pct}%"></div></div>
         </div>
       `;
     }).join('');
@@ -102,9 +93,7 @@ window.DetoxAnalytics = {
     if (platformsEl) {
       const sortedPlatforms = Object.entries(platformCounts).sort((a, b) => b[1] - a[1]);
       platformsEl.innerHTML = sortedPlatforms.map(([plat, count]) => `
-        <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-xs text-slate-200 font-medium">
-          ${window.DetoxConstants.escapeHtml(plat)} <span class="text-rose-400 font-mono ml-1">${count}</span>
-        </span>
+        <span class="tag">${window.DetoxConstants.escapeHtml(plat)} <span class="text-ember-text font-semibold ml-1.5 tabular-nums">${count}</span></span>
       `).join('');
     }
   },
@@ -113,12 +102,7 @@ window.DetoxAnalytics = {
     if (!containerEl) return;
 
     if (laps.length === 0) {
-      containerEl.innerHTML = `
-        <div class="text-xs text-slate-400 py-6 px-3 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-950/40">
-          <p class="font-semibold text-slate-300">Emotional shift loop</p>
-          <p class="text-slate-500 mt-1">Tracks how algorithmic feeds promise relief but leave regret.</p>
-        </div>
-      `;
+      containerEl.innerHTML = `<p class="text-mute text-sm">Nothing logged yet. This shows how feeds promise relief and leave regret.</p>`;
       return;
     }
 
@@ -143,14 +127,11 @@ window.DetoxAnalytics = {
     containerEl.innerHTML = sortedPairs.map(([key, count]) => {
       const [before, after] = key.split('___');
       const pct = Math.round((count / laps.length) * 100);
+      const esc = window.DetoxConstants.escapeHtml;
       return `
-        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 font-medium">${window.DetoxConstants.escapeHtml(before)}</span>
-            <span class="text-slate-500 font-bold">➔</span>
-            <span class="px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-medium">${window.DetoxConstants.escapeHtml(after)}</span>
-          </div>
-          <span class="font-mono text-slate-400 shrink-0 ml-2">${count}x (${pct}%)</span>
+        <div class="flex items-baseline justify-between gap-3 text-sm pb-3 border-b border-line last:border-b-0">
+          <span class="text-mute"><span class="text-ink font-medium">${esc(before)}</span> before, <span class="text-ink font-medium">${esc(after)}</span> after</span>
+          <span class="tabular-nums text-mute shrink-0">${count}x (${pct}%)</span>
         </div>
       `;
     }).join('');
@@ -158,7 +139,7 @@ window.DetoxAnalytics = {
     if (insightEl) {
       const negPct = Math.round((negativeAfterCount / laps.length) * 100);
       insightEl.innerHTML = `
-        <span class="font-semibold text-indigo-300">Pattern Proof:</span> In <span class="text-white font-bold">${negPct}% of your relapses</span>, scrolling left you feeling regretful, brain-fogged, or still bored afterward. Remember this next time the urge hits!
+        <span class="font-semibold text-ink">${negPct}% of your slips</span> left you regretful, foggy or still bored. Remember that the next time the urge hits.
       `;
     }
   },
@@ -218,22 +199,22 @@ window.DetoxAnalytics = {
     }
 
     gridEl.innerHTML = daySlots.map(slot => {
-      let bgStyle = "bg-slate-900 border-slate-800 text-slate-500";
+      let bgStyle = "bg-line text-faint";
       if (slot.hours >= 16) {
-        bgStyle = "bg-emerald-500 border-emerald-400 text-slate-950 font-bold shadow-md shadow-emerald-950/40";
+        bgStyle = "bg-lamp text-lamp-ink";
       } else if (slot.hours >= 8) {
-        bgStyle = "bg-emerald-700/80 border-emerald-500/60 text-emerald-100";
+        bgStyle = "bg-lamp/65 text-ink";
       } else if (slot.hours > 0) {
-        bgStyle = "bg-emerald-950/70 border-emerald-800/40 text-emerald-300";
+        bgStyle = "bg-lamp/30 text-ink";
       }
 
       const isToday = slot.date.toDateString() === now.toDateString();
 
       return `
-        <div class="p-2 rounded-xl border flex flex-col items-center justify-center text-center transition hover:scale-105 select-none relative ${bgStyle} ${isToday ? 'ring-2 ring-emerald-400' : ''}" title="${slot.dateStr}: ${slot.hours.toFixed(1)} hrs clean">
-          <span class="text-[9px] uppercase tracking-wider opacity-75">${slot.dayName}</span>
-          <span class="text-xs font-mono font-bold leading-tight">${slot.dayNum}</span>
-          <span class="text-[9px] font-mono mt-0.5">${slot.hours > 0 ? slot.hours.toFixed(0) + 'h' : '—'}</span>
+        <div class="py-2 rounded-xl flex flex-col items-center justify-center text-center select-none ${bgStyle} ${isToday ? 'ring-2 ring-tide-text ring-offset-2 ring-offset-ground' : ''}" title="${slot.dateStr}: ${slot.hours.toFixed(1)} hrs clean">
+          <span class="text-[10px] opacity-80">${slot.dayName}</span>
+          <span class="text-sm font-semibold tabular-nums leading-tight">${slot.dayNum}</span>
+          <span class="text-[10px] tabular-nums">${slot.hours > 0 ? slot.hours.toFixed(0) + 'h' : '-'}</span>
         </div>
       `;
     }).join('');
@@ -248,37 +229,20 @@ window.DetoxAnalytics = {
     containerEl.innerHTML = milestones.map(m => {
       const isUnlocked = totalHours >= m.targetHours;
       const pct = Math.min(100, Math.round((totalHours / m.targetHours) * 100));
+      const days = m.targetHours >= 48 ? Math.round(m.targetHours / 24) : null;
+      const big = days ? days + 'd' : m.targetHours + 'h';
 
-      if (isUnlocked) {
-        return `
-          <div class="bg-gradient-to-br from-emerald-950/50 to-slate-900 border border-emerald-500/40 p-3.5 rounded-2xl flex flex-col justify-between shadow-lg shadow-emerald-950/30">
-            <div class="flex items-center justify-between">
-              <span class="text-2xl">${m.icon}</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">UNLOCKED ✓</span>
-            </div>
-            <div class="mt-2">
-              <div class="text-xs font-bold text-white">${m.title}</div>
-              <div class="text-[11px] text-emerald-400 mt-0.5">${m.desc}</div>
-            </div>
-          </div>
-        `;
-      } else {
-        return `
-          <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl flex flex-col justify-between opacity-70 hover:opacity-100 transition">
-            <div class="flex items-center justify-between">
-              <span class="text-2xl grayscale">${m.icon}</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono text-slate-400 bg-slate-900 border border-slate-800">${pct}%</span>
-            </div>
-            <div class="mt-2">
-              <div class="text-xs font-semibold text-slate-300">${m.title}</div>
-              <div class="text-[10px] text-slate-500 mt-0.5">${(m.targetHours - totalHours).toFixed(1)}h remaining</div>
-              <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden mt-1.5 border border-slate-800">
-                <div class="h-full bg-emerald-500/50 rounded-full" style="width: ${pct}%"></div>
-              </div>
-            </div>
-          </div>
-        `;
-      }
+      return `
+        <div class="${isUnlocked ? '' : 'opacity-80'}">
+          <div class="numeral text-[3rem] ${isUnlocked ? 'text-lamp-text' : 'text-faint'}">${big}</div>
+          <div class="text-ink font-semibold mt-2">${m.title}</div>
+          <div class="text-mute text-sm">${m.desc}</div>
+          ${isUnlocked
+            ? `<div class="status status-live mt-2"><span class="dot"></span>Unlocked</div>`
+            : `<div class="meter mt-3"><div style="width: ${pct}%"></div></div>
+               <div class="text-mute text-sm mt-1.5 tabular-nums">${(m.targetHours - totalHours).toFixed(1)}h to go</div>`}
+        </div>
+      `;
     }).join('');
   }
 };
