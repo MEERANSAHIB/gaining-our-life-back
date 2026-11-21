@@ -572,6 +572,12 @@
           <input type="file" id="importJsonFileInput" accept=".json,application/json" class="hidden" />
           <button type="button" id="triggerImportJsonBtn" class="btn btn-quiet w-full">Choose a JSON backup file</button>
         </div>
+
+        <div class="pt-5 border-t border-line">
+          <span class="field-label mb-1">Start with a clean slate</span>
+          <p class="field-hint mb-3">Deletes every lap, the urge count and the timer, on this device and in your cloud account. Export a backup first if you might want them back.</p>
+          <button type="button" id="startFreshBtn" class="btn btn-slip w-full"><span id="startFreshText">Erase all laps and start fresh</span></button>
+        </div>
       </div>
     </div>
   </div>

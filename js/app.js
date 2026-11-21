@@ -222,6 +222,8 @@ function queryElements() {
     exportCsvBtn: document.getElementById('exportCsvBtn'),
     exportJsonBtn: document.getElementById('exportJsonBtn'),
     copyMarkdownReportBtn: document.getElementById('copyMarkdownReportBtn'),
+    startFreshBtn: document.getElementById('startFreshBtn'),
+    startFreshText: document.getElementById('startFreshText'),
     triggerImportJsonBtn: document.getElementById('triggerImportJsonBtn'),
     importJsonFileInput: document.getElementById('importJsonFileInput'),
 
@@ -950,6 +952,34 @@ async function addLapRecordToCloud(lapRecord) {
   }
 }
 
+async function startFresh() {
+  const lapIds = state.laps.map(l => l.id);
+  state.laps = [];
+  state.urgesDefeated = 0;
+  state.timer = { isRunning: false, currentLapStartTime: null, accumulatedMs: 0, streakInitialStartTime: null };
+  window.DetoxStorage.saveLaps([]);
+  window.DetoxStorage.saveStats(0);
+  state.deleteConfirmLapId = null;
+  renderAll();
+  await saveTimerStateToCloud();
+
+  if (state.user && db) {
+    try {
+      updateCloudBadge('syncing', 'Clearing...');
+      for (const id of lapIds) {
+        if (String(id).startsWith('local-')) continue;
+        await deleteDoc(doc(db, 'artifacts', state.appId, 'users', state.userId, 'detox_laps', id));
+      }
+      updateCloudBadge('online', 'Synced');
+    } catch (err) {
+      console.error('Failed to clear cloud laps:', err);
+      showToast('Cleared on this device. Some cloud laps could not be deleted, try again.');
+      return;
+    }
+  }
+  showToast('Everything cleared. Press Start when you are ready.');
+}
+
 async function deleteLapFromCloud(lapId) {
   state.laps = state.laps.filter(l => l.id !== lapId);
   window.DetoxStorage.saveLaps(state.laps);
@@ -1613,6 +1643,28 @@ function bindEvents() {
       else showToast("No laps to export yet.");
     });
   }
+  if (el.startFreshBtn) {
+    el.startFreshBtn.addEventListener('click', () => {
+      if (!state.startFreshPending) {
+        state.startFreshPending = true;
+        el.startFreshText.textContent = 'Tap again to erase everything';
+        el.startFreshBtn.classList.add('font-semibold');
+        clearTimeout(window.__startFreshTimeout);
+        window.__startFreshTimeout = setTimeout(() => {
+          state.startFreshPending = false;
+          el.startFreshText.textContent = 'Erase all laps and start fresh';
+          el.startFreshBtn.classList.remove('font-semibold');
+        }, 4000);
+        return;
+      }
+      state.startFreshPending = false;
+      el.startFreshText.textContent = 'Erase all laps and start fresh';
+      el.startFreshBtn.classList.remove('font-semibold');
+      el.backupModal.classList.add('hidden');
+      startFresh();
+    });
+  }
+
   if (el.exportJsonBtn) {
     el.exportJsonBtn.addEventListener('click', () => {
       window.DetoxStorage.exportJSON(state.timer, state.laps, state.urgesDefeated);
