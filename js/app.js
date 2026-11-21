@@ -189,7 +189,6 @@ function queryElements() {
     relapseForm: document.getElementById('relapseForm'),
     modalCapturedDurationText: document.getElementById('modalCapturedDurationText'),
     modalCapturedHoursDecimal: document.getElementById('modalCapturedHoursDecimal'),
-    manualHoursOverride: document.getElementById('manualHoursOverride'),
     modalCapturedTimestampText: document.getElementById('modalCapturedTimestampText'),
     modalCapturedBucketBadge: document.getElementById('modalCapturedBucketBadge'),
     platformPillsContainer: document.getElementById('platformPillsContainer'),
@@ -630,10 +629,11 @@ function openRelapseModal() {
     selectedRelapseDuration: null
   };
 
-  const hoursDecimal = (capturedMs / (1000 * 60 * 60)).toFixed(2);
-  if (el.modalCapturedDurationText) el.modalCapturedDurationText.textContent = window.DetoxConstants.formatDurationCompact(capturedMs);
-  if (el.modalCapturedHoursDecimal) el.modalCapturedHoursDecimal.textContent = `(${hoursDecimal} hrs)`;
-  if (el.manualHoursOverride) el.manualHoursOverride.value = hoursDecimal;
+  // The lap is saved exactly as measured; it is shown as hours.minutes (hh.mm).
+  const totalMinutes = Math.floor(capturedMs / 60000);
+  const hhmm = `${String(Math.floor(totalMinutes / 60)).padStart(2, '0')}.${String(totalMinutes % 60).padStart(2, '0')}`;
+  if (el.modalCapturedDurationText) el.modalCapturedDurationText.textContent = hhmm;
+  if (el.modalCapturedHoursDecimal) el.modalCapturedHoursDecimal.textContent = 'hh.mm';
   if (el.modalCapturedTimestampText) el.modalCapturedTimestampText.textContent = window.DetoxConstants.formatDateTimeReadable(now);
   if (el.modalCapturedBucketBadge) el.modalCapturedBucketBadge.textContent = bucket;
   const nextLapNumberEl = document.getElementById('nextLapNumberText');
@@ -728,13 +728,7 @@ async function handleRelapseFormSubmit(e) {
     return;
   }
 
-  const overrideVal = parseFloat(el.manualHoursOverride.value);
-  const originalHours = parseFloat((state.pendingRelapse.durationMs / (1000 * 60 * 60)).toFixed(2));
-  let finalDurationMs = state.pendingRelapse.durationMs;
-
-  if (!isNaN(overrideVal) && overrideVal >= 0 && Math.abs(overrideVal - originalHours) > 0.01) {
-    finalDurationMs = Math.round(overrideVal * 3600 * 1000);
-  }
+  const finalDurationMs = state.pendingRelapse.durationMs;
 
   const finalHours = Number((finalDurationMs / (1000 * 60 * 60)).toFixed(2));
   const now = Date.now();
