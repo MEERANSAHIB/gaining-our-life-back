@@ -1,0 +1,13 @@
+{
+  "name": "gaining-our-life-back",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Social media detox stopwatch and relapse pattern tracker (PWA)",
+  "scripts": {
+    "build:css": "tailwindcss -c tailwind.config.js -i css/input.css -o css/app.css --minify",
+    "watch:css": "tailwindcss -c tailwind.config.js -i css/input.css -o css/app.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  }
+}

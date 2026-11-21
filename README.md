@@ -60,7 +60,7 @@ Translates total clean hours into rough real-world equivalents:
 
 ### 📲 7. Installable Progressive Web App (PWA)
 * Add to your **iPhone or Android Home Screen** via `manifest.json`.
-* A service worker (`sw.js`) caches the app shell and the Tailwind CDN script for offline use.
+* A service worker (`sw.js`) caches the app shell, stylesheet and fonts for offline use.
 * One-click *"Install App"* button on desktop and Android browsers.
 
 ---
@@ -74,7 +74,9 @@ git clone https://github.com/MEERANSAHIB/gaining-our-life-back.git
 cd gaining-our-life-back
 python3 -m http.server 8000
 ```
-Then open `http://localhost:8000`. Tailwind CSS (CDN) and Google Fonts load from the internet on first run, and Firebase loads from gstatic when available.
+Then open `http://localhost:8000`. Styles and fonts are bundled in the repo; only Firebase loads from gstatic, and only when available.
+
+To change the design, edit `css/input.css` or `tailwind.config.js`, then run `npm install` and `npm run build:css` to regenerate `css/app.css` (commit the result).
 
 ### Option B: Deploy to GitHub Pages
 1. Push this repository to GitHub.
@@ -146,23 +148,27 @@ The app is configured for the `gaining-our-life-back` Firebase project. To use y
 ```text
 gaining-our-life-back/
 ├── css/
-│   └── styles.css          # Card surfaces, scrollbars, breathing animation, safe-area helpers
+│   ├── input.css           # Design tokens per time of day + component classes (source)
+│   └── app.css             # Built stylesheet (Tailwind CLI, committed)
+├── fonts/                  # Archivo (numerals, headings) and Instrument Sans (body), self-hosted
 ├── js/
+│   ├── theme.js            # Time-of-day theme (morning / afternoon / evening / night, with manual override)
 │   ├── constants.js        # Firebase config, storage keys, option lists, formatting utilities
 │   ├── storage.js          # LocalStorage, CSV/JSON export, sample data
 │   ├── analytics.js        # Vulnerability window, triggers, emotional shift, heatmap, milestones
 │   ├── urgeSurfer.js       # 90-second session, breathing cues, reality check
 │   └── app.js              # Orchestrator: tabs, stopwatch, relapse form, import, lazy-loaded Firebase sync
-├── index.html              # 3-tab interface (Focus, Patterns, Journal)
+├── index.html              # 3-tab interface (Today, Patterns, Journal)
 ├── manifest.json           # Web App Manifest
-├── sw.js                   # Service worker (app shell + Tailwind CDN cache)
+├── sw.js                   # Service worker (app shell cache)
 ├── icon.svg                # App icon
 ├── LICENSE                 # MIT
 └── README.md
 ```
 
-* **Core**: Vanilla HTML5 and JavaScript, no build step
-* **Styling**: Tailwind CSS via the Play CDN, plus Inter and JetBrains Mono
+* **Core**: Vanilla HTML5 and JavaScript; the only build step is the CSS
+* **Styling**: Tailwind CSS 3 built locally, colours as CSS variables that change with the hour of day; Archivo and Instrument Sans, self-hosted
+* **Design**: the app takes its tint from the clock. Gold means time banked, blue means urges, red means slips and nothing else
 * **Cloud & Auth**: Firebase JS SDK v11.6.1 (Auth + Firestore), loaded on demand
 * **PWA**: Web App Manifest and service worker
 
@@ -170,7 +176,7 @@ gaining-our-life-back/
 
 ## ⚠️ Known Limitations
 
-* The Tailwind **Play CDN is meant for development**. For a production site, build the CSS with the Tailwind CLI instead.
+* `css/app.css` is generated; rebuild it after changing classes in `index.html` or `js/*.js`.
 * Anonymous sessions are tied to the browser. Sign in with Google to keep your data across devices, and export a JSON backup regularly.
 * There is no automated test suite yet.
 * The "Time Reclaimed" and milestone figures are motivational estimates, not clinical measures.

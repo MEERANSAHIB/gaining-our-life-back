@@ -297,28 +297,12 @@ function switchTab(targetTab) {
     }
   });
 
-  // Update tab buttons styles (Both desktop segmented pills and mobile bottom bar)
+  // Mark the active tab (desktop tabs and mobile bottom bar share the same state classes)
   if (el.navTabs) {
     el.navTabs.forEach(btn => {
       const isTarget = btn.getAttribute('data-tab-target') === targetTab;
-      if (btn.classList.contains('mobile-tab-btn')) {
-        // Mobile bottom navigation bar item
-        const icon = btn.querySelector('.tab-icon');
-        if (isTarget) {
-          btn.className = "mobile-tab-btn flex flex-col items-center justify-center gap-1 text-emerald-400 font-semibold cursor-pointer py-1 transition";
-          if (icon) icon.setAttribute('class', "tab-icon w-5 h-5 text-emerald-400");
-        } else {
-          btn.className = "mobile-tab-btn flex flex-col items-center justify-center gap-1 text-slate-400 font-medium cursor-pointer py-1 transition";
-          if (icon) icon.setAttribute('class', "tab-icon w-5 h-5 text-slate-400");
-        }
-      } else {
-        // Desktop segmented button
-        if (isTarget) {
-          btn.className = "desktop-tab-btn px-3.5 py-1.5 rounded-xl font-bold text-xs bg-emerald-500 text-slate-950 shadow-md shadow-emerald-950/40 transition cursor-pointer flex items-center gap-1.5";
-        } else {
-          btn.className = "desktop-tab-btn px-3.5 py-1.5 rounded-xl font-medium text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition cursor-pointer flex items-center gap-1.5";
-        }
-      }
+      btn.classList.toggle('is-active', isTarget);
+      btn.setAttribute('aria-selected', isTarget ? 'true' : 'false');
     });
   }
 
@@ -338,8 +322,8 @@ function renderStopwatchTick() {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  if (el.timerDays) el.timerDays.textContent = String(days).padStart(2, '0');
-  if (el.timerHours) el.timerHours.textContent = String(hours).padStart(2, '0');
+  if (el.timerDays) el.timerDays.textContent = String(days);
+  if (el.timerHours) el.timerHours.textContent = String(hours);
   if (el.timerMinutes) el.timerMinutes.textContent = String(minutes).padStart(2, '0');
   if (el.timerSeconds) el.timerSeconds.textContent = String(seconds).padStart(2, '0');
 
@@ -361,27 +345,27 @@ function updatePersonalBestBar(currentElapsedMs) {
     const target24h = 24 * 3600 * 1000;
     const pct = Math.min(100, (currentElapsedMs / target24h) * 100);
     el.pbProgressBar.style.width = `${pct.toFixed(1)}%`;
-    el.pbProgressLabel.textContent = `${pct.toFixed(1)}% of 24h Milestone`;
+    el.pbProgressLabel.textContent = `${pct.toFixed(1)}% of the 24-hour milestone`;
   } else if (currentElapsedMs >= maxPastLapMs) {
     el.pbProgressBar.style.width = `100%`;
-    el.pbProgressLabel.textContent = `NEW PERSONAL BEST! (${window.DetoxConstants.formatDurationCompact(currentElapsedMs)})`;
+    el.pbProgressLabel.textContent = `New personal best (${window.DetoxConstants.formatDurationCompact(currentElapsedMs)})`;
   } else {
     const pct = Math.min(100, (currentElapsedMs / maxPastLapMs) * 100);
     el.pbProgressBar.style.width = `${pct.toFixed(1)}%`;
-    el.pbProgressLabel.textContent = `${pct.toFixed(1)}% of Record (${window.DetoxConstants.formatDurationCompact(maxPastLapMs)})`;
+    el.pbProgressLabel.textContent = `${pct.toFixed(1)}% of your best (${window.DetoxConstants.formatDurationCompact(maxPastLapMs)})`;
   }
 }
 
 function renderStopwatchUI() {
   renderStopwatchTick();
   const nextLapNum = state.laps.length + 1;
-  if (el.currentLapNumberBadge) el.currentLapNumberBadge.textContent = `Lap #${nextLapNum}`;
+  if (el.currentLapNumberBadge) el.currentLapNumberBadge.textContent = `Lap ${nextLapNum}`;
 
   if (el.streakStatusLabel) {
     if (state.timer.isRunning) {
-      el.streakStatusLabel.textContent = "ACTIVE DETOX STREAK";
-      if (el.streakPulseDot) el.streakPulseDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
-      if (el.streakLiveIndicator) el.streakLiveIndicator.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+      el.streakStatusLabel.textContent = "Streak running";
+      if (el.streakPulseDot) el.streakPulseDot.className = "dot dot-live";
+      if (el.streakLiveIndicator) el.streakLiveIndicator.className = "status status-live";
       // Lap is running: hide Start button, prominently show Relapse & Reflect button
       if (el.toggleTimerBtn) el.toggleTimerBtn.classList.add('hidden');
       if (el.relapseBtn) {
@@ -390,10 +374,10 @@ function renderStopwatchUI() {
       }
     } else {
       const hasElapsed = getElapsedMs() > 0;
-      el.streakStatusLabel.textContent = hasElapsed ? "READY TO RESUME" : "READY TO START";
-      if (el.streakPulseDot) el.streakPulseDot.className = "w-2 h-2 rounded-full bg-amber-400";
-      if (el.streakLiveIndicator) el.streakLiveIndicator.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30";
-      if (el.toggleTimerText) el.toggleTimerText.textContent = hasElapsed ? "Resume Detox Lap" : "Start Detox Lap";
+      el.streakStatusLabel.textContent = hasElapsed ? "Ready to resume" : "Ready to start";
+      if (el.streakPulseDot) el.streakPulseDot.className = "dot";
+      if (el.streakLiveIndicator) el.streakLiveIndicator.className = "status status-idle";
+      if (el.toggleTimerText) el.toggleTimerText.textContent = hasElapsed ? "Resume detox lap" : "Start detox lap";
       // Lap stopped: show Start button, hide Relapse button
       if (el.toggleTimerBtn) {
         el.toggleTimerBtn.classList.remove('hidden');
@@ -407,7 +391,7 @@ function renderStopwatchUI() {
 
   if (el.lapStartedAtBadge) {
     if (state.timer.streakInitialStartTime) {
-      el.lapStartedAtBadge.textContent = `Streak started: ${window.DetoxConstants.formatDateTimeReadable(state.timer.streakInitialStartTime)}`;
+      el.lapStartedAtBadge.textContent = `Streak started ${window.DetoxConstants.formatDateTimeReadable(state.timer.streakInitialStartTime)}`;
     } else {
       el.lapStartedAtBadge.textContent = "Streak not started yet";
     }
@@ -425,23 +409,23 @@ function renderKPIsAndAnalytics() {
   const pastTotalMs = laps.reduce((acc, l) => acc + (Number(l.durationMs) || 0), 0);
   const grandTotalMs = pastTotalMs + currentElapsedMs;
   if (el.kpiTotalCleanTime) el.kpiTotalCleanTime.textContent = window.DetoxConstants.formatHoursLabel(grandTotalMs);
-  if (el.kpiTotalCleanSub) el.kpiTotalCleanSub.textContent = `${(pastTotalMs / 3600000).toFixed(1)}h past laps + ${(currentElapsedMs / 3600000).toFixed(1)}h current`;
+  if (el.kpiTotalCleanSub) el.kpiTotalCleanSub.textContent = `${(pastTotalMs / 3600000).toFixed(1)}h in past laps, ${(currentElapsedMs / 3600000).toFixed(1)}h in this one`;
 
   // 2. Longest Lap
   const maxPastMs = laps.reduce((max, l) => Math.max(max, Number(l.durationMs) || 0), 0);
   const longestOverallMs = Math.max(maxPastMs, currentElapsedMs);
   if (el.kpiLongestLap) el.kpiLongestLap.textContent = window.DetoxConstants.formatDurationCompact(longestOverallMs);
-  if (el.kpiLongestLapSub) el.kpiLongestLapSub.textContent = `${(longestOverallMs / 3600000).toFixed(2)} hours record`;
+  if (el.kpiLongestLapSub) el.kpiLongestLapSub.textContent = `${(longestOverallMs / 3600000).toFixed(2)} hours in your longest lap`;
 
   // 3. Average Lap Duration
   if (el.kpiAverageLap) {
     if (laps.length > 0) {
       const avgMs = pastTotalMs / laps.length;
       el.kpiAverageLap.textContent = window.DetoxConstants.formatDurationCompact(avgMs);
-      if (el.kpiAverageLapSub) el.kpiAverageLapSub.textContent = `Avg ${(avgMs / 3600000).toFixed(2)} hrs before relapse`;
+      if (el.kpiAverageLapSub) el.kpiAverageLapSub.textContent = `${(avgMs / 3600000).toFixed(2)} hrs between slips`;
     } else {
-      el.kpiAverageLap.textContent = "—";
-      if (el.kpiAverageLapSub) el.kpiAverageLapSub.textContent = "Complete 1 lap to calculate";
+      el.kpiAverageLap.textContent = "None yet";
+      if (el.kpiAverageLapSub) el.kpiAverageLapSub.textContent = "Finish a lap to see this";
     }
   }
 
@@ -450,7 +434,7 @@ function renderKPIsAndAnalytics() {
   if (el.backupModalLapCount) el.backupModalLapCount.textContent = String(laps.length);
 
   // 5. Cravings Defeated Badge
-  if (el.cravingsDefeatedText) el.cravingsDefeatedText.textContent = `${state.urgesDefeated} Urges Surfed`;
+  if (el.cravingsDefeatedText) el.cravingsDefeatedText.textContent = `${state.urgesDefeated} ${state.urgesDefeated === 1 ? 'urge' : 'urges'} surfed`;
 
   // 6. Tangible Life Reclaimed Calculator
   const totalHoursNum = grandTotalMs / (1000 * 60 * 60);
@@ -505,85 +489,57 @@ function renderLapHistory() {
 
   if (filtered.length === 0) {
     el.lapHistoryList.innerHTML = `
-      <div class="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-800 bg-slate-950/40">
-        <p class="text-sm font-semibold text-slate-300">No relapse reflections match your current view</p>
-        <p class="text-xs text-slate-500 mt-1">Keep your current detox stopwatch running, or click "+ Load Sample Relapse Logs" in the Analytics tab to preview insights.</p>
+      <div class="py-6 max-w-[48ch]">
+        <p class="font-semibold text-ink">${totalCount === 0 ? 'No laps in your journal yet' : 'No laps match this search'}</p>
+        <p class="text-mute text-sm mt-1">${totalCount === 0
+          ? 'When you slip, save a reflection and it will appear here. Or open Patterns and fill in sample data to see how the insights look.'
+          : 'Try a different word, or set the time of day back to any.'}</p>
       </div>
     `;
     return;
   }
 
+  const esc = window.DetoxConstants.escapeHtml;
+
   el.lapHistoryList.innerHTML = filtered.map(lap => {
     const isConfirmingDelete = state.deleteConfirmLapId === lap.id;
-    const triggersHtml = (lap.triggers || []).map(t => `
-      <span class="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-300 border border-rose-500/25 text-[11px] font-medium">
-        ${window.DetoxConstants.escapeHtml(t)}
-      </span>
-    `).join('');
+    const triggersHtml = (lap.triggers || []).map(t => `<span class="tag tag-ember">${esc(t)}</span>`).join('');
+    const notes = [
+      lap.feelingBeforeNote ? `<p><span class="text-ink font-semibold">Before:</span> ${esc(lap.feelingBeforeNote)}</p>` : '',
+      lap.feelingAfterNote ? `<p><span class="text-ink font-semibold">After:</span> ${esc(lap.feelingAfterNote)}</p>` : '',
+      lap.nextTimePlan ? `<p><span class="text-lamp-text font-semibold">Next time:</span> ${esc(lap.nextTimePlan)}</p>` : ''
+    ].join('');
 
     return `
-      <div class="bg-slate-950/75 hover:bg-slate-950 border border-slate-800/90 rounded-2xl p-4 sm:p-5 transition">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
-          <div class="flex flex-wrap items-center gap-2.5">
-            <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 font-mono text-xs font-bold text-slate-300">
-              Lap #${lap.lapNumber}
-            </span>
-            <span class="px-3 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 font-mono text-xs sm:text-sm font-bold text-emerald-300">
-              Avoided: ${window.DetoxConstants.formatDurationCompact(lap.durationMs)} (${Number(lap.hoursAvoided || 0).toFixed(2)} hrs)
-            </span>
-            <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 text-xs font-medium">
-              ${window.DetoxConstants.escapeHtml(lap.platform || 'Social Media')}
-            </span>
-            ${lap.relapseDuration ? `<span class="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-300 border border-rose-500/20 text-[11px] font-mono">Relapse: ${window.DetoxConstants.escapeHtml(lap.relapseDuration)}</span>` : ''}
-          </div>
-
-          <div class="flex items-center justify-between sm:justify-end gap-2.5 text-xs text-slate-400">
-            <span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">
-              ${window.DetoxConstants.escapeHtml(lap.timeOfDayBucket || 'Day')}
-            </span>
-            <span>${window.DetoxConstants.formatDateTimeReadable(lap.relapsedAtMs)}</span>
-            <button
-              type="button"
-              data-delete-lap="${window.DetoxConstants.escapeHtml(lap.id)}"
-              class="px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer ${
-                isConfirmingDelete
-                  ? 'bg-rose-600 text-white'
-                  : 'bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800'
-              }"
-            >
-              ${isConfirmingDelete ? 'Confirm Delete?' : 'Delete'}
-            </button>
-          </div>
+      <article class="rail-item">
+        <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+          <h4 class="numeral text-ink text-[2rem]">Lap ${lap.lapNumber}</h4>
+          <span class="text-lamp-text font-semibold tabular-nums">${window.DetoxConstants.formatDurationCompact(lap.durationMs)} clean <span class="text-mute font-normal">(${Number(lap.hoursAvoided || 0).toFixed(2)} hrs)</span></span>
+        </div>
+        <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-mute">
+          <span>${window.DetoxConstants.formatDateTimeReadable(lap.relapsedAtMs)}</span>
+          <span class="tag">${esc(lap.timeOfDayBucket || 'Day')}</span>
+          <span class="tag">${esc(lap.platform || 'Social media')}</span>
+          ${lap.relapseDuration ? `<span class="tag tag-ember">Scrolled ${esc(lap.relapseDuration)}</span>` : ''}
+          <button type="button" data-delete-lap="${esc(lap.id)}" class="${isConfirmingDelete ? 'text-ember-text font-semibold underline' : 'link-btn'} ml-auto">${isConfirmingDelete ? 'Tap again to delete' : 'Delete'}</button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3.5 text-xs">
-          <div class="space-y-2">
-            <div class="text-slate-400 font-medium">What happened before failing (Triggers):</div>
-            <div class="flex flex-wrap gap-1.5">${triggersHtml}</div>
-            ${lap.whatHappenedBefore ? `<p class="text-slate-200 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800/80 italic">"${window.DetoxConstants.escapeHtml(lap.whatHappenedBefore)}"</p>` : ''}
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 text-[0.95rem]">
+          <div class="space-y-2.5">
+            <div class="text-ink font-semibold">What set it off</div>
+            ${triggersHtml ? `<div class="flex flex-wrap gap-1.5">${triggersHtml}</div>` : '<p class="text-mute">No trigger chosen</p>'}
+            ${lap.whatHappenedBefore ? `<p class="text-mute border-l-2 border-line pl-3">${esc(lap.whatHappenedBefore)}</p>` : ''}
           </div>
-
-          <div class="space-y-2">
-            <div class="text-slate-400 font-medium">Emotional Shift (Before ➔ After):</div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold">
-                Before: ${window.DetoxConstants.escapeHtml(lap.feelingBefore || 'N/A')}
-              </span>
-              <span class="text-slate-500 font-bold">➔</span>
-              <span class="px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-semibold">
-                After: ${window.DetoxConstants.escapeHtml(lap.feelingAfter || 'N/A')}
-              </span>
-            </div>
-            ${(lap.feelingBeforeNote || lap.feelingAfterNote || lap.nextTimePlan) ? `
-              <div class="text-slate-300 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800/80 space-y-1">
-                ${lap.feelingBeforeNote ? `<div><span class="text-amber-400 font-medium">Before note:</span> ${window.DetoxConstants.escapeHtml(lap.feelingBeforeNote)}</div>` : ''}
-                ${lap.feelingAfterNote ? `<div><span class="text-indigo-400 font-medium">After note:</span> ${window.DetoxConstants.escapeHtml(lap.feelingAfterNote)}</div>` : ''}
-                ${lap.nextTimePlan ? `<div><span class="text-emerald-400 font-medium">Next plan:</span> ${window.DetoxConstants.escapeHtml(lap.nextTimePlan)}</div>` : ''}
-              </div>` : ''
-            }
+          <div class="space-y-2.5">
+            <div class="text-ink font-semibold">How it felt</div>
+            <p class="text-mute">
+              <span class="text-ink">${esc(lap.feelingBefore || 'Not noted')}</span> before,
+              <span class="text-ink">${esc(lap.feelingAfter || 'not noted')}</span> after
+            </p>
+            ${notes ? `<div class="text-mute space-y-1">${notes}</div>` : ''}
           </div>
         </div>
-      </div>
+      </article>
     `;
   }).join('');
 }
@@ -609,7 +565,7 @@ function toggleStopwatch() {
   state.timer.currentLapStartTime = now;
   state.timer.isRunning = true;
   triggerHaptic('start');
-  showToast("Detox streak active • Live timer running");
+  showToast("Lap started. The timer is running.");
   saveTimerStateToCloud();
 }
 
@@ -617,21 +573,21 @@ function handleResetClick() {
   if (!state.resetConfirmPending) {
     state.resetConfirmPending = true;
     triggerHaptic('tap');
-    if (el.resetTimerText) el.resetTimerText.textContent = "Confirm Discard?";
-    if (el.resetTimerBtn) el.resetTimerBtn.classList.add('text-rose-400', 'font-bold');
+    if (el.resetTimerText) el.resetTimerText.textContent = "Tap again to discard";
+    if (el.resetTimerBtn) el.resetTimerBtn.classList.add('text-ember-text', 'font-semibold');
     clearTimeout(window.__resetConfirmTimeout);
     window.__resetConfirmTimeout = setTimeout(() => {
       state.resetConfirmPending = false;
-      if (el.resetTimerText) el.resetTimerText.textContent = "Discard lap & reset to 00:00";
-      if (el.resetTimerBtn) el.resetTimerBtn.classList.remove('text-rose-400', 'font-bold');
+      if (el.resetTimerText) el.resetTimerText.textContent = "Discard lap and reset to zero";
+      if (el.resetTimerBtn) el.resetTimerBtn.classList.remove('text-ember-text', 'font-semibold');
     }, 3500);
     return;
   }
 
   state.resetConfirmPending = false;
   triggerHaptic('relapse');
-  if (el.resetTimerText) el.resetTimerText.textContent = "Discard lap & reset to 00:00";
-  if (el.resetTimerBtn) el.resetTimerBtn.classList.remove('text-rose-400', 'font-bold');
+  if (el.resetTimerText) el.resetTimerText.textContent = "Discard lap and reset to zero";
+  if (el.resetTimerBtn) el.resetTimerBtn.classList.remove('text-ember-text', 'font-semibold');
 
   const now = Date.now();
   state.timer = {
@@ -704,11 +660,7 @@ function renderModalPills() {
   el.platformPillsContainer.innerHTML = window.DetoxConstants.PLATFORM_OPTIONS.map(plat => {
     const active = state.pendingRelapse.selectedPlatform === plat;
     return `
-      <button type="button" data-platform="${plat}" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium border transition active:scale-95 cursor-pointer touch-manipulation ${
-        active
-          ? 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-sm'
-          : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
-      }">
+      <button type="button" data-platform="${plat}" class="chip ${active ? 'chip-on' : ''}" aria-pressed="${active}">
         ${plat}
       </button>
     `;
@@ -728,12 +680,8 @@ function renderModalPills() {
   el.triggerPillsContainer.innerHTML = window.DetoxConstants.TRIGGER_OPTIONS.map(trig => {
     const active = state.pendingRelapse.selectedTriggers.includes(trig);
     return `
-      <button type="button" data-trigger="${trig}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition active:scale-95 cursor-pointer touch-manipulation ${
-        active
-          ? 'bg-rose-500/25 border-rose-400 text-rose-200 shadow-sm'
-          : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
-      }">
-        ${active ? '✓ ' : ''}${trig}
+      <button type="button" data-trigger="${trig}" class="chip ${active ? 'chip-on-ember' : ''}" aria-pressed="${active}">
+        ${trig}
       </button>
     `;
   }).join('');
@@ -741,11 +689,7 @@ function renderModalPills() {
   el.feelingBeforePillsContainer.innerHTML = window.DetoxConstants.FEELING_BEFORE_OPTIONS.map(feel => {
     const active = state.pendingRelapse.selectedFeelingBefore === feel;
     return `
-      <button type="button" data-before="${feel}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition active:scale-95 cursor-pointer touch-manipulation ${
-        active
-          ? 'bg-amber-500/25 border-amber-400 text-amber-200 shadow-sm'
-          : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
-      }">
+      <button type="button" data-before="${feel}" class="chip ${active ? 'chip-on' : ''}" aria-pressed="${active}">
         ${feel}
       </button>
     `;
@@ -754,11 +698,7 @@ function renderModalPills() {
   el.feelingAfterPillsContainer.innerHTML = window.DetoxConstants.FEELING_AFTER_OPTIONS.map(feel => {
     const active = state.pendingRelapse.selectedFeelingAfter === feel;
     return `
-      <button type="button" data-after="${feel}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition active:scale-95 cursor-pointer touch-manipulation ${
-        active
-          ? 'bg-indigo-500/25 border-indigo-400 text-indigo-200 shadow-sm'
-          : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
-      }">
+      <button type="button" data-after="${feel}" class="chip ${active ? 'chip-on' : ''}" aria-pressed="${active}">
         ${feel}
       </button>
     `;
@@ -768,11 +708,7 @@ function renderModalPills() {
     el.relapseDurationPillsContainer.innerHTML = window.DetoxConstants.RELAPSE_DURATION_OPTIONS.map(dur => {
       const active = state.pendingRelapse.selectedRelapseDuration === dur;
       return `
-        <button type="button" data-relapse-duration="${dur}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border transition active:scale-95 cursor-pointer touch-manipulation ${
-          active
-            ? 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-sm'
-            : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200'
-        }">
+        <button type="button" data-relapse-duration="${dur}" class="chip ${active ? 'chip-on' : ''}" aria-pressed="${active}">
           ${dur}
         </button>
       `;
@@ -841,7 +777,7 @@ async function handleRelapseFormSubmit(e) {
     saveTimerStateToCloud()
   ]);
 
-  showToast(`Logged Lap (${window.DetoxConstants.formatDurationCompact(finalDurationMs)} avoided) & started next streak!`);
+  showToast(`Lap saved: ${window.DetoxConstants.formatDurationCompact(finalDurationMs)} clean. Next lap started.`);
 }
 
 // -------------------------------------------------------------------------
@@ -869,7 +805,7 @@ async function handleUrgeDefeated() {
   window.DetoxStorage.saveStats(state.urgesDefeated);
   renderKPIsAndAnalytics();
   saveTimerStateToCloud();
-  showToast(`🌊 Urge defeated! You have surfed ${state.urgesDefeated} cravings so far!`);
+  showToast(`Urge surfed. That is ${state.urgesDefeated} so far.`);
 }
 
 function handleUrgeRelapsed() {
@@ -884,20 +820,20 @@ function handleUrgeRelapsed() {
 function updateCloudBadge(status, label) {
   if (!el.cloudStatusText || !el.cloudStatusDot) return;
   el.cloudStatusText.textContent = label;
-  el.cloudStatusDot.className = "w-2 h-2 rounded-full ";
+  el.cloudStatusDot.className = "dot ";
   if (status === 'online') {
-    el.cloudStatusDot.classList.add('bg-emerald-400');
+    el.cloudStatusDot.classList.add('bg-lamp');
     if (el.backupModalCloudState) {
-      el.backupModalCloudState.textContent = "Connected & Synced (Live)";
-      el.backupModalCloudState.className = "font-semibold text-emerald-400";
+      el.backupModalCloudState.textContent = "Connected and synced";
+      el.backupModalCloudState.className = "font-semibold text-lamp-text";
     }
   } else if (status === 'syncing') {
-    el.cloudStatusDot.classList.add('bg-amber-400', 'animate-pulse');
+    el.cloudStatusDot.classList.add('bg-faint', 'dot-live');
   } else {
-    el.cloudStatusDot.classList.add('bg-rose-400');
+    el.cloudStatusDot.classList.add('bg-mute');
     if (el.backupModalCloudState) {
       el.backupModalCloudState.textContent = "Offline / Local Storage Mode";
-      el.backupModalCloudState.className = "font-semibold text-amber-400";
+      el.backupModalCloudState.className = "font-semibold text-ink";
     }
   }
 }
@@ -910,9 +846,9 @@ function updateAuthUI(user) {
   );
 
   const displayName = user && (user.displayName || (user.email ? user.email.split('@')[0] : 'Google Account'));
-  const email = user && (user.email || 'Cloud Synced');
+  const email = user && (user.email || 'Synced');
   const initials = displayName ? encodeURIComponent(displayName.charAt(0).toUpperCase()) : 'U';
-  const photo = (user && user.photoURL) || `https://placehold.co/32x32/10b981/070b14?text=${initials}`;
+  const photo = (user && user.photoURL) || `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23F2B705'/%3E%3Ctext x='16' y='21.5' text-anchor='middle' font-family='sans-serif' font-size='15' font-weight='700' fill='%23231800'%3E${initials}%3C/text%3E%3C/svg%3E`;
 
   if (isGoogleLinked) {
     if (el.googleSignInBtn) {
@@ -988,7 +924,7 @@ async function saveTimerStateToCloud() {
       urgesDefeated: state.urgesDefeated,
       updatedAt: Date.now()
     });
-    updateCloudBadge('online', 'Cloud Synced • Live');
+    updateCloudBadge('online', 'Synced');
   } catch (err) {
     console.error("Failed to save timer state:", err);
     updateCloudBadge('offline', 'Cached Locally');
@@ -1010,7 +946,7 @@ async function addLapRecordToCloud(lapRecord) {
       state.laps.unshift({ id: docRef.id, ...lapRecord });
     }
     window.DetoxStorage.saveLaps(state.laps);
-    updateCloudBadge('online', 'Cloud Synced • Live');
+    updateCloudBadge('online', 'Synced');
   } catch (err) {
     console.error("Failed to add lap record:", err);
     state.laps.unshift({ id: 'local-' + Date.now(), ...lapRecord });
@@ -1032,7 +968,7 @@ async function deleteLapFromCloud(lapId) {
     updateCloudBadge('syncing', 'Deleting...');
     const lapDocRef = doc(db, 'artifacts', state.appId, 'users', state.userId, 'detox_laps', lapId);
     await deleteDoc(lapDocRef);
-    updateCloudBadge('online', 'Cloud Synced • Live');
+    updateCloudBadge('online', 'Synced');
     showToast("Deleted lap entry from cloud");
   } catch (err) {
     console.error("Failed to delete lap:", err);
@@ -1133,7 +1069,7 @@ function setupFirestoreListeners() {
 }
 
 async function executeGoogleRedirect(provider) {
-  updateCloudBadge('syncing', 'Connecting to Google...');
+  updateCloudBadge('syncing', 'Connecting');
   showToast("Opening Google Sign-In...");
   
   // Persist local state securely before leaving page
@@ -1199,8 +1135,8 @@ async function handleGoogleSignIn(forceRedirect = false) {
       state.isCloudConnected = true;
       if (el.footerUserId) el.footerUserId.textContent = state.userId;
       updateAuthUI(resultUser);
-      updateCloudBadge('online', 'Google Cloud Synced');
-      showToast(`Signed in as ${resultUser.displayName || resultUser.email}!`);
+      updateCloudBadge('online', 'Synced');
+      showToast(`Signed in as ${resultUser.displayName || resultUser.email}`);
       setupFirestoreListeners();
     }
   } catch (err) {
@@ -1216,8 +1152,8 @@ async function handleGoogleSignIn(forceRedirect = false) {
           state.isCloudConnected = true;
           if (el.footerUserId) el.footerUserId.textContent = state.userId;
           updateAuthUI(credRes.user);
-          updateCloudBadge('online', 'Google Cloud Synced');
-          showToast(`Signed in as ${credRes.user.displayName || credRes.user.email}!`);
+          updateCloudBadge('online', 'Synced');
+          showToast(`Signed in as ${credRes.user.displayName || credRes.user.email}`);
           setupFirestoreListeners();
           return;
         } catch (credErr) {
@@ -1242,7 +1178,7 @@ async function handleGoogleSignIn(forceRedirect = false) {
       }
     }
 
-    updateCloudBadge(state.user ? 'online' : 'offline', state.user ? 'Google Cloud Synced' : 'Local Storage Mode');
+    updateCloudBadge(state.user ? 'online' : 'offline', state.user ? 'Synced' : 'This device only');
 
     if (err.code === 'auth/unauthorized-domain') {
       const domain = window.location.hostname || 'your domain';
@@ -1275,7 +1211,7 @@ async function handleGoogleSignOut() {
     state.isCloudConnected = false;
     updateAuthUI(null);
     if (el.footerUserId) el.footerUserId.textContent = "Local Storage Mode";
-    updateCloudBadge('offline', 'Local Storage Mode');
+    updateCloudBadge('offline', 'This device only');
     showToast("Signed out of Google account.");
   } catch (err) {
     console.error("Sign-out error:", err);
@@ -1298,7 +1234,7 @@ async function initCloudSync() {
       console.warn("Persistence setup note:", persistErr);
     }
 
-    updateCloudBadge('syncing', 'Connecting Cloud...');
+    updateCloudBadge('syncing', 'Connecting');
 
     // Wait for existing auth session to be restored from IndexedDB / persistence
     if (typeof auth.authStateReady === 'function') {
@@ -1323,8 +1259,8 @@ async function initCloudSync() {
         state.isCloudConnected = true;
         if (el.footerUserId) el.footerUserId.textContent = state.userId;
         updateAuthUI(redirectResult.user);
-        updateCloudBadge('online', 'Google Cloud Synced');
-        showToast(`Signed in as ${redirectResult.user.displayName || redirectResult.user.email}!`);
+        updateCloudBadge('online', 'Synced');
+        showToast(`Signed in as ${redirectResult.user.displayName || redirectResult.user.email}`);
         setupFirestoreListeners();
       }
     } catch (redirectErr) {
@@ -1339,8 +1275,8 @@ async function initCloudSync() {
             state.isCloudConnected = true;
             if (el.footerUserId) el.footerUserId.textContent = state.userId;
             updateAuthUI(credRes.user);
-            updateCloudBadge('online', 'Google Cloud Synced');
-            showToast(`Signed in as ${credRes.user.displayName || credRes.user.email}!`);
+            updateCloudBadge('online', 'Synced');
+            showToast(`Signed in as ${credRes.user.displayName || credRes.user.email}`);
             setupFirestoreListeners();
           } catch (credErr) {
             console.error("Sign-in with credential error:", credErr);
@@ -1362,7 +1298,7 @@ async function initCloudSync() {
         state.isCloudConnected = true;
         if (el.footerUserId) el.footerUserId.textContent = state.userId;
         updateAuthUI(user);
-        updateCloudBadge('online', 'Google Cloud Synced');
+        updateCloudBadge('online', 'Synced');
         setupFirestoreListeners();
       } else {
         state.user = null;
@@ -1370,7 +1306,7 @@ async function initCloudSync() {
         state.isCloudConnected = false;
         if (el.footerUserId) el.footerUserId.textContent = "Local Storage Mode";
         updateAuthUI(null);
-        updateCloudBadge('offline', 'Local Storage Mode');
+        updateCloudBadge('offline', 'This device only');
       }
     });
 
@@ -1380,7 +1316,7 @@ async function initCloudSync() {
       state.isCloudConnected = true;
       if (el.footerUserId) el.footerUserId.textContent = state.userId;
       updateAuthUI(auth.currentUser);
-      updateCloudBadge('online', 'Google Cloud Synced');
+      updateCloudBadge('online', 'Synced');
       setupFirestoreListeners();
     } else {
       state.user = null;
@@ -1388,7 +1324,7 @@ async function initCloudSync() {
       state.isCloudConnected = false;
       if (el.footerUserId) el.footerUserId.textContent = "Local Storage Mode";
       updateAuthUI(null);
-      updateCloudBadge('offline', 'Local Storage Mode');
+      updateCloudBadge('offline', 'This device only');
     }
   } catch (err) {
     console.warn("Firebase init note:", err);
@@ -1404,7 +1340,7 @@ async function initCloudSync() {
     state.userId = "local";
     state.isCloudConnected = false;
     if (el.footerUserId) el.footerUserId.textContent = "Local Storage Mode";
-    updateCloudBadge('offline', 'Local Storage Mode');
+    updateCloudBadge('offline', 'This device only');
     startStopwatchIfFirstVisit();
     renderAll();
   }
@@ -1483,7 +1419,7 @@ function handleJsonFileImport(file) {
       window.DetoxStorage.saveLaps(state.laps);
       renderAll();
       if (el.backupModal) el.backupModal.classList.add('hidden');
-      showToast(`Successfully imported ${newCount} new lap(s)!`);
+      showToast(`Imported ${newCount} new lap(s)`);
     } catch (err) {
       console.error("JSON restore error:", err);
       showToast("Failed to parse JSON backup file.");
@@ -1548,7 +1484,7 @@ function bindEvents() {
       };
       el.backdateDrawer.classList.add('hidden');
       saveTimerStateToCloud();
-      showToast("Updated streak start time!");
+      showToast("Start time updated");
     });
   }
 
@@ -1623,7 +1559,7 @@ function bindEvents() {
       ta.select();
       document.execCommand('copy');
       document.body.removeChild(ta);
-      showToast("Copied Firestore Security Rules!");
+      showToast("Rules copied");
     });
   }
 
@@ -1669,7 +1605,7 @@ function bindEvents() {
       for (const item of sample) {
         await addLapRecordToCloud(item);
       }
-      showToast("Loaded 3 sample relapse logs!");
+      showToast("Added 3 sample laps");
     });
   }
 
@@ -1679,20 +1615,20 @@ function bindEvents() {
   if (el.exportCsvBtn) {
     el.exportCsvBtn.addEventListener('click', () => {
       const ok = window.DetoxStorage.exportCSV(state.laps);
-      if (ok) showToast("Downloaded CSV Spreadsheet!");
+      if (ok) showToast("CSV downloaded");
       else showToast("No laps to export yet.");
     });
   }
   if (el.exportJsonBtn) {
     el.exportJsonBtn.addEventListener('click', () => {
       window.DetoxStorage.exportJSON(state.timer, state.laps, state.urgesDefeated);
-      showToast("Downloaded JSON Backup!");
+      showToast("Backup downloaded");
     });
   }
   if (el.copyMarkdownReportBtn) {
     el.copyMarkdownReportBtn.addEventListener('click', () => {
       window.DetoxStorage.copySummaryReport(getElapsedMs(), state.laps, state.urgesDefeated);
-      showToast("Copied Summary Report to Clipboard!");
+      showToast("Report copied");
     });
   }
 
@@ -1725,13 +1661,13 @@ function bindEvents() {
         deferredInstallPrompt.prompt();
         const { outcome } = await deferredInstallPrompt.userChoice;
         if (outcome === 'accepted') {
-          showToast("LifeBack added to home screen! 📲");
+          showToast("LifeBack added to your home screen");
           el.installAppBtn.classList.add('hidden');
           if (el.mobileInstallItem) el.mobileInstallItem.classList.add('hidden');
         }
         deferredInstallPrompt = null;
       } else {
-        showToast("To install on iOS: tap Share (↑) and select 'Add to Home Screen'.");
+        showToast("To install on iOS: tap Share, then Add to Home Screen.");
       }
     });
   }

@@ -32,7 +32,7 @@ window.DetoxUrgeSurfer = {
 
         if (topFeel && negPct > 0) {
           elements.realityCheckText.innerHTML = `
-            In <strong class="text-amber-300 font-bold">${negPct}% of your past relapses</strong>, scrolling left you feeling <strong class="text-white font-bold underline">${window.DetoxConstants.escapeHtml(topFeel)}</strong>. Your own log shows scrolling usually doesn't deliver the relief it promises.
+            In <strong class="text-ink">${negPct}% of your past slips</strong>, scrolling left you feeling <strong class="text-ink">${window.DetoxConstants.escapeHtml(topFeel)}</strong>. Your own log shows scrolling usually doesn't deliver the relief it promises.
           `;
         } else {
           elements.realityCheckText.innerHTML = `
@@ -41,7 +41,7 @@ window.DetoxUrgeSurfer = {
         }
       } else {
         elements.realityCheckText.innerHTML = `
-          Urges tend to rise, peak and fade like a wave when you observe them instead of acting on them. Give this one 90 seconds before you decide. Protect your streak!
+          Urges tend to rise, peak and fade like a wave when you observe them instead of acting on them. Give this one 90 seconds before you decide. Protect your streak.
         `;
       }
     }
@@ -58,11 +58,11 @@ window.DetoxUrgeSurfer = {
         clearInterval(this.intervalId);
         this.intervalId = null;
         if (elements.breathingCue) {
-          elements.breathingCue.textContent = "Wave Passed! You did it! 🎉";
-          elements.breathingCue.className = "text-xs uppercase tracking-wider text-amber-300 font-bold mt-1";
+          elements.breathingCue.textContent = "The wave has passed. Well done.";
+          elements.breathingCue.className = "cue cue-done mt-2";
         }
         if (elements.defeatedBtn) {
-          elements.defeatedBtn.classList.add('animate-pulse');
+          elements.defeatedBtn.classList.add('dot-live');
         }
       }
     }, 1000);
@@ -80,14 +80,14 @@ window.DetoxUrgeSurfer = {
     if (elements.breathingCue) {
       const cyclePos = (90 - sec) % 8;
       if (cyclePos < 3) {
-        elements.breathingCue.textContent = "Inhale Slowly... (3s)";
-        elements.breathingCue.className = "text-xs uppercase tracking-wider text-emerald-300 font-semibold mt-1";
+        elements.breathingCue.textContent = "Breathe in slowly";
+        elements.breathingCue.className = "cue mt-2";
       } else if (cyclePos < 5) {
-        elements.breathingCue.textContent = "Hold Gently... (2s)";
-        elements.breathingCue.className = "text-xs uppercase tracking-wider text-sky-300 font-semibold mt-1";
+        elements.breathingCue.textContent = "Hold gently";
+        elements.breathingCue.className = "cue mt-2";
       } else {
-        elements.breathingCue.textContent = "Exhale Completely... (3s)";
-        elements.breathingCue.className = "text-xs uppercase tracking-wider text-amber-300 font-semibold mt-1";
+        elements.breathingCue.textContent = "Breathe out fully";
+        elements.breathingCue.className = "cue mt-2";
       }
     }
   },
